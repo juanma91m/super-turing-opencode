@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "name": "jmagnaterra-opencode-stack",
+  "version": "0.3.0",
+  "components": {
+    "engram": {
+      "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
+      "upstreamRef": "64bf163d0b9b8533c4b5c9a2566db8464f75eac3",
+      "patchFile": "patches/engram-source-agent.patch"
+    },
+    "goBootstrap": {
+      "version": "1.26.2",
+      "autoInstall": "linux-x86_64"
+    },
+    "playwright": {
+      "mode": "headless",
+      "browser": "chromium user-space"
+    }
+  },
+  "managedFiles": [
+    ".gitignore",
+    "CHANGELOG.md",
+    "PLAYBOOK-ASYNC.md",
+    "README.md",
+    "README-AGENTS.md",
+    "README-DISTRIBUTION.md",
+    "STACK-MANIFEST.json",
+    "package.json",
+    "package-lock.json",
+    "patches/engram-source-agent.patch",
+    "scripts/install-engram.sh",
+    "scripts/install-opencode-stack.sh",
+    "scripts/sync-opencode-stack.sh",
+    "plugins/background-agents.ts",
+    "agents/agent-design.md",
+    "agents/backend-java-developer.md",
+    "agents/code-inspector.md",
+    "agents/explorer.md",
+    "agents/frontend-web-developer.md",
+    "agents/master-dev.md",
+    "agents/reviewer.md",
+    "agents/ui-web-designer.md",
+    "skills/analisis-tecnico-evidencia/SKILL.md",
+    "skills/cambio-seguro-enterprise/SKILL.md",
+    "skills/contratos-api-y-datos/SKILL.md",
+    "skills/diseno-agentes-opencode/SKILL.md",
+    "skills/diseno-ui-web/SKILL.md",
+    "skills/implementacion-frontend-web/SKILL.md",
+    "skills/investigacion-web/SKILL.md",
+    "skills/memoria-engram-opencode/SKILL.md",
+    "skills/performance-cache-concurrencia/SKILL.md"
+  ],
+  "generatedFiles": [
+    "opencode.json"
+  ],
+  "machineLocalFiles": [
+    "stitch-api-key",
+    "node_modules/",
+    ".stack-backups/"
+  ],
+  "machineLocalState": [
+    "~/.cache/ms-playwright/",
+    "~/.opencode/bin/engram",
+    "~/.engram/engram.db"
+  ],
+  "notes": [
+    "plan y build forman parte del esquema efectivo de agentes pero no viven como archivos custom en agents/",
+    "el installer genera opencode.json por máquina destino y no copia secretos",
+    "la memoria persistida de Engram se migra por separado si hace falta",
+    "install-engram.sh recompone Engram desde upstream + patch versionado en vez de depender de un binario preexistente",
+    "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial"
+  ]
+}

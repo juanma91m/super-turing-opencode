@@ -1,0 +1,8 @@
+node_modules/
+.stack-backups/
+.stack-sync-backups/
+stitch-api-key
+*.bak.*
+*.orig
+*.rej
+bun.lock
