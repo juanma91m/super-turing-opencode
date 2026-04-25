@@ -202,6 +202,11 @@ if playwright_exec:
 
 config = {
     "$schema": "https://opencode.ai/config.json",
+    "agent": {
+        "plan": {
+            "disable": True,
+        },
+    },
     "mcp": {
         "engram": {
             "type": "local",

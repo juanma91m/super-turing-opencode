@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "components": {
     "engram": {
       "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
@@ -27,17 +27,30 @@
     "STACK-MANIFEST.json",
     "package.json",
     "package-lock.json",
+    "commands/sessions-clean.md",
+    "commands/sessions-list.md",
+    "commands/ticket-implement.md",
+    "commands/ticket-plan.md",
+    "commands/ticket-refresh.md",
+    "commands/ticket-validate.md",
+    "commands/ticket-verdict.md",
     "patches/engram-source-agent.patch",
+    "scripts/jira_api_read.py",
+    "scripts/jira_helper.sh",
     "scripts/install-engram.sh",
     "scripts/install-opencode-stack.sh",
+    "scripts/session_cleanup.py",
+    "scripts/session_cleanup.sh",
     "scripts/sync-opencode-stack.sh",
     "plugins/background-agents.ts",
     "agents/agent-design.md",
     "agents/backend-java-developer.md",
     "agents/code-inspector.md",
+    "agents/dev-test.md",
     "agents/explorer.md",
     "agents/frontend-web-developer.md",
     "agents/master-dev.md",
+    "agents/planner.md",
     "agents/reviewer.md",
     "agents/ui-web-designer.md",
     "skills/analisis-tecnico-evidencia/SKILL.md",
@@ -48,7 +61,8 @@
     "skills/implementacion-frontend-web/SKILL.md",
     "skills/investigacion-web/SKILL.md",
     "skills/memoria-engram-opencode/SKILL.md",
-    "skills/performance-cache-concurrencia/SKILL.md"
+    "skills/performance-cache-concurrencia/SKILL.md",
+    "skills/workflow-ticket-handoff/SKILL.md"
   ],
   "generatedFiles": [
     "opencode.json"
@@ -68,6 +82,8 @@
     "el installer genera opencode.json por máquina destino y no copia secretos",
     "la memoria persistida de Engram se migra por separado si hace falta",
     "install-engram.sh recompone Engram desde upstream + patch versionado en vez de depender de un binario preexistente",
-    "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial"
+    "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial",
+    "plan queda deshabilitado en favor del agente custom planner",
+    "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales"
   ]
 }

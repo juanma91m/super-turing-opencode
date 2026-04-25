@@ -3,9 +3,11 @@
 Stack portable y versionable de OpenCode con:
 
 - agentes y subagentes custom,
+- planner y validador tecnico reutilizables,
 - skills globales,
 - plugin async con delegación read-only y worktrees aislados,
 - integración con Engram parcheado,
+- helpers opcionales para Jira/tickets y cleanup de sesiones,
 - integración con Playwright headless,
 - integración opcional con Stitch,
 - installer reproducible para desplegar el stack en otra máquina.
@@ -17,6 +19,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 ## Layout
 
 - `agents/`: agentes y subagentes custom
+- `commands/`: comandos reutilizables para tickets y mantenimiento
 - `skills/`: skills globales
 - `plugins/`: plugin async
 - `patches/`: patches versionados sobre dependencias externas (por ahora Engram)
@@ -41,6 +44,14 @@ Ese script:
 - copia assets a `~/.config/opencode/`,
 - regenera `opencode.json` según capacidades locales,
 - valida la config final cuando corresponde.
+
+## Capacidades globales nuevas del workflow
+
+- `planner`: planner tecnico/funcional generico para trabajo previo a implementacion
+- `dev-test`: validador tecnico reutilizable
+- `workflow-ticket-handoff`: skill para el patron `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md`
+- comandos globales `/ticket-*` y `/sessions-*`
+- helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
 
 ## Sync diario recomendado
 

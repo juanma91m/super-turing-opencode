@@ -11,11 +11,12 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
-- `plan`: agente primario orientado a planificar trabajo, clarificar pasos y mantener planes sin tocar código del proyecto salvo archivos de plan.
+- `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.
 - `build`: agente primario orientado a ejecutar cambios y resolver tareas de implementación general.
 
 ## Agentes globales custom
 
+- `planner`: planner tecnico/funcional generico para tickets y analisis previo a implementacion.
 - `explorer`: investiga documentacion, APIs, herramientas y MCPs. Prioriza fetch directo y usa Playwright solo como segunda opcion.
 - `agent-design`: diseña y mantiene agentes, skills, comandos, prompts y permisos para OpenCode.
 - `master-dev`: lider tecnico generico para proyectos enterprise; analiza, decide y puede implementar con foco en evidencia, bajo riesgo y mantenibilidad.
@@ -24,6 +25,7 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 
 - `code-inspector`: inspecciona el flujo actual del codigo, entry points y componentes involucrados sin editar ni ejecutar cambios riesgosos.
 - `backend-java-developer`: implementador de backend Java enterprise para servicios, APIs, persistencia, integraciones, cache y concurrencia.
+- `dev-test`: crea/ajusta tests y ejecuta validacion tecnica final con evidencia reproducible.
 - `frontend-web-developer`: implementador de capa de presentacion web en el stack real del proyecto, incluyendo Vaadin, React, Angular u otros.
 - `reviewer`: revisor tecnico centrado en riesgos, regresiones, compatibilidad, performance y validaciones pendientes.
 - `ui-web-designer`: diseña interfaces y flujos web con criterio de UX, Material UI, Stitch y Playwright cuando haga falta. No implementa codigo; su foco es diseño y definicion visual.
@@ -47,14 +49,26 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
 - `memoria-engram-opencode`: define uso de Engram con memoria curada, buckets, source_agent, promocion y purga segura.
+- `workflow-ticket-handoff`: define el patron reusable `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md` para trabajo guiado por tickets.
+
+## Comandos globales reutilizables
+
+- `/ticket-plan <ticket>`
+- `/ticket-refresh <ticket>`
+- `/ticket-verdict <ticket>`
+- `/ticket-implement <ticket>`
+- `/ticket-validate <ticket>`
+- `/sessions-list [args]`
+- `/sessions-clean [args]`
 
 ## Criterios
 
 - Mantener agentes genericos, sin referencias a dominios o proyectos concretos.
 - Usar agentes globales para capacidades transversales reutilizables.
 - Dejar lo especifico de cada proyecto en sus prompts, docs y configuraciones locales.
-- Al describir el esquema total de agentes, incluir siempre la distincion entre agentes base de OpenCode y agentes custom globales; `plan` y `build` forman parte del esquema efectivo aunque no existan como archivos en `~/.config/opencode/agents/`.
+- Al describir el esquema total de agentes, incluir siempre la distincion entre agentes base de OpenCode y agentes custom globales; `plan` y `build` son agentes base aunque `plan` quede deshabilitado en este stack en favor de `planner`.
 - `agent-design` debe proteger esa separacion y evitar que definiciones globales absorban detalles propios de un proyecto puntual.
+- El workflow `tmp/<ticket>/verdict.md` / `result-dev.md` es reusable pero no obligatorio: debe activarse solo cuando el trabajo esta asociado a tickets y el proyecto adopta ese patron.
 - Para operaciones largas de Stitch, favorecer polling y continuidad desde el estado del proyecto antes que repetir generaciones a ciegas.
 - `master-dev` lidera el trabajo tecnico general; delega solo cuando la especializacion aporta foco real.
 - `code-inspector`, `reviewer`, `explorer` y `ui-web-designer` son buenos candidatos para delegacion async read-only en la fase 1.

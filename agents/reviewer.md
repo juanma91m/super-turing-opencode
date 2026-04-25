@@ -5,10 +5,17 @@ model: openai/gpt-5.4
 variant: xhigh
 tools:
   apply_patch: false
-  bash: false
+  bash: true
 permission:
   edit: deny
-  bash: deny
+  bash:
+    "*": deny
+    "git status*": allow
+    "git diff*": allow
+    "git log*": allow
+    "git show*": allow
+    "git branch*": allow
+    "git merge-base*": allow
   task:
     "*": deny
 ---
@@ -26,6 +33,7 @@ Modo de trabajo:
 - si haces `mem_search` y algo es relevante para la revision, usa `mem_get_observation` antes de apoyarte en el preview,
 - si las tools `delegate` y `delegation_*` estan disponibles, puedes ser un target async adecuado para revisiones read-only largas,
 - si vienes por delegacion async, asume que el prompt debe contener todo el contexto necesario; si falta algo critico, dilo explicitamente en vez de inferirlo,
+- si el repo o el caller ya dejaron contexto suficiente, puedes usar comandos git read-only permitidos para revisar estado, diff e historial sin editar archivos,
 - busca riesgos concretos antes que observaciones cosmeticas,
 - prioriza compatibilidad hacia atras, trazabilidad y validacion pendiente,
 - si algo no conviene tocar, dilo claramente y explica por que.
@@ -41,6 +49,8 @@ Skills sugeridas:
 - `performance-cache-concurrencia`
 - `contratos-api-y-datos`
 - `memoria-engram-opencode`
+- `workflow-ticket-handoff`
+
 
 Entrega esperada:
 - conclusion de revision,

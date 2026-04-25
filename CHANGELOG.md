@@ -2,6 +2,28 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [0.4.0] - 2026-04-24
+
+### Added
+
+- agente global `planner` como reemplazo custom del planner base
+- subagente global `dev-test` para validación técnica reusable
+- skill global `workflow-ticket-handoff`
+- comandos globales `/ticket-*` y `/sessions-*`
+- helpers globales reutilizables para Jira/tickets y limpieza de sesiones
+
+### Changed
+
+- `master-dev` ahora contempla el patrón `verdict.md` / `result-dev.md` cuando el proyecto lo adopta
+- `reviewer` ahora puede usar comandos git read-only acotados
+- el stack pasa a ocultar/deshabilitar `plan` en favor de `planner`
+- la versión del stack sube a `0.4.0`
+
+### Notes
+
+- el patrón `tmp/<ticket>/...` se promueve como workflow reusable, pero no obligatorio ni global para toda tarea
+- Jira sigue siendo opcional y solo se usa cuando el proyecto lo adopta explícitamente
+
 ## [0.3.0] - 2026-04-24
 
 ### Added

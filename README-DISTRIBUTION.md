@@ -19,6 +19,7 @@ Tener un bundle reproducible que instale:
 Estos archivos/directorios deben tratarse como **source of truth versionable**:
 
 - `agents/`
+- `commands/`
 - `skills/`
 - `plugins/`
 - `README-AGENTS.md`
@@ -33,6 +34,10 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `scripts/install-engram.sh`
 - `scripts/install-opencode-stack.sh`
 - `scripts/sync-opencode-stack.sh`
+- `scripts/jira_helper.sh`
+- `scripts/jira_api_read.py`
+- `scripts/session_cleanup.sh`
+- `scripts/session_cleanup.py`
 
 ## Qué NO se versiona
 
@@ -134,6 +139,8 @@ Esto:
 - detecta Playwright Chromium en user-space,
 - si no lo encuentra, intenta instalarlo con `npx playwright install chromium`,
 - genera `opencode.json` con rutas locales de la máquina,
+- deja disponible un set global de comandos `/ticket-*` y `/sessions-*`,
+- instala helpers reutilizables para Jira/tickets y limpieza de sesiones,
 - habilita o deshabilita MCPs según disponibilidad local:
   - Engram: habilitado si existe `~/.opencode/bin/engram` después del bootstrap
   - Stitch: habilitado si existe `stitch-api-key`
@@ -143,6 +150,23 @@ Esto:
 
 - `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base, reinstalación de Engram, o setup inicial de Playwright.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
+
+## Helpers opcionales de Jira
+
+El stack ahora incluye helpers genéricos para Jira/tickets:
+
+- `scripts/jira_helper.sh`
+- `scripts/jira_api_read.py`
+
+No son obligatorios para todos los proyectos.
+Solo conviene usarlos cuando:
+
+- el proyecto realmente trabaja contra Jira,
+- quiere adoptar el patrón `tmp/<ticket>/...`,
+- y tiene credenciales configuradas vía `.env` o `JIRA_ENV_FILE` con:
+  - `JIRA_BASE_URL`
+  - `JIRA_EMAIL`
+  - `JIRA_API_TOKEN`
 
 ## Migración de memoria Engram
 

@@ -6,3 +6,5 @@ stitch-api-key
 *.orig
 *.rej
 bun.lock
+__pycache__/
+*.pyc
