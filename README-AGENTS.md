@@ -27,6 +27,7 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - `backend-java-developer`: implementador de backend Java enterprise para servicios, APIs, persistencia, integraciones, cache y concurrencia.
 - `dev-test`: crea/ajusta tests y ejecuta validacion tecnica final con evidencia reproducible.
 - `frontend-web-developer`: implementador de capa de presentacion web en el stack real del proyecto, incluyendo Vaadin, React, Angular u otros.
+- `merge-conflict-resolver`: integra conflictos de merge/rebase preservando la intención funcional de ambas ramas.
 - `reviewer`: revisor tecnico centrado en riesgos, regresiones, compatibilidad, performance y validaciones pendientes.
 - `ui-web-designer`: diseña interfaces y flujos web con criterio de UX, Material UI, Stitch y Playwright cuando haga falta. No implementa codigo; su foco es diseño y definicion visual.
 
@@ -63,6 +64,8 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
+- `/stack-doctor`
+- `/init-project-agent-layer <path>`
 
 ## Criterios
 
@@ -83,8 +86,11 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - `master-dev` actua como lector principal de memoria por defecto; los subagentes leen por su cuenta solo cuando la especialidad o el historial previo realmente lo ameritan.
 - En async v1, toda delegacion debe llevar un paquete de contexto explicito: objetivo, motivo, alcance, hechos relevantes, rutas exactas, referencias de memoria si aplican y formato de salida esperado.
 - `delegate` es async read-only y tiene matriz de permisos: `master-dev` puede delegar a especialistas/read-only; `frontend-web-developer` y `backend-java-developer` solo a `explorer` o `code-inspector`; `ui-web-designer` a `explorer`; `reviewer` a `code-inspector`.
+- `delegate` ahora puede pasar por estado `pending` si no hay cupo de concurrencia; usar `delegation_tail` para progreso incremental y `delegation_cancel` si hace falta abortar.
 - La delegacion nested read-only permite como maximo un nivel secundario: un subagente puede pedir investigacion/inspeccion, pero el agente delegado no puede seguir delegando.
 - `delegate_isolated` es la Fase 2 inicial para trabajo write-capable async: solo `master-dev` puede lanzarlo, solo contra `backend-java-developer`, `frontend-web-developer` o `master-dev`, y siempre usa un worktree aislado sin auto-merge.
+- `delegate_isolated` requiere disponibilidad de la API `/experimental/worktree`; en `opencode run` local directo puede no estar expuesta, por lo que conviene usar una sesión server-backed para ese flujo.
+- `delegation_continue(id, prompt)` permite retomar una delegacion read-only completada en la misma sesion de subagente para follow-ups con continuidad de contexto.
 - Toda salida de `delegate_isolated` queda para revision manual con artifacts persistidos: `meta.json`, `result.md`, `changed-files.json`, `git-status.txt`, `diff.patch` y `worktree.json`.
 - Lifecycle inicial de delegacion aislada: `running` -> `review_pending` -> `accepted` -> `applied`, o `running/review_pending/accepted` -> `discarded`; en `error` o `timeout` se intenta cleanup automatico del worktree y se preservan artifacts.
 - `delegation_accept(id)` marca una delegacion aislada como revisada/aceptada y conserva el worktree para integracion manual posterior.

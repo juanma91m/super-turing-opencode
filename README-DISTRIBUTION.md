@@ -27,6 +27,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `README-DISTRIBUTION.md`
 - `CHANGELOG.md`
 - `README.md`
+- `INSTALLATION.md`
 - `STACK-MANIFEST.json`
 - `package.json`
 - `package-lock.json`
@@ -68,6 +69,8 @@ La idea es tratar este directorio como un repo/versionable de stack:
 - cuando el stack esté razonablemente estable, crear tags tipo `v0.1.0`, `v0.2.0`, etc.
 
 ## Instalación rápida
+
+Para instrucciones al pie desde `git clone`, ver también `INSTALLATION.md`.
 
 ### Prerrequisitos mínimos
 
@@ -150,6 +153,15 @@ Esto:
 
 - `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base, reinstalación de Engram, o setup inicial de Playwright.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
+
+## Limitación conocida de `delegate_isolated`
+
+`delegate_isolated` requiere que la sesión tenga acceso a la API `/experimental/worktree` de OpenCode.
+
+- En sesiones server-backed funciona bien.
+- En algunos `opencode run` locales directos puede no estar disponible.
+
+En ese caso, el sistema ahora devuelve un error explícito recomendando usar `opencode serve` + `opencode run --attach ...` para ese flujo.
 
 ## Helpers opcionales de Jira
 

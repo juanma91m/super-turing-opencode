@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.5.0",
+  "version": "0.8.0",
   "components": {
     "engram": {
       "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
@@ -20,6 +20,7 @@
   "managedFiles": [
     ".gitignore",
     "CHANGELOG.md",
+    "INSTALLATION.md",
     "PLAYBOOK-ASYNC.md",
     "README.md",
     "README-AGENTS.md",
@@ -29,6 +30,8 @@
     "package-lock.json",
     "commands/sessions-clean.md",
     "commands/sessions-list.md",
+    "commands/init-project-agent-layer.md",
+    "commands/stack-doctor.md",
     "commands/ticket-implement.md",
     "commands/ticket-plan.md",
     "commands/ticket-refresh.md",
@@ -50,6 +53,7 @@
     "agents/explorer.md",
     "agents/frontend-web-developer.md",
     "agents/master-dev.md",
+    "agents/merge-conflict-resolver.md",
     "agents/planner.md",
     "agents/reviewer.md",
     "agents/ui-web-designer.md",
@@ -88,6 +92,8 @@
     "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial",
     "plan queda deshabilitado en favor del agente custom planner",
     "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales",
-    "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos"
+    "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
+    "delegaciones async ahora soportan pending, cancelación, tail incremental y continuación read-only manteniendo el modelo de review manual en isolated-write",
+    "delegate_isolated requiere /experimental/worktree; INSTALLATION.md y PLAYBOOK-ASYNC documentan el uso preferido en sesiones server-backed"
   ]
 }

@@ -2,6 +2,59 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [0.8.0] - 2026-04-26
+
+### Added
+
+- `INSTALLATION.md` con guía paso a paso desde `git clone`
+
+### Changed
+
+- documentación de async e instalación ahora aclara la limitación conocida de `delegate_isolated` fuera de sesiones server-backed
+- la versión del stack sube a `0.8.0`
+
+### Notes
+
+- no se implementó fallback local a `git worktree`; por ahora el sistema documenta y reporta explícitamente cuándo la API `/experimental/worktree` no está disponible
+
+## [0.7.0] - 2026-04-26
+
+### Added
+
+- `delegation_cancel(id|all=true)` para cancelar delegaciones pending/running
+- `delegation_tail(id)` para leer progreso incremental y mensajes nuevos
+- `delegation_continue(id, prompt)` para retomar delegaciones read-only completadas con continuidad de contexto
+- cola/concurrencia para delegaciones async con estado `pending`
+
+### Changed
+
+- `delegation_read` ahora puede devolver estado actual sin bloquear y soporta `wait=true`
+- `delegation_list` muestra más contexto operativo (modo, duración, último tool, último mensaje)
+- documentación async actualizada con los nuevos estados y herramientas
+
+### Notes
+
+- se mantiene nuestro esquema fuerte de worktree aislado + review/apply manual para write-capable
+- las mejoras tomadas de oh-my-opencode se enfocan en UX y lifecycle de delegaciones, no en copiar su orquestación completa
+
+## [0.6.0] - 2026-04-26
+
+### Added
+
+- subagente global `merge-conflict-resolver`
+- comando global `/stack-doctor`
+- comando global `/init-project-agent-layer`
+
+### Changed
+
+- `master-dev` ahora puede delegar a `merge-conflict-resolver`
+- documentación actualizada con los nuevos comandos operativos
+
+### Notes
+
+- `/stack-doctor` queda orientado a `agent-design` y hace diagnóstico read-only del stack
+- `/init-project-agent-layer` queda orientado a `agent-design` y arranca siempre en modo propuesta antes de escribir archivos
+
 ## [0.5.0] - 2026-04-24
 
 ### Added

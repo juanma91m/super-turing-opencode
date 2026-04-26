@@ -26,12 +26,15 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `patches/`: patches versionados sobre dependencias externas (por ahora Engram)
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
+- `INSTALLATION.md`: guía concreta de instalación desde `git clone`
 - `PLAYBOOK-ASYNC.md`: playbook operativo async
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
 - `STACK-MANIFEST.json`: versión y assets administrados
 - `CHANGELOG.md`: cambios relevantes del stack
 
 ## Instalación rápida
+
+Guía completa paso a paso: `INSTALLATION.md`
 
 ```bash
 bash scripts/install-opencode-stack.sh
@@ -55,7 +58,9 @@ Ese script:
 - `verificacion-antes-de-cerrar`: skill para exigir evidencia fresca antes de declarar cierre
 - `revision-por-etapas`: skill para review en dos etapas (cumplimiento y luego calidad/riesgo)
 - comandos globales `/ticket-*` y `/sessions-*`
+- comandos operativos `/stack-doctor` y `/init-project-agent-layer`
 - helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
+- delegaciones async con cola, cancelación, progreso incremental y continuación read-only
 
 ## Sync diario recomendado
 
@@ -86,6 +91,20 @@ Notas:
 
 No editar `~/.config/opencode/` como fuente principal.
 Los cambios del stack deben hacerse en este repo y luego desplegarse con `sync-opencode-stack.sh` o, si hace falta bootstrap completo, con `install-opencode-stack.sh`.
+
+## Comandos operativos nuevos
+
+- `/stack-doctor`: diagnostica instalación, config efectiva, assets globales, MCPs, dependencias base y drift del stack.
+- `/init-project-agent-layer <path>`: inspecciona un proyecto y propone o aplica una capa local de agentes/OpenCode reutilizando lo global y especializando solo lo necesario.
+
+## Nota sobre `delegate_isolated`
+
+`delegate_isolated` depende de la API de worktrees de OpenCode.
+
+- en sesiones server-backed funciona como se espera,
+- en algunos `opencode run` locales directos puede fallar porque `/experimental/worktree` no está expuesto.
+
+Si necesitás ese flujo de forma confiable, usar una sesión con server/attach. Ver `INSTALLATION.md` y `PLAYBOOK-ASYNC.md`.
 
 ## Supuestos actuales
 
