@@ -11,6 +11,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 ### Changed
 
 - documentación de async e instalación ahora aclara la limitación conocida de `delegate_isolated` fuera de sesiones server-backed
+- `install-opencode-stack.sh` ahora intenta ejecutar `stack-doctor` al final cuando valida la instalación sobre `~/.config/opencode/`
 - la versión del stack sube a `0.8.0`
 
 ### Notes

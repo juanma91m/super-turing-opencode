@@ -144,6 +144,7 @@ Esto:
 - genera `opencode.json` con rutas locales de la máquina,
 - deja disponible un set global de comandos `/ticket-*` y `/sessions-*`,
 - instala helpers reutilizables para Jira/tickets y limpieza de sesiones,
+- intenta correr `stack-doctor` al final cuando el target es `~/.config/opencode/`,
 - habilita o deshabilita MCPs según disponibilidad local:
   - Engram: habilitado si existe `~/.opencode/bin/engram` después del bootstrap
   - Stitch: habilitado si existe `stitch-api-key`

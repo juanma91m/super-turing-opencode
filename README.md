@@ -47,7 +47,8 @@ Ese script:
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - regenera `opencode.json` según capacidades locales,
-- valida la config final cuando corresponde.
+- valida la config final cuando corresponde,
+- e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
 ## Capacidades globales nuevas del workflow
 

@@ -299,6 +299,11 @@ validate_config() {
 
   log "Validando configuración final con opencode debug config"
   opencode debug config >/dev/null
+
+  log "Ejecutando stack-doctor post instalación"
+  if ! opencode run --command stack-doctor --agent agent-design --dir "$SOURCE_DIR" --dangerously-skip-permissions; then
+    warn "stack-doctor no pudo ejecutarse automáticamente; corré 'opencode run --command stack-doctor --agent agent-design --dir \"$SOURCE_DIR\" --dangerously-skip-permissions' para revisar el estado del stack"
+  fi
 }
 
 while [[ "$#" -gt 0 ]]; do

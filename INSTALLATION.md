@@ -43,7 +43,8 @@ Ese comando:
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - genera `~/.config/opencode/opencode.json`,
-- valida con `opencode debug config`.
+- valida con `opencode debug config`,
+- e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
 ### 3. Completar secretos opcionales
 
@@ -70,14 +71,19 @@ Los helpers globales de Jira **no** necesitan configuración global fija, pero l
 Después de instalar:
 
 ```bash
-opencode debug config
+opencode run --command stack-doctor --agent agent-design --dir "$(pwd)" --dangerously-skip-permissions
 ```
 
 Opcionalmente, correr:
 
 ```bash
-opencode run --command stack-doctor --agent agent-design --dangerously-skip-permissions
+opencode debug config
 ```
+
+La idea es:
+
+- el installer ya intenta ejecutar `stack-doctor`,
+- y si querés revisar de nuevo después de corregir algo del entorno, corrés ese mismo comando manualmente hasta que el diagnóstico quede sano.
 
 ## Instalación en modo diagnóstico (sin escribir)
 

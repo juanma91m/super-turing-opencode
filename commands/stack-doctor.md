@@ -19,9 +19,10 @@ Checklist mínimo:
 - Playwright Chromium presente si corresponde,
 - Stitch key presente/ausente,
 - comandos/agents/skills globales clave presentes,
-- si existe `~/.local/src/opencode-stack`, revisar si hay drift contra `~/.config/opencode/`.
+- si el directorio actual parece ser el repo fuente `opencode-stack` (por ejemplo, contiene `STACK-MANIFEST.json`), revisar drift contra `~/.config/opencode/`; si no, omitir ese check.
 
 Reglas:
 - no modificar nada; solo diagnosticar,
+- no persistir memorias en Engram desde este comando,
 - si algo opcional falta, clasificarlo como advertencia y no como error fatal,
 - separar hallazgos en: OK, warnings, errores, siguientes pasos.
