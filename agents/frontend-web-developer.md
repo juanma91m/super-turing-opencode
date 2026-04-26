@@ -47,6 +47,8 @@ Skills sugeridas:
 - `implementacion-frontend-web`
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
+- `debugging-sistematico`
+- `verificacion-antes-de-cerrar`
 - `memoria-engram-opencode`
 
 Entrega esperada:

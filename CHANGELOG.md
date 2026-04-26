@@ -2,6 +2,23 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [0.5.0] - 2026-04-24
+
+### Added
+
+- skill global `debugging-sistematico`
+- skill global `verificacion-antes-de-cerrar`
+- skill global `revision-por-etapas`
+
+### Changed
+
+- `master-dev`, `reviewer`, `dev-test`, `backend-java-developer` y `frontend-web-developer` ahora sugieren estas skills cuando corresponde
+- la versión del stack sube a `0.5.0`
+
+### Notes
+
+- se tomaron como inspiración prácticas de Superpowers, pero adaptadas a nuestro estilo y sin crear agentes nuevos ni imponer brainstorming/TDD rígido universal
+
 ## [0.4.0] - 2026-04-24
 
 ### Added

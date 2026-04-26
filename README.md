@@ -5,6 +5,7 @@ Stack portable y versionable de OpenCode con:
 - agentes y subagentes custom,
 - planner y validador tecnico reutilizables,
 - skills globales,
+- skills de debugging, verificacion y review por etapas,
 - plugin async con delegación read-only y worktrees aislados,
 - integración con Engram parcheado,
 - helpers opcionales para Jira/tickets y cleanup de sesiones,
@@ -50,6 +51,9 @@ Ese script:
 - `planner`: planner tecnico/funcional generico para trabajo previo a implementacion
 - `dev-test`: validador tecnico reutilizable
 - `workflow-ticket-handoff`: skill para el patron `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md`
+- `debugging-sistematico`: skill para depurar con causa raiz antes de fixear
+- `verificacion-antes-de-cerrar`: skill para exigir evidencia fresca antes de declarar cierre
+- `revision-por-etapas`: skill para review en dos etapas (cumplimiento y luego calidad/riesgo)
 - comandos globales `/ticket-*` y `/sessions-*`
 - helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "components": {
     "engram": {
       "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
@@ -56,12 +56,15 @@
     "skills/analisis-tecnico-evidencia/SKILL.md",
     "skills/cambio-seguro-enterprise/SKILL.md",
     "skills/contratos-api-y-datos/SKILL.md",
+    "skills/debugging-sistematico/SKILL.md",
     "skills/diseno-agentes-opencode/SKILL.md",
     "skills/diseno-ui-web/SKILL.md",
     "skills/implementacion-frontend-web/SKILL.md",
     "skills/investigacion-web/SKILL.md",
     "skills/memoria-engram-opencode/SKILL.md",
     "skills/performance-cache-concurrencia/SKILL.md",
+    "skills/revision-por-etapas/SKILL.md",
+    "skills/verificacion-antes-de-cerrar/SKILL.md",
     "skills/workflow-ticket-handoff/SKILL.md"
   ],
   "generatedFiles": [
@@ -84,6 +87,7 @@
     "install-engram.sh recompone Engram desde upstream + patch versionado en vez de depender de un binario preexistente",
     "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial",
     "plan queda deshabilitado en favor del agente custom planner",
-    "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales"
+    "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales",
+    "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos"
   ]
 }

@@ -40,4 +40,6 @@ Entrega esperada:
 Skills sugeridas:
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
+- `debugging-sistematico`
+- `verificacion-antes-de-cerrar`
 - `workflow-ticket-handoff`

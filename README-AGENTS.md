@@ -45,11 +45,14 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - `diseno-ui-web`: criterios de diseño web claros, accesibles e implementables, con fuerte referencia en Material UI.
 - `analisis-tecnico-evidencia`: separa hechos, inferencias, riesgos e informacion faltante.
 - `cambio-seguro-enterprise`: prioriza cambios minimos, seguros y auditables en sistemas enterprise o legacy.
+- `debugging-sistematico`: obliga a investigar causa raiz antes de proponer fixes.
 - `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
 - `memoria-engram-opencode`: define uso de Engram con memoria curada, buckets, source_agent, promocion y purga segura.
+- `verificacion-antes-de-cerrar`: evita declarar cierre o éxito sin evidencia fresca.
 - `workflow-ticket-handoff`: define el patron reusable `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md` para trabajo guiado por tickets.
+- `revision-por-etapas`: separa revisión de cumplimiento funcional vs revisión de calidad/riesgo técnico.
 
 ## Comandos globales reutilizables
 

@@ -45,6 +45,8 @@ Skills sugeridas:
 - `cambio-seguro-enterprise`
 - `performance-cache-concurrencia`
 - `contratos-api-y-datos`
+- `debugging-sistematico`
+- `verificacion-antes-de-cerrar`
 - `memoria-engram-opencode`
 
 Entrega esperada:
