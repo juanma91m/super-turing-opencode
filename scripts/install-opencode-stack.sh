@@ -207,6 +207,11 @@ config = {
             "disable": True,
         },
     },
+    "permission": {
+        "external_directory": {
+            "~/.config/opencode/scripts/**": "allow",
+        },
+    },
     "mcp": {
         "engram": {
             "type": "local",
