@@ -9,6 +9,8 @@ Playbook operativo async: `~/.config/opencode/PLAYBOOK-ASYNC.md`
 
 Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.md`
 
+Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
+
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
 - `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.
@@ -64,6 +66,7 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
+- `/check-local-overlays`
 - `/stack-doctor`
 - `/init-project-agent-layer <path>`
 
@@ -72,8 +75,10 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - Mantener agentes genericos, sin referencias a dominios o proyectos concretos.
 - Usar agentes globales para capacidades transversales reutilizables.
 - Dejar lo especifico de cada proyecto en sus prompts, docs y configuraciones locales.
+- Si un agente, skill o comando local sombrea uno global por nombre, el override debe preservar explicitamente el comportamiento global y sus permisos seguros salvo decision contraria del usuario; no asumir herencia automatica del runtime.
 - Al describir el esquema total de agentes, incluir siempre la distincion entre agentes base de OpenCode y agentes custom globales; `plan` y `build` son agentes base aunque `plan` quede deshabilitado en este stack en favor de `planner`.
 - `agent-design` debe proteger esa separacion y evitar que definiciones globales absorban detalles propios de un proyecto puntual.
+- Evitar permisos globales que whitelisteen helpers repo-locales por patron amplio; si un wrapper o script solo tiene sentido en un proyecto, su permiso debe vivir en la capa local de ese proyecto.
 - El workflow `tmp/<ticket>/verdict.md` / `result-dev.md` es reusable pero no obligatorio: debe activarse solo cuando el trabajo esta asociado a tickets y el proyecto adopta ese patron.
 - Para operaciones largas de Stitch, favorecer polling y continuidad desde el estado del proyecto antes que repetir generaciones a ciegas.
 - `master-dev` lidera el trabajo tecnico general; delega solo cuando la especializacion aporta foco real.
@@ -99,3 +104,36 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 - En la sesion hija de `delegate_isolated`, `bash` queda deshabilitado por defecto para evitar bloqueos por permisos `ask` en background; por ahora la validacion shell queda para revision manual o para una futura variante explicita con permisos controlados.
 - Playwright MCP queda configurado en modo headless/no interactivo por defecto. Si alguna vez una inspeccion visual headed/manual realmente conviene, debe pedirse confirmacion explicita al usuario en un flujo foreground y no desde delegaciones async.
 - Para distribuir este stack a otra maquina, tratar `agents/`, `skills/`, `plugins/`, docs y manifest como assets versionables; no versionar secretos ni estado local como `stitch-api-key`, `node_modules/` o la base de datos de Engram.
+- Cuando uses `opencode debug config` para validar o diagnosticar, no compartas la salida cruda si contiene secretos ya resueltos; resumila y redacta valores sensibles.
+- Si un repo tiene `.opencode/`, `stack-doctor` debe auditar explícitamente esos overrides por nombre y reportarlos con estado `OK`/`warning`/`error` usando el patrón institucional de overlays locales.
+
+## Patrón institucional para overlays locales
+
+Cuando un repo crea `.opencode/` y sombrea una definicion global por nombre, el patrón institucional esperado es:
+
+1. **Override solo si hace falta**
+   - si alcanza con `AGENTS.md` o documentacion local, no crear archivo override,
+   - si hace falta especializar un agente/skill/comando existente, mantener el mismo nombre base.
+2. **Overlay aditivo, no reemplazo destructivo**
+   - preservar responsabilidad global, guardrails y formato de salida,
+   - agregar stack, dominio, entry points, riesgos y reglas locales del proyecto,
+   - no recortar comportamiento global salvo pedido expreso del usuario o necesidad tecnica justificada.
+3. **Checklist minimo por override**
+   - `mode` correcto,
+   - `tools:` preservados si el global los define,
+   - permisos seguros heredados explicitamente cuando sigan aplicando,
+   - responsabilidades y limites globales reinyectados si OpenCode no los hereda,
+   - skills globales utiles mantenidas junto a skills locales especializadas.
+4. **Recortes explicitados**
+   - si un override reduce permisos, tools o comportamiento global, documentar el motivo en el `AGENTS.md` local o en la propuesta de cambio.
+5. **Permisos repo-locales solo en local**
+   - wrappers, helpers o scripts de `.opencode/scripts/` deben habilitarse en la capa local del repo que los introduce,
+   - no promover esos permisos a la capa global generica.
+
+Señales de drift a vigilar:
+
+- un override local pierde allowlists seguras que existian globalmente,
+- desaparecen skills globales relevantes sin una razon clara,
+- se borran guardrails globales de memoria, async, validacion o handoff,
+- un comando local cambia contrato o precondiciones sin documentarlo,
+- la especializacion local se vuelve un prompt completamente distinto en vez de un refinamiento del rol global.

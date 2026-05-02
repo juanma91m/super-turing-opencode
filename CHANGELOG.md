@@ -2,6 +2,81 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [0.8.5] - 2026-05-02
+
+### Added
+
+- `PLAYBOOK-LOCAL-OVERLAYS.md` con la guía operativa completa de cómo usar, auditar y mantener capas locales `.opencode/`
+
+### Changed
+
+- `README.md`, `README-AGENTS.md`, `README-DISTRIBUTION.md`, `INSTALLATION.md` y `LOCAL-OVERLAY-TEMPLATE.md` ahora referencian explícitamente el playbook de overlays
+- `STACK-MANIFEST.json` sube a `0.8.5`
+
+### Notes
+
+- con esto queda documentado en un solo lugar qué se agregó al stack, cómo usar `/check-local-overlays`, cómo interpreta `stack-doctor` los overlays y cuál es el flujo recomendado de adopción
+
+## [0.8.4] - 2026-05-02
+
+### Added
+
+- comando global `/check-local-overlays` para ejecutar la auditoría semiestructurada de capas `.opencode/` de forma focalizada
+
+### Changed
+
+- `/stack-doctor` ahora debe usar el helper de overlays como baseline obligatorio cuando detecta `.opencode/`
+- `README.md`, `README-AGENTS.md`, `INSTALLATION.md` y `LOCAL-OVERLAY-TEMPLATE.md` incorporan el nuevo flujo operativo
+- la versión del stack sube a `0.8.4`
+
+### Notes
+
+- el flujo operativo recomendado queda en dos niveles: `/check-local-overlays` para auditoría focalizada del overlay y `/stack-doctor` para diagnóstico más amplio del entorno y del stack
+
+## [0.8.3] - 2026-05-02
+
+### Added
+
+- helper global `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/` contra la base global
+
+### Changed
+
+- `agent-design` y permisos globales ahora permiten ejecutar el helper de auditoría de overlays
+- `/stack-doctor` ahora puede apoyarse explícitamente en el helper para producir la sección `Auditoría de overlays locales`
+- la versión del stack sube a `0.8.3`
+
+### Notes
+
+- el helper hace checks semiestructurados (mode, tools, allowlists, task targets, headings/tokens clave) y deja la evaluación final al diagnóstico del agente
+
+## [0.8.2] - 2026-05-02
+
+### Changed
+
+- `/stack-doctor` ahora exige una auditoría más explícita de overlays locales `.opencode/`, incluyendo clasificación `OK`/`warning`/`error` por override relevante
+- `README.md` y `README-AGENTS.md` actualizan la descripción operativa de `stack-doctor`
+- la versión del stack sube a `0.8.2`
+
+### Notes
+
+- el chequeo de overlays sigue siendo guiado por prompt/documentación, pero ahora el contrato de salida del comando es mucho más explícito y auditable
+
+## [0.8.1] - 2026-05-02
+
+### Added
+
+- `LOCAL-OVERLAY-TEMPLATE.md` como plantilla base reusable para capas locales `.opencode/`
+
+### Changed
+
+- `README-AGENTS.md` institucionaliza el patrón de overlays locales aditivos con checklist y señales de drift
+- `README-DISTRIBUTION.md`, `README.md` e `init-project-agent-layer` ahora referencian explícitamente el modelo de especialización local por proyecto
+- `STACK-MANIFEST.json` sube a `0.8.1`
+
+### Notes
+
+- el criterio de override local deja de ser solo una recomendación dispersa y pasa a ser una convención documentada y reusable para futuros proyectos
+
 ## [0.8.0] - 2026-04-26
 
 ### Added

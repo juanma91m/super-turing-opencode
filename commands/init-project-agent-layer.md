@@ -25,9 +25,13 @@ Flujo obligatorio:
 Reglas de diseño:
 - reutilizar lo global por defecto y dejar local solo el delta,
 - si se especializa un agente o skill global, mantener el mismo nombre base,
+- si se crea un override local con el mismo nombre que un agente, skill o comando global, preservar explicitamente sus capacidades y guardrails globales salvo pedido expreso del usuario; no asumir herencia automatica,
+- para cada override propuesto, revisar explicitamente este checklist: `mode`, `tools`, permisos seguros, responsabilidades globales, limites globales, formato de salida y skills utiles que deban reinyectarse,
+- si un override local va a recortar alguna capacidad global, explicitarlo antes de aplicar y pedir confirmacion del usuario,
 - si el proyecto usa Jira y adopta workflow de tickets, ofrecer la estructura `tmp/<ticket>/verdict.md` / `result-dev.md` y wrappers locales como en Higyrus,
 - si usa Jira, asumir que el usuario luego deberá completar un `.env` compatible con los helpers globales (`JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`),
 - no pisar archivos existentes sin avisar claramente,
+- usar `LOCAL-OVERLAY-TEMPLATE.md` como referencia base cuando convenga proponer snippets o archivos iniciales,
 - si conviene, proponer dry-run/preview de archivos a crear o modificar.
 
 Entrega esperada:

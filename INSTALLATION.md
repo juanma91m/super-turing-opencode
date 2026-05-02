@@ -85,6 +85,16 @@ La idea es:
 - el installer ya intenta ejecutar `stack-doctor`,
 - y si querés revisar de nuevo después de corregir algo del entorno, corrés ese mismo comando manualmente hasta que el diagnóstico quede sano.
 
+Si además estás dentro de un repo que tiene `.opencode/`, podés correr una auditoría focalizada del overlay local con:
+
+```bash
+opencode run --command check-local-overlays --agent agent-design --dir "$(pwd)" --dangerously-skip-permissions
+```
+
+Para entender cuándo usar `AGENTS.md`, cuándo overridear y cómo interpretar `OK` / `warning` / `error`, ver también:
+
+- `PLAYBOOK-LOCAL-OVERLAYS.md`
+
 ## Instalación en modo diagnóstico (sin escribir)
 
 Si querés ver qué haría el installer:

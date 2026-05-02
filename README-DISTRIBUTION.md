@@ -23,6 +23,8 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `skills/`
 - `plugins/`
 - `README-AGENTS.md`
+- `LOCAL-OVERLAY-TEMPLATE.md`
+- `PLAYBOOK-LOCAL-OVERLAYS.md`
 - `PLAYBOOK-ASYNC.md`
 - `README-DISTRIBUTION.md`
 - `CHANGELOG.md`
@@ -37,6 +39,8 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `scripts/sync-opencode-stack.sh`
 - `scripts/jira_helper.sh`
 - `scripts/jira_api_read.py`
+- `scripts/check_local_overlays.sh`
+- `scripts/check_local_overlays.py`
 - `scripts/session_cleanup.sh`
 - `scripts/session_cleanup.py`
 
@@ -60,6 +64,24 @@ La idea es tratar este directorio como un repo/versionable de stack:
 2. corrés un installer simple,
 3. el installer copia assets y **renderiza** `opencode.json` para la máquina destino,
 4. los secretos y rutas locales quedan fuera del bundle.
+
+## Modelo de especialización local por proyecto
+
+Este stack global está pensado para ser la base reusable. Cuando un repo necesite especialización local con `.opencode/`, el patrón recomendado es:
+
+1. usar `AGENTS.md` local para reglas y contexto del proyecto cuando eso alcance,
+2. crear overrides locales solo para agentes/skills/comandos que realmente necesiten especialización ejecutable,
+3. mantener el mismo nombre cuando se sombrea una definición global,
+4. tratar el archivo local como un **overlay aditivo**: reinyectar explícitamente comportamiento global útil, porque OpenCode no hereda prompts/permisos automáticamente,
+5. documentar cualquier recorte intencional de permisos, tools o guardrails globales.
+
+Checklist recomendado para un override local:
+
+- preservar `mode`, `tools` y allowlists seguras del global si siguen aplicando,
+- mantener responsabilidades, límites y formato de salida del rol global,
+- agregar solo stack, dominio, entry points, workflows y riesgos propios del proyecto,
+- dejar wrappers y permisos repo-locales en la capa local del proyecto,
+- validar luego con `opencode debug config` desde el repo especializado.
 
 ## Versionado recomendado
 

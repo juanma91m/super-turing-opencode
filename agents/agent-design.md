@@ -5,7 +5,12 @@ model: openai/gpt-5.4
 variant: xhigh
 permission:
   edit: allow
-  bash: ask
+  bash:
+    "*": ask
+    git status*: allow
+    git diff --name-only*: allow
+    ./gradlew spotlessApply*: allow
+    bash ~/.config/opencode/scripts/check_local_overlays.sh*: allow
   task:
     "*": deny
 ---
@@ -24,6 +29,8 @@ Modo de trabajo:
 - usa criterios de permisos minimos, nombres claros y responsabilidades bien delimitadas,
 - cuando el pedido sea global, trabaja sobre `~/.config/opencode/`; cuando sea por proyecto, trabaja sobre el repo correspondiente,
 - si un criterio aplica solo a un proyecto, dejalo en la configuracion local de ese proyecto y no en las definiciones genericas globales,
+- cuando especialices localmente un agente, skill o comando ya existente, trata el override como un overlay aditivo: preserva el comportamiento global y los permisos seguros salvo que el usuario pida explicitamente recortarlos,
+- si un helper o permiso solo tiene sentido para un repo concreto, habilitalo en la capa local de ese proyecto y no en la definicion global generica,
 - valida los cambios con `opencode debug config` cuando corresponda.
 
 Limites:

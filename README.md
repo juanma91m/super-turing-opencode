@@ -26,6 +26,8 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `patches/`: patches versionados sobre dependencias externas (por ahora Engram)
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
+- `LOCAL-OVERLAY-TEMPLATE.md`: plantilla base para overlays locales aditivos por proyecto
+- `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
 - `PLAYBOOK-ASYNC.md`: playbook operativo async
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
@@ -59,8 +61,9 @@ Ese script:
 - `verificacion-antes-de-cerrar`: skill para exigir evidencia fresca antes de declarar cierre
 - `revision-por-etapas`: skill para review en dos etapas (cumplimiento y luego calidad/riesgo)
 - comandos globales `/ticket-*` y `/sessions-*`
-- comandos operativos `/stack-doctor` y `/init-project-agent-layer`
+- comandos operativos `/stack-doctor`, `/check-local-overlays` y `/init-project-agent-layer`
 - helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
+- helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
 - delegaciones async con cola, cancelación, progreso incremental y continuación read-only
 
 ## Sync diario recomendado
@@ -93,10 +96,20 @@ Notas:
 No editar `~/.config/opencode/` como fuente principal.
 Los cambios del stack deben hacerse en este repo y luego desplegarse con `sync-opencode-stack.sh` o, si hace falta bootstrap completo, con `install-opencode-stack.sh`.
 
+Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overlay aditivo**:
+
+- reutilizar lo global por defecto,
+- overridear solo cuando haga falta especializar,
+- preservar explicitamente guardrails, permisos seguros y capacidades globales que sigan aplicando,
+- dejar el delta de proyecto en `AGENTS.md`, agentes/skills/comandos locales y no en la capa global.
+
 ## Comandos operativos nuevos
 
-- `/stack-doctor`: diagnostica instalación, config efectiva, assets globales, MCPs, dependencias base y drift del stack.
+- `/stack-doctor`: diagnostica instalación, config efectiva, assets globales, MCPs, dependencias base, drift del stack y overlays locales `.opencode/` cuando existan.
+- `/check-local-overlays`: ejecuta la auditoría semiestructurada de `.opencode/` contra la base global y devuelve el detalle por override.
 - `/init-project-agent-layer <path>`: inspecciona un proyecto y propone o aplica una capa local de agentes/OpenCode reutilizando lo global y especializando solo lo necesario.
+- `LOCAL-OVERLAY-TEMPLATE.md`: referencia rápida para construir overrides locales aditivos sin perder guardrails globales.
+- `PLAYBOOK-LOCAL-OVERLAYS.md`: playbook completo de uso diario para overlays locales, `/check-local-overlays` y `/stack-doctor`.
 
 ## Nota sobre `delegate_isolated`
 
@@ -122,3 +135,8 @@ Si necesitás ese flujo de forma confiable, usar una sesión con server/attach. 
 4. sincronizar con `scripts/sync-opencode-stack.sh`,
 5. usar `scripts/install-opencode-stack.sh` solo para bootstrap o cambios de base más pesados,
 6. validar con `opencode debug config`.
+
+Importante:
+
+- `opencode debug config` puede resolver secretos definidos con `{file:...}` y mostrarlos en claro en la salida efectiva,
+- al compartir diagnosticos, resumir hallazgos y redactar valores sensibles en vez de pegar la salida cruda completa.

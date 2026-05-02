@@ -5,7 +5,11 @@ model: openai/gpt-5.4
 variant: xhigh
 permission:
   edit: allow
-  bash: ask
+  bash:
+    "*": ask
+    git status*: allow
+    git diff --name-only*: allow
+    ./gradlew spotlessApply*: allow
   task:
     "*": deny
 ---

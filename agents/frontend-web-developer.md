@@ -8,7 +8,11 @@ tools:
   "stitch_*": true
 permission:
   edit: allow
-  bash: ask
+  bash:
+    "*": ask
+    git status*: allow
+    git diff --name-only*: allow
+    ./gradlew spotlessApply*: allow
   task:
     "*": deny
 ---
