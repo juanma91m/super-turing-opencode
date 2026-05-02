@@ -54,6 +54,15 @@ Usar cuando una heurística reusable necesita:
 - checklist específico de capa/dominio,
 - vocabulario local consistente.
 
+### Scripts/reglas auxiliares en `.opencode/`
+
+Usar cuando el proyecto necesita herramientas ejecutables locales, por ejemplo:
+
+- `.opencode/scripts/check_code_patterns.sh`
+- `.opencode/scripts/find_code_pattern.sh`
+- `.opencode/rules/semgrep/`
+- patterns o catálogos equivalentes para ast-grep
+
 ## Checklist mínimo por override
 
 Antes de dar por bueno un archivo local que sombrea uno global, revisar:

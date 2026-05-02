@@ -27,6 +27,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
 - `LOCAL-OVERLAY-TEMPLATE.md`: plantilla base para overlays locales aditivos por proyecto
+- `PLAYBOOK-CODE-PATTERNS.md`: guía operativa para integrar Semgrep y ast-grep por proyecto
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
 - `PLAYBOOK-ASYNC.md`: playbook operativo async
@@ -64,6 +65,7 @@ Ese script:
 - comandos operativos `/stack-doctor`, `/check-local-overlays` y `/init-project-agent-layer`
 - helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
 - helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
+- wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
 - delegaciones async con cola, cancelación, progreso incremental y continuación read-only
 
 ## Sync diario recomendado
@@ -107,9 +109,12 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 
 - `/stack-doctor`: diagnostica instalación, config efectiva, assets globales, MCPs, dependencias base, drift del stack y overlays locales `.opencode/` cuando existan.
 - `/check-local-overlays`: ejecuta la auditoría semiestructurada de `.opencode/` contra la base global y devuelve el detalle por override.
+- `/check-code-patterns`: ejecuta checks de patrones del proyecto actual si existe integración local.
+- `/find-code-pattern`: ejecuta búsquedas estructurales del proyecto actual si existe integración local.
 - `/init-project-agent-layer <path>`: inspecciona un proyecto y propone o aplica una capa local de agentes/OpenCode reutilizando lo global y especializando solo lo necesario.
 - `LOCAL-OVERLAY-TEMPLATE.md`: referencia rápida para construir overrides locales aditivos sin perder guardrails globales.
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: playbook completo de uso diario para overlays locales, `/check-local-overlays` y `/stack-doctor`.
+- `PLAYBOOK-CODE-PATTERNS.md`: playbook de cuándo y cómo integrar Semgrep/ast-grep sin meter reglas de proyecto en global.
 
 ## Nota sobre `delegate_isolated`
 

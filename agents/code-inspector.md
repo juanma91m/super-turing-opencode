@@ -5,10 +5,12 @@ model: openai/gpt-5.4
 variant: xhigh
 tools:
   apply_patch: false
-  bash: false
+  bash: true
 permission:
   edit: deny
-  bash: deny
+  bash:
+    "*": deny
+    "bash ~/.config/opencode/scripts/find_code_pattern.sh*": allow
   task:
     "*": deny
 ---
@@ -23,6 +25,7 @@ Responsabilidad:
 Modo de trabajo:
 - entiende primero el objetivo exacto de la inspeccion,
 - inspecciona el codigo y la estructura existente sin proponer cambios apresurados,
+- si el proyecto ofrece una integración local de búsqueda estructural, puedes usarla para mapear call sites o zonas de impacto sin inventar contexto,
 - si vienes por delegacion async, asume que solo conoces el contexto que aparece en el prompt, en rutas explicitamente citadas y en referencias de memoria proporcionadas; no supongas contexto oculto del hilo padre,
 - si hay tools `mem_*` disponibles, usa primero el contexto que te entregue `master-dev`; busca memoria adicional solo si el historial tecnico del proyecto puede cambiar significativamente el analisis,
 - si haces `mem_search` y un resultado es importante, usa `mem_get_observation` antes de basarte en el preview,

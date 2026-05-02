@@ -24,6 +24,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `plugins/`
 - `README-AGENTS.md`
 - `LOCAL-OVERLAY-TEMPLATE.md`
+- `PLAYBOOK-CODE-PATTERNS.md`
 - `PLAYBOOK-LOCAL-OVERLAYS.md`
 - `PLAYBOOK-ASYNC.md`
 - `README-DISTRIBUTION.md`
@@ -41,6 +42,8 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `scripts/jira_api_read.py`
 - `scripts/check_local_overlays.sh`
 - `scripts/check_local_overlays.py`
+- `scripts/check_code_patterns.sh`
+- `scripts/find_code_pattern.sh`
 - `scripts/session_cleanup.sh`
 - `scripts/session_cleanup.py`
 

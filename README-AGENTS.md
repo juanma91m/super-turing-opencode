@@ -11,6 +11,8 @@ Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.m
 
 Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
 
+Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
+
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
 - `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.
@@ -67,6 +69,8 @@ Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
 - `/check-local-overlays`
+- `/check-code-patterns [args]`
+- `/find-code-pattern [args]`
 - `/stack-doctor`
 - `/init-project-agent-layer <path>`
 

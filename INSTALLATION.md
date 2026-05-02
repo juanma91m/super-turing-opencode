@@ -95,6 +95,10 @@ Para entender cuándo usar `AGENTS.md`, cuándo overridear y cómo interpretar `
 
 - `PLAYBOOK-LOCAL-OVERLAYS.md`
 
+Si un proyecto incorpora pattern checks con Semgrep/ast-grep, la guía global de uso e integración está en:
+
+- `PLAYBOOK-CODE-PATTERNS.md`
+
 ## Instalación en modo diagnóstico (sin escribir)
 
 Si querés ver qué haría el installer:

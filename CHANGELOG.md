@@ -2,6 +2,25 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [0.8.6] - 2026-05-02
+
+### Added
+
+- `PLAYBOOK-CODE-PATTERNS.md` para integrar Semgrep y ast-grep por proyecto
+- wrappers globales `scripts/check_code_patterns.sh` y `scripts/find_code_pattern.sh`
+- comandos globales `/check-code-patterns` y `/find-code-pattern`
+
+### Changed
+
+- `reviewer` ahora puede ejecutar el wrapper global de pattern checks
+- `code-inspector` ahora puede ejecutar el wrapper global de búsqueda estructural con permisos acotados
+- `README.md`, `README-AGENTS.md`, `README-DISTRIBUTION.md`, `INSTALLATION.md` y `LOCAL-OVERLAY-TEMPLATE.md` documentan el split global/local para estas herramientas
+- `STACK-MANIFEST.json` sube a `0.8.6`
+
+### Notes
+
+- el stack global no trae reglas Higyrus; solo deja el contrato, wrappers y playbook para que cada proyecto integre su implementación local
+
 ## [0.8.5] - 2026-05-02
 
 ### Added

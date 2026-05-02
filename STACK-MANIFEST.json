@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "components": {
     "engram": {
       "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
@@ -22,6 +22,7 @@
     "CHANGELOG.md",
     "INSTALLATION.md",
     "LOCAL-OVERLAY-TEMPLATE.md",
+    "PLAYBOOK-CODE-PATTERNS.md",
     "PLAYBOOK-LOCAL-OVERLAYS.md",
     "PLAYBOOK-ASYNC.md",
     "README.md",
@@ -33,6 +34,8 @@
     "commands/sessions-clean.md",
     "commands/sessions-list.md",
     "commands/check-local-overlays.md",
+    "commands/check-code-patterns.md",
+    "commands/find-code-pattern.md",
     "commands/init-project-agent-layer.md",
     "commands/stack-doctor.md",
     "commands/ticket-implement.md",
@@ -45,6 +48,8 @@
     "scripts/jira_helper.sh",
     "scripts/check_local_overlays.py",
     "scripts/check_local_overlays.sh",
+    "scripts/check_code_patterns.sh",
+    "scripts/find_code_pattern.sh",
     "scripts/install-engram.sh",
     "scripts/install-opencode-stack.sh",
     "scripts/session_cleanup.py",
