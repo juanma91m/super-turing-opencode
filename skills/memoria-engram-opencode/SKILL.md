@@ -46,6 +46,17 @@ compatibility: opencode
 - Formato recomendado: `workflow/<nombre>/<artifacto>` o una familia equivalente del dominio.
 - Guardar el estado y los artefactos largos con `topic_key` estable para permitir reanudacion limpia y evitar duplicados.
 
+## Calibracion por fase de trabajo
+- **Analisis / planning**: si la sesion solo deja preguntas o hipotesis temporales, no guardar memoria. Si confirma un descarte importante, una restriccion funcional, una regla de negocio no obvia o un hecho arquitectonico reusable, guardar **una** `decision` o `discovery` con `topic_key` estable.
+- **Implementacion**: guardar `bugfix`, `decision`, `architecture` o `pattern` cuando el cambio deje una leccion durable. Si el tema evoluciona en varias iteraciones, preferir actualizar el mismo `topic_key` antes que crear memorias paralelas.
+- **Validacion / testing**: guardar solo hallazgos tecnicos durables (`discovery`, `bugfix`, `pattern`) o una `session_summary` final cuando la validacion ya quedo cerrada. Evitar una `session_summary` nueva por cada rerun intermedio si la final ya sintetiza el estado.
+
+## Topic keys recomendados
+- Para analisis de tickets: `analysis/<ticket>/<tema>`
+- Para validacion de tickets: `validation/<ticket>/<tema>`
+- Para arquitectura o workflows evolutivos: `architecture/<tema-estable>` o `workflow/<nombre>/<artifacto>`
+- Si una memoria nueva reemplaza claramente a otra del mismo tema, conservar el `topic_key` y actualizar la vigente en vez de abrir otra rama paralela.
+
 ## Que guardar
 - Solo memoria durable, no obvia, reusable o valiosa entre sesiones.
 - Preferencias estables del usuario.
@@ -67,6 +78,12 @@ compatibility: opencode
 - Si un tema evoluciona, primero actualiza o registra la memoria vigente.
 - Luego purga la memoria obsoleta con soft-delete por defecto.
 - Hard-delete solo para ruido puro, duplicados accidentales, datos sensibles o memorias incorrectas sin valor historico.
+- Si hay varias memorias del mismo ticket/fase y solo la ultima sigue siendo operativamente util, conservar la mas vigente y evaluar soft-delete de las supersedidas.
+
+## Señales de calibracion
+- **Demasiado agresivo**: muchas `session_summary` del mismo ticket/fase, memorias que solo repiten output de validacion, o varias memorias paralelas para un mismo tema evolutivo sin `topic_key` comun.
+- **Demasiado conservador**: sesiones de analisis que confirman descartes/restricciones importantes y no dejan ninguna `decision` ni `discovery`, o fixes/validaciones que enseñan algo reusable y no se persisten.
+- **Acertado**: cada ticket relevante deja pocas memorias pero utiles, con hallazgos durables separados de summaries finales y con poco drift entre memorias viejas y vigentes.
 
 ## Bootstrap de lectura
 - Siempre consultar primero `mem-global-user` y el proyecto actual cuando haya probabilidad real de contexto previo util.

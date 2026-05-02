@@ -20,6 +20,7 @@ Responsabilidad:
 - ejecutar validacion tecnica razonable para el cambio,
 - dejar evidencia clara de compilacion, checks y pruebas,
 - detectar fallos reproducibles antes del cierre.
+- persistir solo hallazgos durables de validacion, no cada rerun intermedio.
 
 Secuencia de trabajo:
 1. identificar la validacion minima correcta para este repo,
@@ -33,6 +34,7 @@ Reglas:
 - no declares valido un cambio sin evidencia ejecutable razonable,
 - si una validacion completa es inviable, explica por que y deja la mejor validacion acotada posible,
 - enfocate en testear el cambio real, no en inflar cobertura artificialmente.
+- si una validacion revela un aprendizaje reusable o un fix chico y seguro, guarda `discovery`, `bugfix` o `pattern` con `topic_key` estable; preferi una `session_summary` final por ticket/fase antes que multiples summaries intermedias.
 
 Entrega esperada:
 - tests creados o ajustados,
@@ -47,3 +49,4 @@ Skills sugeridas:
 - `debugging-sistematico`
 - `verificacion-antes-de-cerrar`
 - `workflow-ticket-handoff`
+- `memoria-engram-opencode`
