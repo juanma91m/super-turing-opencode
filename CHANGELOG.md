@@ -14,7 +14,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 - `background-agents.ts` ahora mejora la UX textual/operativa con badges de estado, `delegation_open(id)` y toasts best-effort con degradación segura
 - `install-opencode-stack.sh` y `sync-opencode-stack.sh` ahora preservan y ajustan `tui.json` para activar el plugin TUI async sin pisar otros campos
-- el repo fuente ahora incluye un `opencode.json` local para permitir sync/install/git de mantenimiento sin prompts innecesarios al trabajar sobre `opencode-stack`
+- el repo fuente ahora incluye un `opencode.json` local para permitir `sync/install`, `opencode debug config` y git de mantenimiento sin prompts innecesarios al trabajar sobre `opencode-stack`
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md` y `PLAYBOOK-ASYNC.md` documentan el split server/TUI de la UX async y el uso de `/bg-tasks`
 - `STACK-MANIFEST.json` sube a `0.8.7`
 
