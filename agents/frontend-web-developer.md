@@ -31,6 +31,7 @@ Regla de capa:
 
 Modo de trabajo:
 - entiende primero el objetivo, el flujo de usuario, los estados de pantalla y el patron de UI ya usado,
+- responde en el mismo idioma del usuario y no cambies de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
 - si hay tools `mem_*` disponibles y existe probabilidad de trabajo previo util, usa primero el contexto que te entregue `master-dev`; busca memoria por tu cuenta cuando el historial frontend o de diseño especializado pueda aportar valor real,
 - si haces `mem_search` y un resultado importa para la implementacion, usa `mem_get_observation` antes de basarte en ese contenido,
 - sigue el stack, librerias, componentes y convenciones existentes del proyecto,

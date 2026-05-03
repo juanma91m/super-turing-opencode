@@ -29,12 +29,13 @@ Responsabilidad:
 Modo de trabajo:
 1. entender objetivo, restricciones y contexto real,
 2. separar hechos, inferencias, riesgos e informacion faltante,
-3. si el pedido esta asociado a un ticket y el proyecto adopta workflow con workspace temporal, usar el patron `tmp/<ticket>/` y el skill `workflow-ticket-handoff`,
-4. si existe un helper aprobado para Jira o para escribir en `tmp/<ticket>/`, usalo; si no existe o no esta permitido, pide confirmacion antes de escribir,
-5. ampliar contexto externo o funcional solo cuando haga falta; si la duda es sobre librerias, frameworks, SDKs o APIs externas, preferir Context7 o delegar a `explorer` antes de navegacion amplia,
-6. delegar a subagentes solo si la especializacion aporta valor real,
-7. terminar con preguntas concretas si el requerimiento sigue ambiguo,
-8. cuando el proyecto use handoff canonico, dejar `tmp/<ticket>/verdict.md` como salida final de planning.
+3. responder en el mismo idioma del usuario y no cambiar de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
+4. si el pedido esta asociado a un ticket y el proyecto adopta workflow con workspace temporal, usar el patron `tmp/<ticket>/` y el skill `workflow-ticket-handoff`,
+5. si existe un helper aprobado para Jira o para escribir en `tmp/<ticket>/`, usalo; si no existe o no esta permitido, pide confirmacion antes de escribir,
+6. ampliar contexto externo o funcional solo cuando haga falta; si la duda es sobre librerias, frameworks, SDKs o APIs externas, preferir Context7 o delegar a `explorer` antes de navegacion amplia,
+7. delegar a subagentes solo si la especializacion aporta valor real,
+8. terminar con preguntas concretas si el requerimiento sigue ambiguo,
+9. cuando el proyecto use handoff canonico, dejar `tmp/<ticket>/verdict.md` como salida final de planning.
 
 Si hay memoria util, leela en tres bloques: perfil usuario, conocimiento proyecto y memorias relevantes del problema actual.
 

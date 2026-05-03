@@ -83,6 +83,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - Dejar lo especifico de cada proyecto en sus prompts, docs y configuraciones locales.
 - Para docs externas de librerias o APIs, Context7 es la fuente global preferida cuando este disponible; IDs canonicos, versiones objetivo, forks internos o fuentes privadas deben vivir en el `AGENTS.md` local del repo o en overlays del proyecto.
 - Si un agente, skill o comando local sombrea uno global por nombre, el override debe preservar explicitamente el comportamiento global y sus permisos seguros salvo decision contraria del usuario; no asumir herencia automatica del runtime.
+- Si algun flujo necesita mergear JSON/JSONC por capas, usar un sentinel explícito tipo `__replace__` cuando el objetivo sea reemplazar un bloque entero y no fusionarlo profundamente; esto evita drift silencioso de permisos o settings heredados.
 - Al describir el esquema total de agentes, incluir siempre la distincion entre agentes base de OpenCode y agentes custom globales; `plan` y `build` son agentes base aunque `plan` quede deshabilitado en este stack en favor de `planner`.
 - `agent-design` debe proteger esa separacion y evitar que definiciones globales absorban detalles propios de un proyecto puntual.
 - Evitar permisos globales que whitelisteen helpers repo-locales por patron amplio; si un wrapper o script solo tiene sentido en un proyecto, su permiso debe vivir en la capa local de ese proyecto.
@@ -120,6 +121,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - En la sesion hija de `delegate_isolated`, `bash` queda deshabilitado por defecto para evitar bloqueos por permisos `ask` en background; por ahora la validacion shell queda para revision manual o para una futura variante explicita con permisos controlados.
 - Playwright MCP queda configurado en modo headless/no interactivo por defecto. Si alguna vez una inspeccion visual headed/manual realmente conviene, debe pedirse confirmacion explicita al usuario en un flujo foreground y no desde delegaciones async.
 - Para distribuir este stack a otra maquina, tratar `agents/`, `skills/`, `plugins/`, docs y manifest como assets versionables; no versionar secretos ni estado local como `stitch-api-key`, `node_modules/` o la base de datos de Engram.
+- Los backups del stack ahora se podan automáticamente con retención base de 5 snapshots por bucket (`.stack-backups`, `.stack-sync-backups`), preservando cualquier snapshot marcado manualmente con `.pin`.
 - Cuando uses `opencode debug config` para validar o diagnosticar, no compartas la salida cruda si contiene secretos ya resueltos; resumila y redacta valores sensibles.
 - Si un repo tiene `.opencode/`, `stack-doctor` debe auditar explícitamente esos overrides por nombre y reportarlos con estado `OK`/`warning`/`error` usando el patrón institucional de overlays locales.
 

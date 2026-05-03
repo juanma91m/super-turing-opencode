@@ -340,6 +340,25 @@ validate_config() {
   fi
 }
 
+prune_backups() {
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    return 0
+  fi
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    warn "python3 no está disponible; no se pudieron podar backups viejos"
+    return 0
+  fi
+
+  if [[ ! -f "$TARGET_DIR/scripts/prune_stack_backups.py" ]]; then
+    warn "No se encontró scripts/prune_stack_backups.py en el target; se omite poda de backups"
+    return 0
+  fi
+
+  log "Podando backups viejos del stack (retención: 5 + pinned)"
+  python3 "$TARGET_DIR/scripts/prune_stack_backups.py" --target-dir "$TARGET_DIR" --keep 5 >/dev/null || warn "Falló la poda de backups viejos"
+}
+
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
     --target-dir)
@@ -402,6 +421,7 @@ install_npm_dependencies
 install_engram_if_needed
 render_opencode_config
 ensure_tui_plugin_config
+prune_backups
 validate_config
 
 log "Instalación finalizada"

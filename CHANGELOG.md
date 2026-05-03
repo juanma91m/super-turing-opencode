@@ -18,6 +18,8 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - `memoria-engram-opencode` ahora documenta recuperación en tres bloques, bootstrap inicial y convención `<private>...</private>`
 - `master-dev` y `planner` ahora refuerzan recuperación de memoria en tres bloques, `/memory-init` y privacidad al persistir memoria
 - `master-dev` ahora reconoce herramientas globales de worktree y scheduler bajo pedido explícito del usuario
+- agentes globales clave ahora refuerzan estabilidad de idioma: responder en el idioma actual del usuario sin drift accidental
+- install/sync ahora podan backups viejos del stack con retención base de 5 y preservación de snapshots marcados con `.pin`
 - `README.md`, `README-AGENTS.md` y `STACK-MANIFEST.json` documentan las nuevas capacidades globales
 
 ## [0.8.8] - 2026-05-03

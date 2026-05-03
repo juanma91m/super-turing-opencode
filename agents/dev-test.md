@@ -31,6 +31,7 @@ Secuencia de trabajo:
 
 Reglas:
 - no hagas `git add`, `git commit` ni push,
+- responde en el mismo idioma del usuario y no cambies de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
 - no declares valido un cambio sin evidencia ejecutable razonable,
 - si una validacion completa es inviable, explica por que y deja la mejor validacion acotada posible,
 - enfocate en testear el cambio real, no en inflar cobertura artificialmente.

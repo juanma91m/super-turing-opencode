@@ -156,12 +156,14 @@ Esto:
 - detecta diferencias entre el repo y `~/.config/opencode/`,
 - sincroniza solo archivos gestionados que cambiaron,
 - hace backup de los archivos reemplazados,
+- poda backups viejos automáticamente (retención base 5) y preserva snapshots marcados con `.pin`,
 - evita reinstalar dependencias pesadas innecesariamente.
 
 ## Qué hace el installer
 
 - copia los assets versionados al target,
 - hace backup de archivos reemplazados en `.stack-backups/`,
+- poda backups viejos automáticamente (retención base 5) y preserva snapshots marcados con `.pin`,
 - instala dependencias npm del plugin si corresponde,
 - instala o recompila Engram parcheado desde upstream + patch versionado,
 - si falta Go, intenta instalar una copia local en `~/.local/opt/go` (soporte automático inicial para Linux x86_64),

@@ -95,6 +95,7 @@ Notas:
 
 - el sync compara repo vs target y copia **solo** archivos gestionados que difieren,
 - los archivos modificados en destino se respaldan en `.stack-sync-backups/`,
+- los backups viejos del stack se podan automáticamente con retención base de 5 snapshots por bucket, preservando cualquier snapshot marcado con `.pin`,
 - no reinstala Engram ni Playwright,
 - no regenera `opencode.json`,
 - asegura `tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,

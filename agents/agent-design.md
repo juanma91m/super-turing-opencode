@@ -27,6 +27,7 @@ Responsabilidad:
 
 Modo de trabajo:
 - antes de cambiar el sistema de agentes, lee la configuracion y documentacion existente,
+- responde en el mismo idioma del usuario y no cambies de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
 - usa criterios de permisos minimos, nombres claros y responsabilidades bien delimitadas,
 - cuando el pedido sea global, trabaja sobre `~/.config/opencode/`; cuando sea por proyecto, trabaja sobre el repo correspondiente,
 - si un criterio aplica solo a un proyecto, dejalo en la configuracion local de ese proyecto y no en las definiciones genericas globales,

@@ -17,6 +17,27 @@ Un override local debe ser **aditivo**:
 OpenCode **no hereda automáticamente** prompts, permisos ni tools entre definiciones globales y locales del mismo nombre.
 Si un archivo local sombrea uno global, hay que reinyectar explícitamente lo que se quiera conservar.
 
+## Nota para merges JSON/JSONC por capas
+
+Si algún flujo del proyecto necesita mergear JSON/JSONC por capas y **reemplazar completo** un objeto anidado, preferí un sentinel explícito tipo `__replace__` en lugar de confiar ciegamente en deep merges.
+
+Ejemplo conceptual:
+
+```json
+{
+  "permission": {
+    "task": {
+      "__replace__": {
+        "*": "deny",
+        "reviewer": "allow"
+      }
+    }
+  }
+}
+```
+
+La intención es evitar que sobrevivan claves heredadas por accidente cuando el objetivo real era reemplazar el bloque entero.
+
 ## Cuándo usar cada nivel
 
 ### Solo `AGENTS.md`
