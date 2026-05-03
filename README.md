@@ -22,7 +22,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `agents/`: agentes y subagentes custom
 - `commands/`: comandos reutilizables para tickets y mantenimiento
 - `skills/`: skills globales
-- `plugins/`: plugin async
+- `plugins/`: plugins async server/TUI
 - `patches/`: patches versionados sobre dependencias externas (por ahora Engram)
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
@@ -91,6 +91,7 @@ Notas:
 - los archivos modificados en destino se respaldan en `.stack-sync-backups/`,
 - no reinstala Engram ni Playwright,
 - no regenera `opencode.json`,
+- asegura `tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - no debería usarse para secretos ni para migrar memoria.
 
 ## Regla de trabajo

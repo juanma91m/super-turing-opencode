@@ -10,6 +10,7 @@ Guía práctica para usar la delegación async global configurada en `~/.config/
 | `delegate_isolated(prompt, agent, name?)` | implementación write-capable paralela en worktree aislado | solo `master-dev`, sin auto-merge, queda en `review_pending` |
 | `delegation_read(id, wait?)` | leer resultado completo persistido o estado actual | por default no bloquea si sigue corriendo; `wait=true` bloquea intencionalmente |
 | `delegation_tail(id)` | leer solo novedades/progreso de una delegación | ideal para seguir una ejecución viva sin releer todo |
+| `/bg-tasks` | abrir la lista TUI de delegaciones del proyecto actual | pensado para sesiones TUI foreground; permite abrir sesión hija cuando exista |
 | `delegation_cancel(id, all=true)` | cancelar delegaciones pendientes o running | útil si el trabajo dejó de ser necesario o fue mal planteado |
 | `delegation_continue(id, prompt)` | retomar una delegación read-only completada en la misma sesión | follow-up con continuidad de contexto; no aplica a isolated write |
 | `delegation_accept(id)` | aceptar una delegación aislada | solo `master-dev`, requiere `review_pending`, conserva worktree |
@@ -62,6 +63,7 @@ El segundo nivel ya no debe seguir delegando.
 - las delegaciones read-only usan una cola con concurrencia limitada,
 - una delegación puede quedar `pending` antes de empezar,
 - `delegation_tail(id)` muestra novedades incrementales y progreso reciente,
+- en TUI foreground, `/bg-tasks` muestra un resumen persistente y permite abrir la sesión hija cuando haya `sessionID`,
 - evitar usar `delegation_list()` como polling continuo.
 
 ## 4. Flujo write-capable aislado

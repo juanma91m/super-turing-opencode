@@ -50,12 +50,14 @@
     "scripts/check_local_overlays.sh",
     "scripts/check_code_patterns.sh",
     "scripts/find_code_pattern.sh",
+    "scripts/ensure_tui_plugin.py",
     "scripts/install-engram.sh",
     "scripts/install-opencode-stack.sh",
     "scripts/session_cleanup.py",
     "scripts/session_cleanup.sh",
     "scripts/sync-opencode-stack.sh",
     "plugins/background-agents.ts",
+    "plugins/background-agents-tui/index.ts",
     "agents/agent-design.md",
     "agents/backend-java-developer.md",
     "agents/code-inspector.md",
@@ -82,7 +84,8 @@
     "skills/workflow-ticket-handoff/SKILL.md"
   ],
   "generatedFiles": [
-    "opencode.json"
+    "opencode.json",
+    "tui.json"
   ],
   "machineLocalFiles": [
     "stitch-api-key",

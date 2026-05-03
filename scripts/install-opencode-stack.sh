@@ -244,6 +244,26 @@ print(json.dumps(config, indent=2))
 PY
 }
 
+ensure_tui_plugin_config() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    warn "python3 no está disponible; no se pudo asegurar tui.json"
+    return 0
+  fi
+
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    log "Dry-run: se omite asegurar tui.json en $TARGET_DIR"
+    return 0
+  fi
+
+  if [[ ! -f "$TARGET_DIR/scripts/ensure_tui_plugin.py" ]]; then
+    warn "No se encontró scripts/ensure_tui_plugin.py en el target; se omite ajuste de tui.json"
+    return 0
+  fi
+
+  log "Asegurando tui.json con el plugin TUI async"
+  python3 "$TARGET_DIR/scripts/ensure_tui_plugin.py" "$TARGET_DIR"
+}
+
 install_npm_dependencies() {
   if [[ "$SKIP_NPM_INSTALL" -eq 1 ]]; then
     return 0
@@ -363,6 +383,7 @@ for rel_path in "${MANAGED_FILES[@]}"; do
   backup_path "$rel_path" "$BACKUP_DIR"
 done
 backup_path "opencode.json" "$BACKUP_DIR"
+backup_path "tui.json" "$BACKUP_DIR"
 
 for rel_path in "${MANAGED_FILES[@]}"; do
   copy_file "$rel_path"
@@ -371,6 +392,7 @@ done
 install_npm_dependencies
 install_engram_if_needed
 render_opencode_config
+ensure_tui_plugin_config
 validate_config
 
 log "Instalación finalizada"

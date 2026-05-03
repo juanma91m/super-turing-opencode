@@ -135,6 +135,7 @@ interface DelegationListItem {
   description?: string
   agent?: string
   mode?: DelegationMode
+  sessionID?: string
   duration?: string
   lastTool?: string
   lastMessage?: string
@@ -287,6 +288,46 @@ function formatDuration(start: Date, end?: Date): string {
   if (hours > 0) return `${hours}h ${minutes % 60}m ${seconds % 60}s`
   if (minutes > 0) return `${minutes}m ${seconds % 60}s`
   return `${seconds}s`
+}
+
+function formatStatusLabel(status: string): string {
+  return status.replace(/_/g, " ")
+}
+
+function getDelegationStatusPresentation(status: string): {
+  icon: string
+  label: string
+  variant: "info" | "success" | "warning" | "error"
+} {
+  const label = formatStatusLabel(status)
+  switch (status) {
+    case "pending":
+      return { icon: "🟡", label, variant: "info" }
+    case "running":
+      return { icon: "🔵", label, variant: "info" }
+    case "complete":
+      return { icon: "🟢", label, variant: "success" }
+    case "review_pending":
+      return { icon: "🟣", label, variant: "success" }
+    case "accepted":
+      return { icon: "✅", label, variant: "success" }
+    case "applied":
+      return { icon: "🟢", label, variant: "success" }
+    case "cancelled":
+      return { icon: "⚪", label, variant: "warning" }
+    case "timeout":
+      return { icon: "🟠", label, variant: "warning" }
+    case "discarded":
+      return { icon: "⚪", label, variant: "warning" }
+    case "error":
+    default:
+      return { icon: "🔴", label, variant: "error" }
+  }
+}
+
+function formatDelegationStatusBadge(status: string): string {
+  const presentation = getDelegationStatusPresentation(status)
+  return `${presentation.icon} ${presentation.label.toUpperCase()}`
 }
 
 function deriveMetadata(content: string): { title: string; description: string } {
@@ -457,6 +498,71 @@ class DelegationManager {
     } catch {
       // ignore
     }
+  }
+
+  private async showToast(
+    input: { title: string; message: string; variant: "info" | "success" | "warning" | "error"; duration?: number },
+    directory = this.projectDirectory,
+  ): Promise<void> {
+    try {
+      if (!this.worktreeClient?.tui?.showToast) return
+      const result = await withTimeout(
+        this.worktreeClient.tui.showToast({
+          directory,
+          title: input.title,
+          message: input.message,
+          variant: input.variant,
+          duration: input.duration,
+        }),
+        1500,
+        "tui.showToast timed out",
+      )
+      if (result?.error) {
+        throw new Error(typeof result.error === "string" ? result.error : JSON.stringify(result.error))
+      }
+    } catch (error) {
+      await this.debugLog(`showToast failed: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
+  private buildDelegationToastDetail(delegation: Delegation): string {
+    const detail = `${delegation.id} · ${delegation.agent}`
+    const extra = delegation.title ?? delegation.error ?? delegation.description
+    return extra ? `${detail} — ${summarize(extra, 120)}` : detail
+  }
+
+  private async notifyLaunchToast(delegation: Delegation): Promise<void> {
+    const title =
+      delegation.status === "running"
+        ? delegation.mode === "isolated-write"
+          ? "Isolated task started"
+          : "Background task started"
+        : delegation.mode === "isolated-write"
+          ? "Isolated task queued"
+          : "Background task queued"
+    const statusLabel = formatStatusLabel(delegation.status)
+    await this.showToast({
+      title,
+      message: `${this.buildDelegationToastDetail(delegation)} is ${statusLabel}.`,
+      variant: "info",
+      duration: 3500,
+    })
+  }
+
+  private async notifyTerminalToast(delegation: Delegation): Promise<void> {
+    const presentation = getDelegationStatusPresentation(String(delegation.status))
+    let title = `Background task ${presentation.label}`
+    if (delegation.status === "review_pending") title = "Isolated task ready for review"
+    else if (delegation.status === "timeout") title = "Background task timed out"
+    else if (delegation.status === "cancelled") title = "Background task cancelled"
+    else if (delegation.status === "error") title = "Background task failed"
+
+    await this.showToast({
+      title,
+      message: this.buildDelegationToastDetail(delegation),
+      variant: presentation.variant,
+      duration: presentation.variant === "error" ? 7000 : 5000,
+    })
   }
 
   private getQueue(mode: DelegationMode): QueueItem[] {
@@ -630,7 +736,6 @@ class DelegationManager {
       title: meta.title ?? undefined,
       description: meta.description ?? undefined,
       result: undefined,
-      error: undefined,
       worktree: meta.worktree ?? undefined,
       artifactsDir: meta.artifactsDir ?? undefined,
       promptPreview: meta.promptPreview ?? undefined,
@@ -774,7 +879,7 @@ class DelegationManager {
       `| ID | \`${delegation.id}\` |`,
       `| Mode | ${delegation.mode} |`,
       `| Agent | ${delegation.agent} |`,
-      `| Status | **${delegation.status}** |`,
+      `| Status | **${formatDelegationStatusBadge(String(delegation.status))}** |`,
       `| Duration | ${formatDurationFromDelegation(delegation)} |`,
       `| Session ID | ${delegation.sessionID ? `\`${delegation.sessionID}\`` : "N/A"} |`,
     ]
@@ -782,6 +887,10 @@ class DelegationManager {
     if (progress?.lastTool) lines.push(`| Last tool | ${progress.lastTool} |`)
     if (progress?.toolCalls !== undefined) lines.push(`| Tool calls | ${progress.toolCalls} |`)
     if (progress?.lastUpdate) lines.push(`| Last update | ${progress.lastUpdate.toISOString()} |`)
+
+    if (delegation.sessionID) {
+      lines.push(``, `> **Open session**: Use \`delegation_open("${delegation.id}")\` to jump into the delegated session.`)
+    }
 
     if (delegation.status === "pending") {
       lines.push(``, `> **Queued**: Waiting for a concurrency slot to start.`)
@@ -1064,6 +1173,7 @@ Review artifacts before applying anything to the main workspace. This plugin doe
           tools: {
             task: false,
             delegate: shouldExposeDelegateTool(callerDepth + 1),
+            delegation_open: false,
             delegation_read: false,
             delegation_list: false,
             delegation_tail: false,
@@ -1158,6 +1268,7 @@ Review artifacts before applying anything to the main workspace. This plugin doe
             bash: false,
             task: false,
             delegate: false,
+            delegation_open: false,
             delegation_read: false,
             delegation_list: false,
             delegation_tail: false,
@@ -1212,6 +1323,7 @@ Review artifacts before applying anything to the main workspace. This plugin doe
 
     this.markQueued(delegation, input, callerDepth)
     await this.saveDelegationMeta(delegation)
+    void this.notifyLaunchToast(delegation)
     void this.processQueue("read-only")
 
     return delegation
@@ -1243,6 +1355,7 @@ Review artifacts before applying anything to the main workspace. This plugin doe
 
     this.markQueued(delegation, input)
     await this.saveDelegationMeta(delegation)
+    void this.notifyLaunchToast(delegation)
     void this.processQueue("isolated-write")
 
     return delegation
@@ -1426,6 +1539,7 @@ Review artifacts before applying anything to the main workspace. This plugin doe
     if (delegation.sessionID) {
       try {
         await this.client.session.delete({ path: { id: delegation.sessionID } })
+        delegation.sessionID = undefined
       } catch {
         // ignore
       }
@@ -1513,6 +1627,7 @@ Review artifacts before applying anything to the main workspace. This plugin doe
     this.pendingByParent.get(delegation.parentSessionID)?.add(delegation.id)
     this.setActiveCount("read-only", this.getActiveCount("read-only") + 1)
     await this.saveDelegationMeta(delegation)
+    void this.notifyLaunchToast(delegation)
 
     this.client.session
       .prompt({
@@ -1523,6 +1638,7 @@ Review artifacts before applying anything to the main workspace. This plugin doe
           tools: {
             task: false,
             delegate: false,
+            delegation_open: false,
             delegation_read: false,
             delegation_list: false,
             delegation_tail: false,
@@ -1565,16 +1681,17 @@ Review artifacts before applying anything to the main workspace. This plugin doe
     delegation.status = "timeout"
     delegation.completedAt = new Date()
     delegation.error = `Delegation timed out after ${MAX_RUN_TIME_MS / 1000}s`
+    const result = await this.getResult(delegation)
 
     if (delegation.sessionID) {
       try {
         await this.client.session.delete({ path: { id: delegation.sessionID } })
+        delegation.sessionID = undefined
       } catch {
         // ignore
       }
     }
 
-    const result = await this.getResult(delegation)
     if (delegation.mode === "isolated-write") {
       await this.captureIsolatedArtifacts(delegation, `${result}\n\n[TIMEOUT REACHED]`)
       await this.cleanupIsolatedWorktree(delegation, "Automatic cleanup after isolated delegation timeout")
@@ -1721,6 +1838,8 @@ ${content}`
 
   private async notifyParent(delegation: Delegation): Promise<void> {
     try {
+      void this.notifyTerminalToast(delegation)
+
       const pendingSet = this.pendingByParent.get(delegation.parentSessionID)
       pendingSet?.delete(delegation.id)
       const allComplete = !pendingSet || pendingSet.size === 0
@@ -1728,7 +1847,11 @@ ${content}`
         this.pendingByParent.delete(delegation.parentSessionID)
       }
 
-      const completionNotification = `[TASK NOTIFICATION]\nID: ${delegation.id}\nStatus: ${delegation.status}\nUse delegation_read("${delegation.id}") to retrieve the full result.`
+      const titleLine = delegation.title ? `\nTitle: ${delegation.title}` : ""
+      const sessionHint = delegation.sessionID
+        ? `\nUse delegation_open("${delegation.id}") to jump into the child session.`
+        : ""
+      const completionNotification = `[TASK NOTIFICATION]\nID: ${delegation.id}\nStatus: ${delegation.status}${titleLine}${sessionHint}\nUse delegation_read("${delegation.id}") to retrieve the full result.`
 
       await this.client.session.prompt({
         path: { id: delegation.parentSessionID },
@@ -1788,6 +1911,7 @@ ${content}`
         description: delegation.description || summarize(delegation.prompt, 120),
         agent: delegation.agent,
         mode: delegation.mode,
+        sessionID: delegation.sessionID,
         duration: formatDurationFromDelegation(delegation),
         lastTool: delegation.progress?.lastTool,
         lastMessage: delegation.progress?.lastMessage,
@@ -1815,6 +1939,7 @@ ${content}`
             description: delegation.description ?? "(loaded from storage)",
             agent: delegation.agent,
             mode: delegation.mode,
+            sessionID: delegation.sessionID,
             duration: formatDurationFromDelegation(delegation),
             lastTool: delegation.progress?.lastTool,
             lastMessage: delegation.progress?.lastMessage,
@@ -1840,6 +1965,38 @@ ${content}`
     }
 
     return results.sort((a, b) => a.id.localeCompare(b.id))
+  }
+
+  async openDelegationSession(sessionID: string, id: string): Promise<string> {
+    const delegation = await this.resolveDelegation(sessionID, id)
+    if (!delegation.sessionID) {
+      if (delegation.status === "pending") {
+        return `Delegation "${id}" is still pending and has no child session yet. Wait for it to start, or use delegation_read("${id}") after completion.`
+      }
+      return `Delegation "${id}" has no live child session to open. Use delegation_read("${id}") to inspect persisted output.`
+    }
+
+    if (!this.worktreeClient?.tui?.selectSession) {
+      return `This OpenCode runtime does not expose TUI session navigation. Use delegation_read("${id}") to inspect persisted output.`
+    }
+
+    const directory = delegation.worktree?.directory || this.projectDirectory
+    try {
+      const result = await withTimeout(
+        this.worktreeClient.tui.selectSession({
+          directory,
+          sessionID: delegation.sessionID,
+        }),
+        2000,
+        "tui.selectSession timed out",
+      )
+      if (result?.error) {
+        throw new Error(typeof result.error === "string" ? result.error : JSON.stringify(result.error))
+      }
+      return `Opened delegation session: ${delegation.id}\nSession ID: ${delegation.sessionID}\nAgent: ${delegation.agent}`
+    } catch (error) {
+      return `Could not open delegation session for "${id}". Use delegation_read("${id}") to inspect persisted output.\n\nReason: ${error instanceof Error ? error.message : "Unknown error"}`
+    }
   }
 
   async getRecentCompletedDelegations(sessionID: string): Promise<DelegationListItem[]> {
@@ -1873,10 +2030,11 @@ function formatDelegationContext(
     for (const delegation of completed) {
       sections.push(`- \`${delegation.id}\` [${delegation.status}]${delegation.title ? ` — ${delegation.title}` : ""}`)
     }
-    sections.push("", "> Use delegation_read(id) to retrieve the full result.", "")
+    sections.push("", "> Use delegation_open(id) to jump into a persisted child session when available, or delegation_read(id) for the stored result.", "")
   }
 
   sections.push("## Retrieval")
+  sections.push('Use `delegation_open("id")` to navigate into a child session when it exists.')
   sections.push('Use `delegation_read("id")` to access full delegation output.')
   sections.push("</delegation-context>")
   return sections.join("\n")
@@ -1913,6 +2071,7 @@ Results are persisted to disk and survive compaction. Nested read-only delegatio
         const activeCount = manager.getRunningDelegations().filter((d) => d.parentSessionID === toolCtx.sessionID).length
         let response = `Delegation queued: ${delegation.id}\nAgent: ${args.agent}\nStatus: ${delegation.status}`
         if (activeCount > 1) response += `\n\n${activeCount} delegations now active.`
+        response += `\nUse delegation_open("${delegation.id}") once it starts if you want to jump into the child session.`
         response += "\nYou WILL be notified when it completes. Use delegation_tail(id) if you need incremental progress. Do NOT poll delegation_list()."
         return response
       } catch (error) {
@@ -1948,7 +2107,7 @@ It does NOT commit, merge, apply, or push changes.`,
           name: args.name,
         })
 
-        return `Isolated delegation queued: ${delegation.id}\nAgent: ${args.agent}\nStatus: ${delegation.status}\nYou WILL be notified when it reaches review_pending/error/timeout. No changes will be applied automatically.`
+        return `Isolated delegation queued: ${delegation.id}\nAgent: ${args.agent}\nStatus: ${delegation.status}\nUse delegation_open("${delegation.id}") once it starts if you want to jump into the child session.\nYou WILL be notified when it reaches review_pending/error/timeout. No changes will be applied automatically.`
       } catch (error) {
         return `❌ Isolated delegation failed:\n\n${error instanceof Error ? error.message : "Unknown error"}`
       }
@@ -2036,6 +2195,24 @@ If the delegation is still pending/running, it returns current status unless wai
   })
 }
 
+function createDelegationOpen(manager: DelegationManager) {
+  return tool({
+    description: `Open the child session for a delegation in the TUI when one exists.
+Use this to jump directly into a live or persisted worker session from its delegation ID.`,
+    args: {
+      id: tool.schema.string().describe("Delegation ID, for example brisk-blue-falcon."),
+    },
+    async execute(args: { id: string }, toolCtx: ToolContext): Promise<string> {
+      if (!toolCtx?.sessionID) return "❌ delegation_open requires sessionID. This is a system error."
+      try {
+        return await manager.openDelegationSession(toolCtx.sessionID, args.id)
+      } catch (error) {
+        return `❌ delegation_open failed:\n\n${error instanceof Error ? error.message : "Unknown error"}`
+      }
+    },
+  })
+}
+
 function createDelegationTail(manager: DelegationManager) {
   return tool({
     description: `Read only new incremental output from a running delegation.
@@ -2088,7 +2265,7 @@ Use this when follow-up questions benefit from preserving the subagent's prior c
       if (!toolCtx?.sessionID) return "❌ delegation_continue requires sessionID. This is a system error."
       try {
         const delegation = await manager.continueDelegation(toolCtx.sessionID, args.id, args.prompt)
-        return `Delegation continued: ${delegation.id}\nAgent: ${delegation.agent}\nStatus: ${delegation.status}\nUse delegation_tail("${delegation.id}") for incremental output.`
+        return `Delegation continued: ${delegation.id}\nAgent: ${delegation.agent}\nStatus: ${delegation.status}\nUse delegation_open("${delegation.id}") to jump into the worker session, or delegation_tail("${delegation.id}") for incremental output.`
       } catch (error) {
         return `❌ delegation_continue failed:\n\n${error instanceof Error ? error.message : "Unknown error"}`
       }
@@ -2108,13 +2285,16 @@ Use sparingly. Do NOT use this as a polling loop while waiting for completion no
       if (delegations.length === 0) return "No delegations found for this session."
 
       const lines = delegations.map((delegation) => {
-        const title = delegation.title ? ` | ${delegation.title}` : ""
+        const title = delegation.title ? ` — ${delegation.title}` : ""
         const description = delegation.description ? `\n  → ${delegation.description}` : ""
-        const meta = [delegation.mode, delegation.duration, delegation.lastTool ? `last tool: ${delegation.lastTool}` : ""]
+        const meta = [formatDelegationStatusBadge(delegation.status), delegation.mode, delegation.duration, delegation.lastTool ? `last tool: ${delegation.lastTool}` : ""]
           .filter(Boolean)
           .join(" | ")
+        const commands = delegation.sessionID
+          ? `\n  ↗ open: \`delegation_open("${delegation.id}")\` | read: \`delegation_read("${delegation.id}")\``
+          : `\n  ↗ read: \`delegation_read("${delegation.id}")\``
         const progress = delegation.lastMessage ? `\n  ↳ ${delegation.lastMessage}` : ""
-        return `- **${delegation.id}**${title} [${delegation.status}]${meta ? `\n  ${meta}` : ""}${description}${progress}`
+        return `- **${delegation.id}**${title}${meta ? `\n  ${meta}` : ""}${commands}${description}${progress}`
       })
       return `## Delegations\n\n${lines.join("\n")}`
     },
@@ -2129,6 +2309,7 @@ const DELEGATION_RULES = `<task-notification>
 You have tools for parallel background work:
 - \`delegate(prompt, agent)\` - Launch a background task and get an ID immediately
 - \`delegate_isolated(prompt, agent, name?)\` - Launch write-capable work in an isolated worktree for manual review
+- \`delegation_open(id)\` - Jump into the child session when it exists
 - \`delegation_read(id)\` - Retrieve the full persisted result
 - \`delegation_tail(id)\` - Retrieve only new incremental output/status from a running delegation
 - \`delegation_list()\` - List delegations (use sparingly)
@@ -2178,7 +2359,7 @@ Do NOT assume the delegated agent can infer hidden context from the parent conve
 1. Call \`delegate(prompt, agent)\`
 2. Continue productive work while it runs in the background
 3. Receive a compact notification with ID and status only
-4. Use \`delegation_tail(id)\` for incremental progress and \`delegation_read(id)\` when you need the full result
+4. Use \`delegation_open(id)\` to jump into the child session, \`delegation_tail(id)\` for incremental progress, and \`delegation_read(id)\` when you need the full result
 
 For \`delegate_isolated\`, wait for \`review_pending\`, then inspect the persisted summary, worktree path, changed files, and \`diff.patch\`.
 After review:
@@ -2223,6 +2404,7 @@ export const BackgroundAgents: Plugin = async (ctx) => {
   return {
     tool: {
       delegate: createDelegate(manager),
+      delegation_open: createDelegationOpen(manager),
       delegation_read: createDelegationRead(manager),
       delegation_tail: createDelegationTail(manager),
       delegation_list: createDelegationList(manager),
