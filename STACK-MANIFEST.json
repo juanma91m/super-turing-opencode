@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "components": {
     "engram": {
       "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
@@ -107,6 +107,7 @@
     "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales",
     "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
     "delegaciones async ahora soportan pending, cancelación, tail incremental y continuación read-only manteniendo el modelo de review manual en isolated-write",
-    "delegate_isolated requiere /experimental/worktree; INSTALLATION.md y PLAYBOOK-ASYNC documentan el uso preferido en sesiones server-backed"
+    "delegate_isolated requiere /experimental/worktree; INSTALLATION.md y PLAYBOOK-ASYNC documentan el uso preferido en sesiones server-backed",
+    "la UX async visual en TUI se activa con el plugin background-agents-tui via tui.json; install/sync aseguran esa entrada sin pisar otros campos del archivo"
   ]
 }

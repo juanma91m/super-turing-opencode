@@ -68,6 +68,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
+- `/bg-tasks` (solo TUI foreground)
 - `/check-local-overlays`
 - `/check-code-patterns [args]`
 - `/find-code-pattern [args]`
@@ -94,8 +95,11 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - Si Engram esta habilitado, la lectura debe seguir el patron `mem_context`/`mem_search` -> `mem_get_observation` para evitar razonar sobre previews truncados.
 - `master-dev` actua como lector principal de memoria por defecto; los subagentes leen por su cuenta solo cuando la especialidad o el historial previo realmente lo ameritan.
 - En async v1, toda delegacion debe llevar un paquete de contexto explicito: objetivo, motivo, alcance, hechos relevantes, rutas exactas, referencias de memoria si aplican y formato de salida esperado.
+- La UX async global ahora se divide entre un plugin server (`background-agents.ts`) que persiste y orquesta delegaciones, y un plugin TUI (`background-agents-tui`) que visualiza ese estado en sesiones foreground.
+- El plugin TUI async se activa desde `tui.json`; `opencode.json` sigue gobernando plugins server/runtime.
 - `delegate` es async read-only y tiene matriz de permisos: `master-dev` puede delegar a especialistas/read-only; `frontend-web-developer` y `backend-java-developer` solo a `explorer` o `code-inspector`; `ui-web-designer` a `explorer`; `reviewer` a `code-inspector`.
 - `delegate` ahora puede pasar por estado `pending` si no hay cupo de concurrencia; usar `delegation_tail` para progreso incremental y `delegation_cancel` si hace falta abortar.
+- `/bg-tasks` es el comando TUI global para listar delegaciones del proyecto actual, abrir la sesión hija cuando exista `sessionID` y mostrar un resumen persistente del estado async en foreground.
 - La delegacion nested read-only permite como maximo un nivel secundario: un subagente puede pedir investigacion/inspeccion, pero el agente delegado no puede seguir delegando.
 - `delegate_isolated` es la Fase 2 inicial para trabajo write-capable async: solo `master-dev` puede lanzarlo, solo contra `backend-java-developer`, `frontend-web-developer` o `master-dev`, y siempre usa un worktree aislado sin auto-merge.
 - `delegate_isolated` requiere disponibilidad de la API `/experimental/worktree`; en `opencode run` local directo puede no estar expuesta, por lo que conviene usar una sesión server-backed para ese flujo.

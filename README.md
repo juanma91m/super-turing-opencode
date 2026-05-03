@@ -92,6 +92,7 @@ Notas:
 - no reinstala Engram ni Playwright,
 - no regenera `opencode.json`,
 - asegura `tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
+- este repo también trae un `opencode.json` local con allowlists para `sync-opencode-stack.sh`, `install-opencode-stack.sh` y git de mantenimiento habitual, para evitar prompts innecesarios al trabajar sobre el source-of-truth,
 - no debería usarse para secretos ni para migrar memoria.
 
 ## Regla de trabajo

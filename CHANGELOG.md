@@ -2,6 +2,27 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [0.8.7] - 2026-05-03
+
+### Added
+
+- plugin TUI `plugins/background-agents-tui/index.ts` para la UX visible de delegaciones async en sesiones TUI foreground
+- helper `scripts/ensure_tui_plugin.py` para asegurar `tui.json` con el plugin TUI async
+- comando TUI global `/bg-tasks` para listar delegaciones del proyecto actual y abrir la sesión hija cuando exista `sessionID`
+
+### Changed
+
+- `background-agents.ts` ahora mejora la UX textual/operativa con badges de estado, `delegation_open(id)` y toasts best-effort con degradación segura
+- `install-opencode-stack.sh` y `sync-opencode-stack.sh` ahora preservan y ajustan `tui.json` para activar el plugin TUI async sin pisar otros campos
+- el repo fuente ahora incluye un `opencode.json` local para permitir sync/install/git de mantenimiento sin prompts innecesarios al trabajar sobre `opencode-stack`
+- `README.md`, `README-AGENTS.md`, `INSTALLATION.md` y `PLAYBOOK-ASYNC.md` documentan el split server/TUI de la UX async y el uso de `/bg-tasks`
+- `STACK-MANIFEST.json` sube a `0.8.7`
+
+### Notes
+
+- los plugins TUI externos se cargan desde `tui.json`, no desde `opencode.json`
+- la validación visual de `/bg-tasks` y navegación a sesiones hijas quedó confirmada en TUI foreground; en headless la capa textual sigue siendo el fallback confiable
+
 ## [0.8.6] - 2026-05-02
 
 ### Added

@@ -7,7 +7,7 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 - agentes y subagentes globales,
 - commands globales,
 - skills globales,
-- plugin async,
+- plugins async server/TUI,
 - helpers Jira/session cleanup,
 - Engram parcheado (si hace falta compilarlo),
 - configuración MCP para Engram, Playwright y Stitch,
@@ -43,6 +43,7 @@ Ese comando:
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - genera `~/.config/opencode/opencode.json`,
+- asegura `~/.config/opencode/tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
@@ -79,6 +80,20 @@ Opcionalmente, correr:
 ```bash
 opencode debug config
 ```
+
+Y si querés validar la UX visual async en una TUI foreground real:
+
+```bash
+opencode ~/.local/src/opencode-stack
+```
+
+Dentro de esa sesión, usar:
+
+```text
+/bg-tasks
+```
+
+Ese comando abre la lista TUI de delegaciones del proyecto actual y permite navegar a la sesión hija cuando exista `sessionID`.
 
 La idea es:
 
@@ -141,7 +156,8 @@ Eso **no afecta**:
 - `delegation_read`,
 - `delegation_tail`,
 - `delegation_cancel`,
-- `delegation_continue`.
+- `delegation_continue`,
+- `/bg-tasks` dentro de una TUI foreground ya conectada.
 
 ## Qué NO migra automáticamente
 
