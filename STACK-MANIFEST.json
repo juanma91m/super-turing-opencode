@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "components": {
     "engram": {
       "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
@@ -20,6 +20,7 @@
   "managedFiles": [
     ".gitignore",
     "CHANGELOG.md",
+    "CONTEXT7-TECH-CATALOG.md",
     "INSTALLATION.md",
     "LOCAL-OVERLAY-TEMPLATE.md",
     "PLAYBOOK-CODE-PATTERNS.md",

@@ -113,7 +113,8 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 - `/check-local-overlays`: ejecuta la auditoría semiestructurada de `.opencode/` contra la base global y devuelve el detalle por override.
 - `/check-code-patterns`: ejecuta checks de patrones del proyecto actual si existe integración local.
 - `/find-code-pattern`: ejecuta búsquedas estructurales del proyecto actual si existe integración local.
-- `/init-project-agent-layer <path>`: inspecciona un proyecto y propone o aplica una capa local de agentes/OpenCode reutilizando lo global y especializando solo lo necesario.
+- `/init-project-agent-layer <path>`: inspecciona un proyecto y propone o aplica una capa local de agentes/OpenCode reutilizando lo global, especializando solo lo necesario y sembrando IDs de Context7 cuando el stack detectado lo justifique.
+- `CONTEXT7-TECH-CATALOG.md`: catálogo curado de tecnologías -> IDs canónicos de Context7 para inicializar `AGENTS.md` locales con confianza y notas de drift.
 - `LOCAL-OVERLAY-TEMPLATE.md`: referencia rápida para construir overrides locales aditivos sin perder guardrails globales.
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: playbook completo de uso diario para overlays locales, `/check-local-overlays` y `/stack-doctor`.
 - `PLAYBOOK-CODE-PATTERNS.md`: playbook de cuándo y cómo integrar Semgrep/ast-grep sin meter reglas de proyecto en global.

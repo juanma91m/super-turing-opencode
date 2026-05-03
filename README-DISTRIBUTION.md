@@ -10,7 +10,7 @@ Tener un bundle reproducible que instale:
 - skills globales,
 - plugin async,
 - documentación operativa,
-- integración MCP con Engram, Stitch y Playwright,
+- integración MCP con Context7, Engram, Stitch y Playwright,
 - política headless para Playwright,
 - sin copiar secretos ni estado local innecesario.
 
@@ -23,6 +23,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `skills/`
 - `plugins/`
 - `README-AGENTS.md`
+- `CONTEXT7-TECH-CATALOG.md`
 - `LOCAL-OVERLAY-TEMPLATE.md`
 - `PLAYBOOK-CODE-PATTERNS.md`
 - `PLAYBOOK-LOCAL-OVERLAYS.md`
@@ -170,7 +171,8 @@ Esto:
 - deja disponible un set global de comandos `/ticket-*` y `/sessions-*`,
 - instala helpers reutilizables para Jira/tickets y limpieza de sesiones,
 - intenta correr `stack-doctor` al final cuando el target es `~/.config/opencode/`,
-- habilita o deshabilita MCPs según disponibilidad local:
+- deja Context7 configurado globalmente vía `npx -y @upstash/context7-mcp@latest` para docs de librerias/APIs,
+- habilita o deshabilita otros MCPs según disponibilidad local:
   - Engram: habilitado si existe `~/.opencode/bin/engram` después del bootstrap
   - Stitch: habilitado si existe `stitch-api-key`
   - Playwright: habilitado si se pudo detectar/instalar Chromium

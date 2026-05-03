@@ -10,7 +10,7 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 - plugins async server/TUI,
 - helpers Jira/session cleanup,
 - Engram parcheado (si hace falta compilarlo),
-- configuración MCP para Engram, Playwright y Stitch,
+- configuración MCP para Context7, Engram, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
 
 ## Prerrequisitos mínimos
@@ -42,7 +42,7 @@ Ese comando:
 - clona/aplica patch/recompila Engram si hace falta,
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
-- genera `~/.config/opencode/opencode.json`,
+- genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs según disponibilidad local,
 - asegura `~/.config/opencode/tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
@@ -66,6 +66,14 @@ Los helpers globales de Jira **no** necesitan configuración global fija, pero l
 - `JIRA_BASE_URL`
 - `JIRA_EMAIL`
 - `JIRA_API_TOKEN`
+
+#### Context7
+
+El MCP global de Context7 queda configurado via `npx -y @upstash/context7-mcp@latest` y sirve para documentacion actualizada de librerias/APIs.
+
+- no requiere secreto para uso basico,
+- aprovecha los prerrequisitos globales `node`/`npx` ya pedidos por el stack,
+- si mas adelante queres mejores rate limits o material privado, conviene evaluar una API key local y ajustar esa integracion aparte.
 
 ## Validación básica
 

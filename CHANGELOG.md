@@ -2,6 +2,23 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [0.8.8] - 2026-05-03
+
+### Added
+
+- `CONTEXT7-TECH-CATALOG.md` como catálogo curado de tecnologías -> IDs canónicos de Context7 para overlays locales
+
+### Changed
+
+- `/init-project-agent-layer` ahora debe inspeccionar manifests/dependencias y proponer, cuando aplique, una sección `Fuentes de documentación preferidas` con IDs de Context7 clasificados por confianza
+- `LOCAL-OVERLAY-TEMPLATE.md` ahora incluye el patrón recomendado para sembrar IDs canónicos, notas de drift y fallbacks de Context7 en `AGENTS.md`
+- `README.md` y `README-DISTRIBUTION.md` documentan el nuevo catálogo reusable para bootstrap de proyectos
+- `STACK-MANIFEST.json` sube a `0.8.8`
+
+### Notes
+
+- el catálogo global es intencionalmente incompleto: solo debería crecer con evidencia y no debe absorber forks privados ni detalles específicos de un repo concreto
+
 ## [0.8.7] - 2026-05-03
 
 ### Added

@@ -26,7 +26,9 @@ Modo de trabajo:
 - primero comprende exactamente que hay que averiguar o decidir,
 - si las tools `delegate` y `delegation_*` estan disponibles, puedes ser un buen target de delegacion async para investigacion web read-only,
 - si vienes por delegacion async, asume que solo conoces el contexto que aparezca explicitamente en el prompt y en las referencias incluidas; no supongas historia adicional del hilo padre,
-- intenta investigar primero con fetch directo, documentacion web accesible y fuentes textuales sin usar navegador,
+- si estan disponibles las tools MCP de Context7 y la duda es sobre librerias, frameworks, SDKs o APIs publicas, priorizalas antes de la navegacion web general,
+- si el caller ya conoce la libreria exacta, un ID canonico o una version objetivo, aprovechalo para reducir matching ambiguo,
+- para el resto, intenta investigar primero con fetch directo, documentacion web accesible y fuentes textuales sin usar navegador,
 - usa Playwright solo como segunda opcion cuando la web sea dinamica, el contenido no aparezca por fetch o la inspeccion real de la pagina sea necesaria,
 - si usas Playwright en trabajo async o delegado, asume modo no interactivo/headless: no dependas de un navegador visible ni de interacciones que aparezcan en la pantalla del usuario,
 - si una inspeccion headed/manual realmente agregaria valor, no la fuerces desde async; dilo y pide confirmacion al caller para un flujo foreground,
@@ -44,3 +46,7 @@ Entrega esperada:
 - comparativa o hallazgos clave,
 - riesgos, limites y dudas abiertas,
 - recomendacion final o siguiente paso sugerido.
+
+Skills sugeridas:
+- `investigacion-web`
+- `analisis-tecnico-evidencia`

@@ -21,7 +21,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 ## Agentes globales custom
 
 - `planner`: planner tecnico/funcional generico para tickets y analisis previo a implementacion.
-- `explorer`: investiga documentacion, APIs, herramientas y MCPs. Prioriza fetch directo y usa Playwright solo como segunda opcion.
+- `explorer`: investiga documentacion, APIs, herramientas y MCPs. Prioriza Context7 para docs de librerias/APIs, fetch directo para el resto y usa Playwright solo como segunda opcion.
 - `agent-design`: diseña y mantiene agentes, skills, comandos, prompts y permisos para OpenCode.
 - `master-dev`: lider tecnico generico para proyectos enterprise; analiza, decide y puede implementar con foco en evidencia, bajo riesgo y mantenibilidad.
 
@@ -45,7 +45,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 
 ## Skills globales
 
-- `investigacion-web`: investigacion web con evidencia verificable y fetch-first.
+- `investigacion-web`: investigacion web con evidencia verificable y heuristica Context7-first para docs de librerias/APIs.
 - `diseno-agentes-opencode`: criterios para crear o ajustar agentes, skills, comandos y permisos.
 - `diseno-ui-web`: criterios de diseño web claros, accesibles e implementables, con fuerte referencia en Material UI.
 - `analisis-tecnico-evidencia`: separa hechos, inferencias, riesgos e informacion faltante.
@@ -80,6 +80,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - Mantener agentes genericos, sin referencias a dominios o proyectos concretos.
 - Usar agentes globales para capacidades transversales reutilizables.
 - Dejar lo especifico de cada proyecto en sus prompts, docs y configuraciones locales.
+- Para docs externas de librerias o APIs, Context7 es la fuente global preferida cuando este disponible; IDs canonicos, versiones objetivo, forks internos o fuentes privadas deben vivir en el `AGENTS.md` local del repo o en overlays del proyecto.
 - Si un agente, skill o comando local sombrea uno global por nombre, el override debe preservar explicitamente el comportamiento global y sus permisos seguros salvo decision contraria del usuario; no asumir herencia automatica del runtime.
 - Al describir el esquema total de agentes, incluir siempre la distincion entre agentes base de OpenCode y agentes custom globales; `plan` y `build` son agentes base aunque `plan` quede deshabilitado en este stack en favor de `planner`.
 - `agent-design` debe proteger esa separacion y evitar que definiciones globales absorban detalles propios de un proyecto puntual.

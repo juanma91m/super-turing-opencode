@@ -4,6 +4,8 @@ Esta plantilla sirve como base para crear una capa local `.opencode/` sin perder
 
 Para el flujo operativo completo de uso diario, auditoría y mantenimiento, ver también `PLAYBOOK-LOCAL-OVERLAYS.md`.
 
+Si querés sembrar IDs de Context7 según el stack detectado del proyecto, ver además `CONTEXT7-TECH-CATALOG.md`.
+
 ## Principio rector
 
 Un override local debe ser **aditivo**:
@@ -23,6 +25,8 @@ Usar cuando alcanza con:
 
 - describir stack,
 - entry points,
+- fuentes de documentacion preferidas del proyecto (por ejemplo IDs de Context7, versiones base o docs internas),
+- clasificación de confianza/drift para esos IDs cuando haga falta,
 - reglas de validación,
 - restricciones de negocio o de seguridad,
 - aclarar ownership entre agentes.
@@ -100,6 +104,21 @@ Estas instrucciones aplican solo dentro de este repo y especializan el comportam
 ## Stack real del proyecto
 
 - ...
+
+## Fuentes de documentación preferidas
+
+- librerías/frameworks base y sus IDs canónicos de Context7 si el proyecto ya los conoce
+- versiones objetivo o líneas soportadas que conviene priorizar
+- documentación interna/privada que no debe mezclarse en la capa global
+
+### IDs canónicos de Context7 para <Proyecto>
+
+- **Alta confianza / usar directo cuando aplique**
+  - <tecnología>: <id>
+- **Usar con cautela por drift de versión en Context7**
+  - <tecnología>: <id> _(motivo)_
+- **Cuando no haya match confiable en Context7**
+  - <tecnología>: preferir código del repo, docs oficiales o investigación puntual con `explorer`
 
 ## Entry points relevantes
 

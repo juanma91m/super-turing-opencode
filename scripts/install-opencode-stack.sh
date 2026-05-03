@@ -222,6 +222,15 @@ config = {
             ],
             "enabled": engram_enabled,
         },
+        "context7": {
+            "type": "local",
+            "command": [
+                "npx",
+                "-y",
+                "@upstash/context7-mcp@latest",
+            ],
+            "enabled": True,
+        },
         "playwright": {
             "type": "local",
             "command": playwright_command,

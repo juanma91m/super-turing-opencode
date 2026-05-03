@@ -16,6 +16,7 @@ Checklist mínimo:
 - `opencode` disponible y `opencode debug config` funcionando,
 - `node`, `npm`, `npx`, `python3` disponibles,
 - plugin async cargado,
+- MCP Context7 presente/habilitado para documentación externa de librerías/APIs,
 - binario Engram presente y funcional si está configurado,
 - Playwright Chromium presente si corresponde,
 - Stitch key presente/ausente,

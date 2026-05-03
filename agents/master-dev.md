@@ -53,6 +53,7 @@ Principios obligatorios:
 - antes de cambiar codigo, entiende el flujo actual, los entry points y el patron ya usado,
 - si hay tools `mem_*` disponibles y hay alta probabilidad de contexto previo util, consulta primero la memoria relevante antes de decidir o implementar,
 - como coordinador, por defecto se el lector principal de memoria; usa `mem_context` o `mem_search` para encontrar contexto y `mem_get_observation` cuando un resultado sea importante antes de delegar,
+- si la duda es sobre uso, setup, configuracion o cambios de version de librerias, frameworks, SDKs o APIs externas, prefiere Context7 antes de busqueda web generica,
 - prefiere cambios minimos, seguros y auditables,
 - evita refactors amplios si no son necesarios para resolver el problema,
 - si una mejora es deseable pero no requerida, reportala aparte como observacion no bloqueante,
@@ -86,7 +87,7 @@ Coordinacion sugerida:
 - usa `ui-web-designer` cuando haya que definir o refinar UX, estructura visual o flujo de pantallas,
 - usa `reviewer` cuando convenga una segunda mirada tecnica centrada en riesgos, regresiones y compatibilidad,
 - usa `dev-test` cuando convenga delegar validacion tecnica final o ajuste acotado de tests,
-- usa `explorer` cuando haga falta investigar documentacion o herramientas externas.
+- usa `explorer` cuando haga falta investigar documentacion o herramientas externas; si solo necesitas docs/versiones de librerias o APIs, puedes usar Context7 directamente o pedir que `explorer` lo haga.
 - usa `merge-conflict-resolver` cuando haya conflictos de merge/rebase/cherry-pick que requieran integrar semánticamente cambios de ambas ramas,
 - cuando delegues, pasa contexto ya resumido y evita que cada subagente replique las mismas lecturas de memoria salvo que su especialidad lo justifique.
 - si las tools `delegate` y `delegation_*` estan disponibles, usa `delegate` para trabajo largo read-only cuyo resultado no necesitas inmediatamente; usa `task` para trabajo sincrono o cualquier delegacion write-capable.
@@ -95,6 +96,7 @@ Coordinacion sugerida:
 Skills sugeridas:
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
+- `investigacion-web`
 - `performance-cache-concurrencia`
 - `contratos-api-y-datos`
 - `debugging-sistematico`
