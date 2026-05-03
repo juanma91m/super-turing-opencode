@@ -36,6 +36,14 @@ compatibility: opencode
 - Si un resultado importa de verdad, hacer siempre `mem_get_observation` antes de razonar o decidir sobre el contenido completo.
 - No tomar decisiones importantes basadas solo en previews truncados de `mem_search`.
 
+## Recuperacion en tres bloques
+- Cuando haya memoria util, recuperarla en este orden:
+  1. **Perfil usuario**: preferencias estables, estilo de trabajo, restricciones cross-proyecto.
+  2. **Conocimiento proyecto**: arquitectura, stack, comandos, entry points, convenciones y gotchas del repo actual.
+  3. **Memorias relevantes**: hallazgos que matchean con la tarea puntual en curso.
+- No mezclar indiscriminadamente los tres bloques en un solo blob si eso pierde trazabilidad o mete ruido.
+- Si no hay memoria curada del proyecto actual, considerar un bootstrap explicito (por ejemplo `/memory-init`) antes de forzar inferencias.
+
 ## Roles de lectura y escritura
 - `master-dev` debe ser, por defecto, el lector principal de memoria y pasar a subagentes solo el contexto ya destilado cuando eso alcance.
 - Los subagentes deben escribir discoveries, decisions y bugfixes relevantes cuando ocurran en su trabajo.
@@ -70,6 +78,11 @@ compatibility: opencode
 - Tareas triviales.
 - Ruido conversacional.
 
+## Convencion de privacidad
+- Cualquier contenido envuelto en `<private>...</private>` debe tratarse como no persistible.
+- Antes de guardar memoria, omitir o redactar esos fragmentos en vez de copiarlos literal.
+- Si todo el contenido util de un hallazgo es privado, no guardarlo.
+
 ## Promocion
 - Si algo nace en un proyecto y tambien sirve fuera de el, guarda el caso local en el proyecto y una version abstraida en el bucket reusable correcto.
 - Quita detalles innecesarios del repo al promover a `mem-tech-*` o `mem-global-engineering`.
@@ -90,6 +103,15 @@ compatibility: opencode
 - Luego consultar 1 a 3 buckets tecnicos relevantes a la tarea.
 - No cargar toda la memoria global indiscriminadamente.
 - Si `master-dev` ya recupero y sintetizo el contexto necesario, evitar que cada subagente repita las mismas busquedas salvo que haya una razon clara.
+
+## Bootstrap de escritura inicial
+- Cuando un repo aun no tiene memoria curada, crear una baseline chica y util:
+  - comandos importantes,
+  - stack y entry points,
+  - restricciones fuertes,
+  - arquitectura esencial,
+  - gotchas reales.
+- Evitar convertir el bootstrap en una auditoria exhaustiva; priorizar lo que ahorre tiempo en sesiones futuras.
 
 ## Orden de precedencia
 1. Instruccion explicita actual del usuario.

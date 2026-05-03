@@ -2,6 +2,24 @@
 
 Todos los cambios relevantes del stack global de OpenCode deberían registrarse acá.
 
+## [Unreleased]
+
+### Added
+
+- plugins globales `plugins/opencode-notify.ts`, `plugins/env-guard.ts`, `plugins/agent-identity.ts` y `plugins/engram-memory-hints.ts`
+- comando global `/memory-init` para sembrar baseline curada de memoria Engram por repo
+- plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
+- script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
+
+### Changed
+
+- `opencode-notify` ahora reduce el ruido: solo notifica en español cuando OpenCode espera respuesta humana o cuando la tarea terminó por completo, con debounce/quiet period y título `OpenCode: <sesión>`
+- `opencode-worktree` ahora ejecuta `git worktree prune --expire now` después del borrado y antes del listado para evitar metadata stale en `git worktree list`
+- `memoria-engram-opencode` ahora documenta recuperación en tres bloques, bootstrap inicial y convención `<private>...</private>`
+- `master-dev` y `planner` ahora refuerzan recuperación de memoria en tres bloques, `/memory-init` y privacidad al persistir memoria
+- `master-dev` ahora reconoce herramientas globales de worktree y scheduler bajo pedido explícito del usuario
+- `README.md`, `README-AGENTS.md` y `STACK-MANIFEST.json` documentan las nuevas capacidades globales
+
 ## [0.8.8] - 2026-05-03
 
 ### Added

@@ -68,6 +68,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
+- `/memory-init`
 - `/bg-tasks` (solo TUI foreground)
 - `/check-local-overlays`
 - `/check-code-patterns [args]`
@@ -94,7 +95,11 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - La especificidad por proyecto debe vivir en el `AGENTS.md` del repo: stack real, frontend principal, build, tests, base de datos, integraciones, entry points y restricciones locales.
 - Si Engram esta habilitado, la memoria debe mantenerse curada: primero bucket correcto, luego `source_agent`, uso de `topic_key`, promocion selectiva a buckets `mem-tech-*` o globales, y soft-delete de memorias obsoletas por defecto.
 - Si Engram esta habilitado, la lectura debe seguir el patron `mem_context`/`mem_search` -> `mem_get_observation` para evitar razonar sobre previews truncados.
+- Si Engram esta habilitado, recuperar memoria en tres bloques cuando aplique: `perfil usuario` -> `conocimiento proyecto` -> `memorias relevantes`.
 - `master-dev` actua como lector principal de memoria por defecto; los subagentes leen por su cuenta solo cuando la especialidad o el historial previo realmente lo ameritan.
+- El stack global incluye guardrails explicitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos por herramientas generales.
+- El stack global puede emitir notificaciones nativas del SO solo en dos momentos: cuando OpenCode espera respuesta humana y cuando la tarea terminó por completo y ya acepta un nuevo prompt. El título usa el formato `OpenCode: <sesión>`.
+- El stack global puede exponer `agent_attribution` para atribucion multiagente y autoidentidad de agente activo durante una sesion.
 - En async v1, toda delegacion debe llevar un paquete de contexto explicito: objetivo, motivo, alcance, hechos relevantes, rutas exactas, referencias de memoria si aplican y formato de salida esperado.
 - La UX async global ahora se divide entre un plugin server (`background-agents.ts`) que persiste y orquesta delegaciones, y un plugin TUI (`background-agents-tui`) que visualiza ese estado en sesiones foreground.
 - El plugin TUI async se activa desde `tui.json`; `opencode.json` sigue gobernando plugins server/runtime.
@@ -103,6 +108,8 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/bg-tasks` es el comando TUI global para listar delegaciones del proyecto actual, abrir la sesión hija cuando exista `sessionID` y mostrar un resumen persistente del estado async en foreground.
 - La delegacion nested read-only permite como maximo un nivel secundario: un subagente puede pedir investigacion/inspeccion, pero el agente delegado no puede seguir delegando.
 - `delegate_isolated` es la Fase 2 inicial para trabajo write-capable async: solo `master-dev` puede lanzarlo, solo contra `backend-java-developer`, `frontend-web-developer` o `master-dev`, y siempre usa un worktree aislado sin auto-merge.
+- El stack global también puede exponer herramientas de worktree para trabajo paralelo por ticket (`worktree_create`, `worktree_list`, `worktree_delete`) y herramientas de scheduler para automatización recurrente explícita (`schedule_job`, `list_jobs`, `get_job`, `run_job`, `job_logs`, `delete_job`). La apertura de terminal para worktrees es best-effort y el backend inicial del scheduler es cron supervisado.
+- Los schedulers deben crearse solo por pedido explícito del usuario; nunca como automatización implícita.
 - `delegate_isolated` requiere disponibilidad de la API `/experimental/worktree`; en `opencode run` local directo puede no estar expuesta, por lo que conviene usar una sesión server-backed para ese flujo.
 - `delegation_continue(id, prompt)` permite retomar una delegacion read-only completada en la misma sesion de subagente para follow-ups con continuidad de contexto.
 - Toda salida de `delegate_isolated` queda para revision manual con artifacts persistidos: `meta.json`, `result.md`, `changed-files.json`, `git-status.txt`, `diff.patch` y `worktree.json`.

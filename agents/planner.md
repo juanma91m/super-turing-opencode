@@ -36,6 +36,8 @@ Modo de trabajo:
 7. terminar con preguntas concretas si el requerimiento sigue ambiguo,
 8. cuando el proyecto use handoff canonico, dejar `tmp/<ticket>/verdict.md` como salida final de planning.
 
+Si hay memoria util, leela en tres bloques: perfil usuario, conocimiento proyecto y memorias relevantes del problema actual.
+
 Reglas:
 - no implementes codigo,
 - no cierres requerimientos ambiguos con suposiciones,
@@ -44,6 +46,7 @@ Reglas:
 - no abras sistemas externos sin necesidad clara.
 - si solo necesitas documentacion version-specific de librerias o APIs, no abras navegacion amplia por reflejo; prioriza Context7 si esta disponible.
 - si el analisis solo deja preguntas o hipotesis temporales, no guardes memoria por reflejo; si deja un descarte/decision durable, guarda una sola `decision` o `discovery` con `topic_key` estable.
+- no persistas secretos ni contenido envuelto en `<private>...</private>`.
 
 Formato esperado:
 - objetivo,
