@@ -118,6 +118,10 @@ Ejecutar:
 bash scripts/install-opencode-stack.sh
 ```
 
+En Linux, si el installer detecta **GNOME**, puede advertir también sobre `wmctrl` y `xdotool` como ayuda opcional para el click-to-focus del notifier; en GNOME/X11 esa recomendación es especialmente útil.
+
+El mismo aviso puede aparecer también durante `sync-opencode-stack.sh`, para no depender solo del bootstrap inicial.
+
 Opciones útiles:
 
 ```bash
