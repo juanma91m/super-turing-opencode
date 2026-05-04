@@ -4,9 +4,8 @@ import { homedir, platform } from "node:os"
 import { join } from "node:path"
 import { readFile } from "node:fs/promises"
 
-type NotifyEventKind = "idle" | "question"
+type NotifyEventKind = "idle" | "question" | "permission"
 
-const COMPLETION_QUIET_PERIOD_MS = 10000
 const MAX_PARENT_CHAIN_DEPTH = 12
 
 interface NotifyConfig {
@@ -18,6 +17,7 @@ interface NotifyConfig {
   sounds: {
     idle?: string
     question?: string
+    permission?: string
   }
 }
 
@@ -30,6 +30,7 @@ const DEFAULT_CONFIG: NotifyConfig = {
   sounds: {
     idle: "Glass",
     question: "Submarine",
+    permission: "Submarine",
   },
 }
 
@@ -108,7 +109,8 @@ function detectTerminalProcess(): string | null {
   return null
 }
 
-async function isTerminalFocused(_kind: NotifyEventKind): Promise<boolean> {
+async function isTerminalFocused(kind: NotifyEventKind): Promise<boolean> {
+  if (kind === "question" || kind === "permission") return false
   const terminalProcess = detectTerminalProcess()
   if (!terminalProcess || platform() !== "darwin") return false
   const frontmost = await runOsascript(
@@ -128,8 +130,11 @@ async function sendNotification(kind: NotifyEventKind, title: string, message: s
 
   if (platform() === "linux") {
     try {
-      const args = sound ? [title, message, "-h", `string:sound-name:${sound}`] : [title, message]
-      Bun.spawn(["notify-send", ...args], { stdout: "ignore", stderr: "ignore" })
+      const urgency = kind === "question" ? "critical" : "normal"
+      const effectiveUrgency = kind === "permission" ? "critical" : urgency
+      const args = ["-a", "OpenCode", "-u", effectiveUrgency, title, message]
+      if (sound) args.push("-h", `string:sound-name:${sound}`)
+      Bun.spawnSync(["notify-send", ...args], { stdout: "ignore", stderr: "ignore" })
     } catch {
       // best effort
     }
@@ -203,80 +208,110 @@ async function getSessionTitle(client: Parameters<Plugin>[0]["client"], sessionI
   return sessionID.slice(0, 8)
 }
 
+async function getLatestAssistantMessage(
+  client: Parameters<Plugin>[0]["client"],
+  sessionID: string,
+): Promise<{ id: string; text: string } | null> {
+  try {
+    const response = await client.session.messages({ path: { id: sessionID } })
+    const messages = response.data ?? []
+    const lastAssistant = [...messages].reverse().find((message) => message.info.role === "assistant")
+    if (!lastAssistant?.parts) return null
+    const text = lastAssistant.parts
+      .filter((part): part is { type: "text"; text: string } => part.type === "text" && typeof (part as { text?: string }).text === "string")
+      .map((part) => part.text)
+      .join("\n")
+      .trim()
+    if (!text) return null
+    return { id: lastAssistant.info.id, text }
+  } catch {
+    return null
+  }
+}
+
+function looksLikeQuestion(text: string): boolean {
+  const normalized = text.trim()
+  if (!normalized) return false
+  return normalized.endsWith("?") || normalized.endsWith("¿")
+}
+
 const NotifyPlugin: Plugin = async ({ client }) => {
+  const log = (message: string, data?: Record<string, unknown>) =>
+    client.app.log({
+      body: {
+        service: "opencode-notify",
+        level: "info",
+        message: data ? `${message} ${JSON.stringify(data)}` : message,
+      },
+    }).catch(() => {})
+
   const readyNotifications = new Map<string, number>()
   const questionNotifications = new Map<string, number>()
-  const completionArmedSessions = new Set<string>()
-  const waitingForUserReplySessions = new Set<string>()
-  const activityVersionByRootSession = new Map<string, number>()
-  const completionTimers = new Map<string, ReturnType<typeof setTimeout>>()
-
-  function clearCompletionTimer(rootSessionID: string): void {
-    const timer = completionTimers.get(rootSessionID)
-    if (!timer) return
-    clearTimeout(timer)
-    completionTimers.delete(rootSessionID)
-  }
-
-  function bumpActivity(rootSessionID: string): number {
-    clearCompletionTimer(rootSessionID)
-    const next = (activityVersionByRootSession.get(rootSessionID) ?? 0) + 1
-    activityVersionByRootSession.set(rootSessionID, next)
-    return next
-  }
+  const permissionNotifications = new Map<string, number>()
+  const sessionTitleCache = new Map<string, string>()
+  const lastNotifiedAssistantMessageByRootSession = new Map<string, string>()
 
   async function maybeNotify(kind: NotifyEventKind, sessionID: string, title: string, message: string, dedupe: Map<string, number>, key: string) {
     const config = await loadConfig()
-    if (isQuietHours(config)) return
-    if (!(await isParentSession(client, sessionID))) return
-    if (!shouldSendDeduped(dedupe, key)) return
-    if (await isTerminalFocused(kind)) return
+    if (isQuietHours(config)) {
+      await log("skip quiet hours", { kind, sessionID })
+      return
+    }
+    if (!(await isParentSession(client, sessionID))) {
+      await log("skip child session", { kind, sessionID })
+      return
+    }
+    if (!shouldSendDeduped(dedupe, key)) {
+      await log("skip deduped", { kind, sessionID, key })
+      return
+    }
+    if (await isTerminalFocused(kind)) {
+      await log("skip focused terminal", { kind, sessionID })
+      return
+    }
+    await log("sending notification", { kind, sessionID, title, message })
     await sendNotification(kind, title, message, config.sounds[kind])
   }
 
-  async function maybeNotifyCompletion(rootSessionID: string, scheduledVersion: number): Promise<void> {
-    if ((activityVersionByRootSession.get(rootSessionID) ?? 0) !== scheduledVersion) return
-    if (!completionArmedSessions.has(rootSessionID)) return
-    if (waitingForUserReplySessions.has(rootSessionID)) return
+  async function maybeNotifyLatestAssistant(rootSessionID: string): Promise<void> {
+    const latestAssistantMessage = await getLatestAssistantMessage(client, rootSessionID)
+    if (!latestAssistantMessage) {
+      await log("skip notify without latest assistant message", { rootSessionID })
+      return
+    }
 
-    completionArmedSessions.delete(rootSessionID)
-    const sessionTitle = await getSessionTitle(client, rootSessionID)
-    await maybeNotify(
-      "idle",
-      rootSessionID,
-      `OpenCode: ${sessionTitle}`,
-      "La tarea finalizó y ya podés enviar un nuevo prompt.",
-      readyNotifications,
-      `idle:${rootSessionID}`,
-    )
-  }
+    if (lastNotifiedAssistantMessageByRootSession.get(rootSessionID) === latestAssistantMessage.id) {
+      await log("skip duplicate assistant notification", { rootSessionID, messageID: latestAssistantMessage.id })
+      return
+    }
 
-  function scheduleCompletionNotification(rootSessionID: string): void {
-    clearCompletionTimer(rootSessionID)
-    const scheduledVersion = activityVersionByRootSession.get(rootSessionID) ?? 0
-    const timer = setTimeout(() => {
-      void maybeNotifyCompletion(rootSessionID, scheduledVersion)
-    }, COMPLETION_QUIET_PERIOD_MS)
-    completionTimers.set(rootSessionID, timer)
-  }
+    lastNotifiedAssistantMessageByRootSession.set(rootSessionID, latestAssistantMessage.id)
+    const sessionTitle = sessionTitleCache.get(rootSessionID) ?? (await getSessionTitle(client, rootSessionID))
+    sessionTitleCache.set(rootSessionID, sessionTitle)
 
-  return {
-    "tool.execute.before": async (input) => {
-      if (input.tool !== "question") return
-      const rootSessionID = await getRootSessionID(client, input.sessionID)
-      bumpActivity(rootSessionID)
-      waitingForUserReplySessions.add(rootSessionID)
-      completionArmedSessions.delete(rootSessionID)
-      const sessionTitle = await getSessionTitle(client, rootSessionID)
+    if (looksLikeQuestion(latestAssistantMessage.text)) {
       await maybeNotify(
         "question",
         rootSessionID,
         `OpenCode: ${sessionTitle}`,
         "El agente hizo una pregunta y está esperando tu respuesta.",
         questionNotifications,
-        `question:${rootSessionID}:${input.callID}`,
+        `question:${rootSessionID}:${latestAssistantMessage.id}`,
       )
-    },
+      return
+    }
+
+    await maybeNotify(
+      "idle",
+      rootSessionID,
+      `OpenCode: ${sessionTitle}`,
+      "La tarea finalizó y ya podés enviar un nuevo prompt.",
+      readyNotifications,
+      `idle:${rootSessionID}:${latestAssistantMessage.id}`,
+    )
+  }
+
+  return {
     event: async ({ event }: { event: Event }) => {
       const runtimeEvent = event as { type: string; properties?: Record<string, unknown> }
       const sessionID = getSessionID(runtimeEvent.properties)
@@ -285,46 +320,40 @@ const NotifyPlugin: Plugin = async ({ client }) => {
 
       switch (runtimeEvent.type) {
         case "message.updated": {
-          bumpActivity(rootSessionID)
           const info = runtimeEvent.properties?.info as Record<string, unknown> | undefined
-          if ((info?.role as string | undefined) === "user") {
-            completionArmedSessions.add(rootSessionID)
-            waitingForUserReplySessions.delete(rootSessionID)
-          }
+          await log("event message.updated", { sessionID, rootSessionID, role: info?.role as string | undefined })
           break
         }
         case "session.idle": {
+          await log("event session.idle", { sessionID, rootSessionID })
           if (sessionID !== rootSessionID) break
-          if (!completionArmedSessions.has(rootSessionID)) break
-          if (waitingForUserReplySessions.has(rootSessionID)) break
-          scheduleCompletionNotification(rootSessionID)
+          await maybeNotifyLatestAssistant(rootSessionID)
           break
         }
-        case "question.asked": {
-          bumpActivity(rootSessionID)
-          waitingForUserReplySessions.add(rootSessionID)
-          completionArmedSessions.delete(rootSessionID)
-          const requestId = typeof runtimeEvent.properties?.requestID === "string" ? runtimeEvent.properties.requestID : "event"
-          const sessionTitle = await getSessionTitle(client, rootSessionID)
+        case "permission.asked":
+        case "permission.updated": {
+          await log("event permission", { type: runtimeEvent.type, sessionID, rootSessionID })
+          const sessionTitle = sessionTitleCache.get(rootSessionID) ?? (await getSessionTitle(client, rootSessionID))
+          sessionTitleCache.set(rootSessionID, sessionTitle)
           await maybeNotify(
-            "question",
+            "permission",
             rootSessionID,
             `OpenCode: ${sessionTitle}`,
-            "El agente hizo una pregunta y está esperando tu respuesta.",
-            questionNotifications,
-            `question:${rootSessionID}:${requestId}`,
+            "El agente está esperando tu permiso para continuar.",
+            permissionNotifications,
+            `permission:${rootSessionID}:${runtimeEvent.type}`,
           )
           break
         }
         case "session.deleted": {
-          clearCompletionTimer(rootSessionID)
-          completionArmedSessions.delete(rootSessionID)
-          waitingForUserReplySessions.delete(rootSessionID)
-          activityVersionByRootSession.delete(rootSessionID)
+          await log("event session.deleted", { sessionID, rootSessionID })
+          await maybeNotifyLatestAssistant(rootSessionID)
+          sessionTitleCache.delete(rootSessionID)
+          lastNotifiedAssistantMessageByRootSession.delete(rootSessionID)
           break
         }
         default: {
-          bumpActivity(rootSessionID)
+          await log("event other", { type: runtimeEvent.type, sessionID, rootSessionID })
           break
         }
       }

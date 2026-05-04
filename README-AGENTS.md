@@ -99,7 +99,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - Si Engram esta habilitado, recuperar memoria en tres bloques cuando aplique: `perfil usuario` -> `conocimiento proyecto` -> `memorias relevantes`.
 - `master-dev` actua como lector principal de memoria por defecto; los subagentes leen por su cuenta solo cuando la especialidad o el historial previo realmente lo ameritan.
 - El stack global incluye guardrails explicitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos por herramientas generales.
-- El stack global puede emitir notificaciones nativas del SO solo en dos momentos: cuando OpenCode espera respuesta humana y cuando la tarea terminó por completo y ya acepta un nuevo prompt. El título usa el formato `OpenCode: <sesión>`.
+- El stack global puede emitir notificaciones nativas del SO cuando OpenCode espera respuesta humana, cuando espera un permiso `Allow/Reject`, y cuando la tarea terminó por completo y ya acepta un nuevo prompt. El título usa el formato `OpenCode: <sesión>`.
 - El stack global puede exponer `agent_attribution` para atribucion multiagente y autoidentidad de agente activo durante una sesion.
 - En async v1, toda delegacion debe llevar un paquete de contexto explicito: objetivo, motivo, alcance, hechos relevantes, rutas exactas, referencias de memoria si aplican y formato de salida esperado.
 - La UX async global ahora se divide entre un plugin server (`background-agents.ts`) que persiste y orquesta delegaciones, y un plugin TUI (`background-agents-tui`) que visualiza ese estado en sesiones foreground.

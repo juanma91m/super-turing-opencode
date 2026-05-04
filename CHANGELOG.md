@@ -13,7 +13,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
-- `opencode-notify` ahora reduce el ruido: solo notifica en español cuando OpenCode espera respuesta humana o cuando la tarea terminó por completo, con debounce/quiet period y título `OpenCode: <sesión>`
+- `opencode-notify` ahora reduce el ruido: notifica en español cuando OpenCode espera respuesta humana, cuando espera un permiso `Allow/Reject`, o cuando la tarea terminó por completo, con título `OpenCode: <sesión>` y app-name/urgency explícitos en Linux
 - `opencode-worktree` ahora ejecuta `git worktree prune --expire now` después del borrado y antes del listado para evitar metadata stale en `git worktree list`
 - `memoria-engram-opencode` ahora documenta recuperación en tres bloques, bootstrap inicial y convención `<private>...</private>`
 - `master-dev` y `planner` ahora refuerzan recuperación de memoria en tres bloques, `/memory-init` y privacidad al persistir memoria

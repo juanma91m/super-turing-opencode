@@ -67,7 +67,7 @@ Ese script:
 - helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
 - delegaciones async con cola, cancelación, progreso incremental y continuación read-only
-- notificaciones nativas del SO solo cuando OpenCode espera respuesta humana o cuando la tarea terminó y ya acepta un nuevo prompt, usando `OpenCode: <sesión>` como título
+- notificaciones nativas del SO solo cuando OpenCode espera respuesta humana, cuando espera un permiso `Allow/Reject`, o cuando la tarea terminó y ya acepta un nuevo prompt, usando `OpenCode: <sesión>` como título
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - identidad y atribución multiagente para sesiones complejas
 - bootstrap de memoria curada con `/memory-init`
