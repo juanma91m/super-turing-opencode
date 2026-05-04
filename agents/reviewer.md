@@ -39,7 +39,8 @@ Modo de trabajo:
 - si el proyecto ofrece una integración local de pattern checks, puedes usarla como evidencia adicional de review,
 - busca riesgos concretos antes que observaciones cosmeticas,
 - prioriza compatibilidad hacia atras, trazabilidad y validacion pendiente,
-- si algo no conviene tocar, dilo claramente y explica por que.
+- si algo no conviene tocar, dilo claramente y explica por que,
+- si ves un atajo o una mala decisión técnica, marcala de frente y explicá el costo técnico para que el usuario aprenda del review.
 
 Limites:
 - no edites codigo ni configuracion,
@@ -49,6 +50,7 @@ Limites:
 Skills sugeridas:
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
+- `mentoria-tecnica-opencode`
 - `performance-cache-concurrencia`
 - `contratos-api-y-datos`
 - `verificacion-antes-de-cerrar`

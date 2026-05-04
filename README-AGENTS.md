@@ -51,10 +51,14 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `analisis-tecnico-evidencia`: separa hechos, inferencias, riesgos e informacion faltante.
 - `cambio-seguro-enterprise`: prioriza cambios minimos, seguros y auditables en sistemas enterprise o legacy.
 - `debugging-sistematico`: obliga a investigar causa raiz antes de proponer fixes.
+- `delegacion-async-opencode`: resume el workflow async de OpenCode para delegaciones read-only e isolated-write con task packet, lifecycle y review segura.
 - `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
 - `memoria-engram-opencode`: define uso de Engram con memoria curada, buckets, source_agent, promocion y purga segura.
+- `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
+- `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
+- `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI con foco en headless, polling y evitar regeneraciones ciegas.
 - `verificacion-antes-de-cerrar`: evita declarar cierre o éxito sin evidencia fresca.
 - `workflow-ticket-handoff`: define el patron reusable `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md` para trabajo guiado por tickets.
 - `revision-por-etapas`: separa revisión de cumplimiento funcional vs revisión de calidad/riesgo técnico.
@@ -76,82 +80,23 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/stack-doctor`
 - `/init-project-agent-layer <path>`
 
-## Criterios
+## Criterios globales resumidos
 
-- Mantener agentes genericos, sin referencias a dominios o proyectos concretos.
-- Usar agentes globales para capacidades transversales reutilizables.
-- Dejar lo especifico de cada proyecto en sus prompts, docs y configuraciones locales.
-- Para docs externas de librerias o APIs, Context7 es la fuente global preferida cuando este disponible; IDs canonicos, versiones objetivo, forks internos o fuentes privadas deben vivir en el `AGENTS.md` local del repo o en overlays del proyecto.
-- Si un agente, skill o comando local sombrea uno global por nombre, el override debe preservar explicitamente el comportamiento global y sus permisos seguros salvo decision contraria del usuario; no asumir herencia automatica del runtime.
-- Si algun flujo necesita mergear JSON/JSONC por capas, usar un sentinel explícito tipo `__replace__` cuando el objetivo sea reemplazar un bloque entero y no fusionarlo profundamente; esto evita drift silencioso de permisos o settings heredados.
-- Al describir el esquema total de agentes, incluir siempre la distincion entre agentes base de OpenCode y agentes custom globales; `plan` y `build` son agentes base aunque `plan` quede deshabilitado en este stack en favor de `planner`.
-- `agent-design` debe proteger esa separacion y evitar que definiciones globales absorban detalles propios de un proyecto puntual.
-- Evitar permisos globales que whitelisteen helpers repo-locales por patron amplio; si un wrapper o script solo tiene sentido en un proyecto, su permiso debe vivir en la capa local de ese proyecto.
-- El workflow `tmp/<ticket>/verdict.md` / `result-dev.md` es reusable pero no obligatorio: debe activarse solo cuando el trabajo esta asociado a tickets y el proyecto adopta ese patron.
-- Para operaciones largas de Stitch, favorecer polling y continuidad desde el estado del proyecto antes que repetir generaciones a ciegas.
-- `master-dev` lidera el trabajo tecnico general; delega solo cuando la especializacion aporta foco real.
-- `code-inspector`, `reviewer`, `explorer` y `ui-web-designer` son buenos candidatos para delegacion async read-only en la fase 1.
-- `ui-web-designer` define UX y estructura visual; `frontend-web-developer` implementa la capa de presentacion en el stack concreto.
-- `backend-java-developer` cubre backend, integraciones y datos; no debe absorber ownership de la capa de presentacion.
-- La especificidad por proyecto debe vivir en el `AGENTS.md` del repo: stack real, frontend principal, build, tests, base de datos, integraciones, entry points y restricciones locales.
-- Si Engram esta habilitado, la memoria debe mantenerse curada: primero bucket correcto, luego `source_agent`, uso de `topic_key`, promocion selectiva a buckets `mem-tech-*` o globales, y soft-delete de memorias obsoletas por defecto.
-- Si Engram esta habilitado, la lectura debe seguir el patron `mem_context`/`mem_search` -> `mem_get_observation` para evitar razonar sobre previews truncados.
-- Si Engram esta habilitado, recuperar memoria en tres bloques cuando aplique: `perfil usuario` -> `conocimiento proyecto` -> `memorias relevantes`.
-- `master-dev` actua como lector principal de memoria por defecto; los subagentes leen por su cuenta solo cuando la especialidad o el historial previo realmente lo ameritan.
-- El stack global incluye guardrails explicitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos por herramientas generales.
-- El stack global puede emitir notificaciones nativas del SO cuando OpenCode espera respuesta humana, cuando espera un permiso `Allow/Reject`, y cuando la tarea terminó por completo y ya acepta un nuevo prompt. El título usa el formato `OpenCode: <sesión>`. En Linux/GNOME Terminal, el click sobre la notificación intenta traer la terminal y, si hay suficiente contexto, la pestaña exacta al frente en modo best-effort; en sesiones X11 puede usar `wmctrl` o `xdotool` como fallback opcional si están disponibles.
-- El stack global puede exponer `agent_attribution` para atribucion multiagente y autoidentidad de agente activo durante una sesion.
-- En async v1, toda delegacion debe llevar un paquete de contexto explicito: objetivo, motivo, alcance, hechos relevantes, rutas exactas, referencias de memoria si aplican y formato de salida esperado.
-- La UX async global ahora se divide entre un plugin server (`background-agents.ts`) que persiste y orquesta delegaciones, y un plugin TUI (`background-agents-tui`) que visualiza ese estado en sesiones foreground.
-- El plugin TUI async se activa desde `tui.json`; `opencode.json` sigue gobernando plugins server/runtime.
-- `delegate` es async read-only y tiene matriz de permisos: `master-dev` puede delegar a especialistas/read-only; `frontend-web-developer` y `backend-java-developer` solo a `explorer` o `code-inspector`; `ui-web-designer` a `explorer`; `reviewer` a `code-inspector`.
-- `delegate` ahora puede pasar por estado `pending` si no hay cupo de concurrencia; usar `delegation_tail` para progreso incremental y `delegation_cancel` si hace falta abortar.
-- `/bg-tasks` es el comando TUI global para listar delegaciones del proyecto actual, abrir la sesión hija cuando exista `sessionID` y mostrar un resumen persistente del estado async en foreground.
-- La delegacion nested read-only permite como maximo un nivel secundario: un subagente puede pedir investigacion/inspeccion, pero el agente delegado no puede seguir delegando.
-- `delegate_isolated` es la Fase 2 inicial para trabajo write-capable async: solo `master-dev` puede lanzarlo, solo contra `backend-java-developer`, `frontend-web-developer` o `master-dev`, y siempre usa un worktree aislado sin auto-merge.
-- El stack global también puede exponer herramientas de worktree para trabajo paralelo por ticket (`worktree_create`, `worktree_list`, `worktree_delete`) y herramientas de scheduler para automatización recurrente explícita (`schedule_job`, `list_jobs`, `get_job`, `run_job`, `job_logs`, `delete_job`). La apertura de terminal para worktrees es best-effort y el backend inicial del scheduler es cron supervisado.
-- Los schedulers deben crearse solo por pedido explícito del usuario; nunca como automatización implícita.
-- `delegate_isolated` requiere disponibilidad de la API `/experimental/worktree`; en `opencode run` local directo puede no estar expuesta, por lo que conviene usar una sesión server-backed para ese flujo.
-- `delegation_continue(id, prompt)` permite retomar una delegacion read-only completada en la misma sesion de subagente para follow-ups con continuidad de contexto.
-- Toda salida de `delegate_isolated` queda para revision manual con artifacts persistidos: `meta.json`, `result.md`, `changed-files.json`, `git-status.txt`, `diff.patch` y `worktree.json`.
-- Lifecycle inicial de delegacion aislada: `running` -> `review_pending` -> `accepted` -> `applied`, o `running/review_pending/accepted` -> `discarded`; en `error` o `timeout` se intenta cleanup automatico del worktree y se preservan artifacts.
-- `delegation_accept(id)` marca una delegacion aislada como revisada/aceptada y conserva el worktree para integracion manual posterior.
-- `delegation_apply(id)` aplica el `diff.patch` persistido sobre el workspace principal solo si la delegacion ya fue aceptada y el workspace principal esta limpio; no hace commit y luego intenta limpiar el worktree aislado.
-- `delegation_discard(id)` elimina el worktree aislado y deja los artifacts para auditoria; ambos comandos quedan restringidos a `master-dev`.
-- En la sesion hija de `delegate_isolated`, `bash` queda deshabilitado por defecto para evitar bloqueos por permisos `ask` en background; por ahora la validacion shell queda para revision manual o para una futura variante explicita con permisos controlados.
-- Playwright MCP queda configurado en modo headless/no interactivo por defecto. Si alguna vez una inspeccion visual headed/manual realmente conviene, debe pedirse confirmacion explicita al usuario en un flujo foreground y no desde delegaciones async.
-- Para distribuir este stack a otra maquina, tratar `agents/`, `skills/`, `plugins/`, docs y manifest como assets versionables; no versionar secretos ni estado local como `stitch-api-key`, `node_modules/` o la base de datos de Engram.
-- Los backups del stack ahora se podan automáticamente con retención base de 5 snapshots por bucket (`.stack-backups`, `.stack-sync-backups`), preservando cualquier snapshot marcado manualmente con `.pin`.
-- Cuando uses `opencode debug config` para validar o diagnosticar, no compartas la salida cruda si contiene secretos ya resueltos; resumila y redacta valores sensibles.
-- Si un repo tiene `.opencode/`, `stack-doctor` debe auditar explícitamente esos overrides por nombre y reportarlos con estado `OK`/`warning`/`error` usando el patrón institucional de overlays locales.
-
-## Patrón institucional para overlays locales
-
-Cuando un repo crea `.opencode/` y sombrea una definicion global por nombre, el patrón institucional esperado es:
-
-1. **Override solo si hace falta**
-   - si alcanza con `AGENTS.md` o documentacion local, no crear archivo override,
-   - si hace falta especializar un agente/skill/comando existente, mantener el mismo nombre base.
-2. **Overlay aditivo, no reemplazo destructivo**
-   - preservar responsabilidad global, guardrails y formato de salida,
-   - agregar stack, dominio, entry points, riesgos y reglas locales del proyecto,
-   - no recortar comportamiento global salvo pedido expreso del usuario o necesidad tecnica justificada.
-3. **Checklist minimo por override**
-   - `mode` correcto,
-   - `tools:` preservados si el global los define,
-   - permisos seguros heredados explicitamente cuando sigan aplicando,
-   - responsabilidades y limites globales reinyectados si OpenCode no los hereda,
-   - skills globales utiles mantenidas junto a skills locales especializadas.
-4. **Recortes explicitados**
-   - si un override reduce permisos, tools o comportamiento global, documentar el motivo en el `AGENTS.md` local o en la propuesta de cambio.
-5. **Permisos repo-locales solo en local**
-   - wrappers, helpers o scripts de `.opencode/scripts/` deben habilitarse en la capa local del repo que los introduce,
-   - no promover esos permisos a la capa global generica.
-
-Señales de drift a vigilar:
-
-- un override local pierde allowlists seguras que existian globalmente,
-- desaparecen skills globales relevantes sin una razon clara,
-- se borran guardrails globales de memoria, async, validacion o handoff,
-- un comando local cambia contrato o precondiciones sin documentarlo,
-- la especializacion local se vuelve un prompt completamente distinto en vez de un refinamiento del rol global.
+- Mantener agentes globales genéricos, reutilizables y sin dominio de proyecto; lo específico debe vivir en el `AGENTS.md` local o en overlays del repo.
+- Distinguir siempre entre agentes base de OpenCode y agentes custom del stack; `agent-design` debe proteger esa separación.
+- Para docs externas de librerías o APIs, Context7 es la fuente preferida cuando esté disponible; IDs canónicos, versiones objetivo o fuentes privadas deben quedar en la capa local del proyecto.
+- Si un agente, skill o comando local sombrea uno global, el override debe ser aditivo y reinyectar explícitamente comportamiento, permisos seguros y guardrails útiles; para checklist, drift y `__replace__`, referirse a `overlays-locales-opencode`, `PLAYBOOK-LOCAL-OVERLAYS.md` y `LOCAL-OVERLAY-TEMPLATE.md`.
+- El workflow `tmp/<ticket>/verdict.md` -> implementación -> `result-dev.md` es reusable pero opcional: activarlo solo cuando el proyecto adopta ese patrón.
+- `master-dev` lidera el trabajo técnico general; `ui-web-designer` define UX, `frontend-web-developer` implementa presentación y `backend-java-developer` cubre backend/datos. Delegar solo cuando la especialización aporte foco real.
+- `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
+- Si Engram está habilitado, la memoria debe mantenerse curada y `master-dev` actúa como lector principal por defecto; para lectura/escritura detallada, usar `memoria-engram-opencode`.
+- El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
+- El stack global puede emitir notificaciones del SO cuando OpenCode espera respuesta, permiso o finalización. En Linux/GNOME Terminal, el click intenta traer la terminal y, si hay contexto suficiente, la pestaña exacta; en X11 puede apoyarse en `wmctrl` o `xdotool`.
+- El stack global puede exponer `agent_attribution` para atribución multiagente.
+- La UX async se divide entre plugin server y plugin TUI. Para task packet, lifecycle, nested, artifacts y apply/review de delegaciones, referirse a `delegacion-async-opencode` y `PLAYBOOK-ASYNC.md`.
+- Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.
+- Las herramientas de worktree y scheduler deben usarse solo bajo pedido explícito del usuario.
+- Playwright MCP queda en modo headless/no interactivo por defecto; si una inspección visual headed/manual realmente conviene, debe pedirse confirmación explícita en foreground.
+- Para distribuir este stack a otra máquina, versionar `agents/`, `skills/`, `plugins/`, docs y manifest; no versionar secretos ni estado local (`stitch-api-key`, `node_modules/`, base de Engram, etc.).
+- Los backups del stack se podan automáticamente con retención base de 5 snapshots por bucket y soporte de `.pin`.
+- Cuando uses `opencode debug config`, no compartas la salida cruda si contiene secretos resueltos; resumila y redactá valores sensibles.

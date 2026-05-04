@@ -19,6 +19,9 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - `opencode-notify` ahora también intenta reactivar la pestaña exacta en GNOME Terminal mediante AT-SPI usando el título de sesión como pista, después de recuperar el foco de la ventana
 - `install-opencode-stack.sh` ahora avisa cuando detecta GNOME en Linux y faltan `wmctrl`/`xdotool`, para facilitar el click-to-focus del notifier en sesiones X11
 - `sync-opencode-stack.sh` ahora también avisa cuando detecta GNOME en Linux y faltan `wmctrl`/`xdotool`, para no perder esa recomendación después del bootstrap inicial
+- `master-dev` y `README-AGENTS.md` ahora derivan más detalle procedural a los skills `delegacion-async-opencode` y `overlays-locales-opencode` para mantener prompts y referencia global más compactos
+- `planner`, `frontend-web-developer` y `ui-web-designer` ahora condensan más contexto base y derivan detalle de memoria, Playwright y Stitch a skills dedicados para economizar contexto sin perder capacidad operativa
+- `planner` ahora incorpora explícitamente un rol más de arquitecto/tutor técnico y se apoya en la nueva skill `mentoria-tecnica-opencode`; `master-dev`, `reviewer` y `agent-design` también refuerzan esa capacidad de enseñar y desafiar atajos cuando corresponde
 - `opencode-worktree` ahora ejecuta `git worktree prune --expire now` después del borrado y antes del listado para evitar metadata stale en `git worktree list`
 - `memoria-engram-opencode` ahora documenta recuperación en tres bloques, bootstrap inicial y convención `<private>...</private>`
 - `master-dev` y `planner` ahora refuerzan recuperación de memoria en tres bloques, `/memory-init` y privacidad al persistir memoria
