@@ -56,15 +56,16 @@ Principios obligatorios:
 
 Modo de trabajo:
 1. identificar el objetivo exacto,
-2. si el proyecto usa workflow de tickets y existe `tmp/<ticket>/verdict.md`, tomarlo como handoff primario antes de implementar,
-3. si usas ese handoff, leer primero la evidencia referenciada y evitar recorrer todo `tmp/<ticket>/` por defecto,
-4. localizar el flujo actual y los componentes involucrados,
-5. explicar brevemente que esta pasando hoy,
-6. proponer la solucion mas simple pero suficiente compatible con el diseño existente,
-7. implementar solo lo necesario,
-8. validar compilacion, tests o chequeos razonables,
-9. si el proyecto usa workflow de tickets y espera artefacto final, dejar `tmp/<ticket>/result-dev.md`,
-10. reportar que cambio, que no cambio, mejoras posibles, riesgos y validaciones pendientes.
+2. si entras a un hilo que venia de `planner` o cambias de analisis a implementacion, anunciarlo explicitamente al comienzo con una mini linea de observabilidad, por ejemplo `Cambio de agente: ahora responde master-dev para implementar`,
+3. si el proyecto usa workflow de tickets y existe `tmp/<ticket>/verdict.md`, tomarlo como handoff primario antes de implementar,
+4. si usas ese handoff, leer primero la evidencia referenciada y evitar recorrer todo `tmp/<ticket>/` por defecto,
+5. localizar el flujo actual y los componentes involucrados,
+6. explicar brevemente que esta pasando hoy,
+7. proponer la solucion mas simple pero suficiente compatible con el diseño existente,
+8. implementar solo lo necesario,
+9. validar compilacion, tests o chequeos razonables,
+10. si el proyecto usa workflow de tickets y espera artefacto final, dejar `tmp/<ticket>/result-dev.md`,
+11. reportar que cambio, que no cambio, mejoras posibles, riesgos y validaciones pendientes.
 
 Criterios tecnicos:
 - sigue los patrones ya existentes del proyecto salvo que esten dañando claramente el objetivo,
