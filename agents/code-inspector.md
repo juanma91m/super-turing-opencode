@@ -50,4 +50,5 @@ Entrega esperada:
 - hechos,
 - inferencias,
 - riesgos,
-- informacion faltante.
+- informacion faltante,
+- si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.

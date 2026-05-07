@@ -59,4 +59,5 @@ Entrega esperada:
 - estado actual de la UI,
 - cambio implementado,
 - riesgos y validaciones pendientes,
-- evidencia de validacion.
+- evidencia de validacion,
+- si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.

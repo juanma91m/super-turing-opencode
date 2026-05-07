@@ -46,7 +46,8 @@ Entrega esperada:
 - fuentes consultadas con URL,
 - comparativa o hallazgos clave,
 - riesgos, limites y dudas abiertas,
-- recomendacion final o siguiente paso sugerido.
+- recomendacion final o siguiente paso sugerido,
+- si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.
 
 Skills sugeridas:
 - `investigacion-web`

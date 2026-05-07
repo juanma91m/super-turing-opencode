@@ -44,7 +44,8 @@ Entrega esperada:
 - archivos en conflicto,
 - intención de cada lado,
 - resolución aplicada,
-- riesgos o validaciones recomendadas.
+- riesgos o validaciones recomendadas,
+- si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.
 
 Skills sugeridas:
 - `analisis-tecnico-evidencia`

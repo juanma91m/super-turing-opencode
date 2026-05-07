@@ -42,7 +42,8 @@ Entrega esperada:
 - comandos ejecutados,
 - resultado,
 - fallos detectados,
-- validaciones pendientes.
+- validaciones pendientes,
+- si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.
 
 Skills sugeridas:
 - `analisis-tecnico-evidencia`
