@@ -141,11 +141,71 @@ interface DelegationListItem {
   lastMessage?: string
 }
 
+type SameSessionTaskStatus = "queued" | "running" | "done" | "error"
+type SameSessionTaskSource = "foreground-detach" | "prompt-async"
+
+interface SameSessionTaskRef {
+  id: string
+  source: SameSessionTaskSource
+  sequence?: number
+  title?: string
+  bgTaskToken?: string
+  inspectionHostSessionID?: string
+  parentUserMessageID?: string
+  assistantMessageID?: string
+  createdAt: number
+  detachedAt: number
+}
+
+interface SameSessionBackgroundState {
+  backgroundModeEnabled: boolean
+  trackedTaskRefs: SameSessionTaskRef[]
+  threadRootSessionID?: string
+}
+
+interface SameSessionThreadState {
+  rootSessionID: string
+  foregroundSessionID: string
+  title?: string
+  nextSequence?: number
+}
+
+interface SameSessionTaskRecord {
+  id: string
+  source: SameSessionTaskSource
+  sequence?: number
+  title?: string
+  status: SameSessionTaskStatus
+  sessionID: string
+  rootSessionID: string
+  promptText?: string
+  outputText?: string
+  error?: string
+  parentUserMessageID?: string
+  assistantMessageID?: string
+  inspectionHostSessionID?: string
+  bgTaskToken?: string
+  createdAt?: Date
+  detachedAt?: Date
+  queuedAt?: Date
+  startedAt?: Date
+  completedAt?: Date
+  metadataOnly: boolean
+}
+
+interface SameSessionThreadContext {
+  rootSessionID?: string
+  threadState?: SameSessionThreadState
+  tasks: SameSessionTaskRecord[]
+}
+
 const MAX_RUN_TIME_MS = 15 * 60 * 1000
 const RECENT_COMPLETED_LIMIT = 10
 const MAX_DELEGATION_CALLER_DEPTH = 1
 const READ_ONLY_CONCURRENCY_LIMIT = 4
 const ISOLATED_WRITE_CONCURRENCY_LIMIT = 1
+const SAME_SESSION_STATE_PREFIX = "background-agents-tui"
+const SAME_SESSION_KV_PATH = path.join(os.homedir(), ".local", "state", "opencode", "kv.json")
 
 const READ_ONLY_DELEGATION_MATRIX: Record<string, string[]> = {
   "master-dev": ["backend-java-developer", "frontend-web-developer", "reviewer", "code-inspector", "explorer", "ui-web-designer"],
@@ -279,6 +339,18 @@ function summarize(text: string, max: number): string {
   return normalized.length > max ? `${normalized.slice(0, max).trim()}...` : normalized
 }
 
+function truncateBlock(text: string | undefined, max: number): string | undefined {
+  if (!text) return undefined
+  const trimmed = text.trim()
+  if (!trimmed) return undefined
+  return trimmed.length > max ? `${trimmed.slice(0, max).trimEnd()}\n...[truncated]` : trimmed
+}
+
+function normalizePositiveInt(value: unknown): number | undefined {
+  const number = Number(value)
+  return Number.isInteger(number) && number > 0 ? number : undefined
+}
+
 function formatDuration(start: Date, end?: Date): string {
   const duration = (end ?? new Date()).getTime() - start.getTime()
   const seconds = Math.floor(duration / 1000)
@@ -328,6 +400,106 @@ function getDelegationStatusPresentation(status: string): {
 function formatDelegationStatusBadge(status: string): string {
   const presentation = getDelegationStatusPresentation(status)
   return `${presentation.icon} ${presentation.label.toUpperCase()}`
+}
+
+function formatSameSessionTaskStatusBadge(status: SameSessionTaskStatus): string {
+  switch (status) {
+    case "queued":
+      return "🟡 QUEUED"
+    case "running":
+      return "🔵 RUNNING"
+    case "done":
+      return "🟢 DONE"
+    case "error":
+    default:
+      return "🔴 ERROR"
+  }
+}
+
+function buildSameSessionStateKey(sessionID: string): string {
+  return `${SAME_SESSION_STATE_PREFIX}:session:${sessionID}`
+}
+
+function buildSameSessionThreadKey(rootSessionID: string): string {
+  return `${SAME_SESSION_STATE_PREFIX}:thread:${rootSessionID}`
+}
+
+function normalizeSameSessionBackgroundState(value: unknown): SameSessionBackgroundState {
+  const input = value && typeof value === "object" ? (value as Partial<SameSessionBackgroundState>) : {}
+  const refs = Array.isArray(input.trackedTaskRefs)
+    ? input.trackedTaskRefs
+        .filter((ref): ref is SameSessionTaskRef => Boolean(ref && typeof ref === "object" && typeof (ref as SameSessionTaskRef).id === "string"))
+        .map(
+          (ref): SameSessionTaskRef => ({
+            id: ref.id,
+            source: ref.source === "foreground-detach" ? "foreground-detach" : "prompt-async",
+            sequence: normalizePositiveInt(ref.sequence),
+            title: ref.title,
+            bgTaskToken: ref.bgTaskToken,
+            inspectionHostSessionID: ref.inspectionHostSessionID,
+            parentUserMessageID: ref.parentUserMessageID,
+            assistantMessageID: ref.assistantMessageID,
+            createdAt: Number(ref.createdAt || Date.now()),
+            detachedAt: Number(ref.detachedAt || ref.createdAt || Date.now()),
+          }),
+        )
+    : []
+
+  const unique = new Map<string, SameSessionTaskRef>()
+  for (const ref of refs) unique.set(ref.id, ref)
+
+  return {
+    backgroundModeEnabled: Boolean(input.backgroundModeEnabled),
+    trackedTaskRefs: Array.from(unique.values()).sort((a, b) => b.detachedAt - a.detachedAt),
+    threadRootSessionID:
+      typeof input.threadRootSessionID === "string" && input.threadRootSessionID.trim() ? input.threadRootSessionID.trim() : undefined,
+  }
+}
+
+function normalizeSameSessionThreadState(value: unknown, fallbackRootSessionID: string): SameSessionThreadState {
+  const input = value && typeof value === "object" ? (value as Partial<SameSessionThreadState>) : {}
+  return {
+    rootSessionID:
+      typeof input.rootSessionID === "string" && input.rootSessionID.trim() ? input.rootSessionID.trim() : fallbackRootSessionID,
+    foregroundSessionID:
+      typeof input.foregroundSessionID === "string" && input.foregroundSessionID.trim()
+        ? input.foregroundSessionID.trim()
+        : fallbackRootSessionID,
+    title: typeof input.title === "string" && input.title.trim() ? input.title.trim() : undefined,
+    nextSequence: normalizePositiveInt(input.nextSequence),
+  }
+}
+
+function extractBackgroundToken(parts: Part[] | undefined): string | undefined {
+  if (!parts) return undefined
+  for (const part of parts) {
+    if ((part as any)?.type !== "text") continue
+    const token = (part as any)?.metadata?.bgTaskToken
+    if (typeof token === "string" && token.trim()) return token.trim()
+  }
+  return undefined
+}
+
+function stringifyStructured(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined
+  if (typeof value === "string") return value
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return String(value)
+  }
+}
+
+function compareSameSessionTasks(a: SameSessionTaskRecord, b: SameSessionTaskRecord): number {
+  const aSequence = normalizePositiveInt(a.sequence)
+  const bSequence = normalizePositiveInt(b.sequence)
+  if (aSequence !== undefined && bSequence !== undefined && aSequence !== bSequence) return aSequence - bSequence
+
+  const aOrder = a.queuedAt?.toISOString() || a.startedAt?.toISOString() || a.detachedAt?.toISOString() || a.createdAt?.toISOString() || a.id
+  const bOrder = b.queuedAt?.toISOString() || b.startedAt?.toISOString() || b.detachedAt?.toISOString() || b.createdAt?.toISOString() || b.id
+  if (aOrder !== bOrder) return aOrder.localeCompare(bOrder)
+
+  return a.id.localeCompare(b.id)
 }
 
 function deriveMetadata(content: string): { title: string; description: string } {
@@ -773,6 +945,178 @@ class DelegationManager {
     return (messages?.data ?? []) as Array<{ info?: any; parts?: Part[] }>
   }
 
+  private async readSameSessionKV(): Promise<Record<string, unknown>> {
+    try {
+      const raw = await fs.readFile(SAME_SESSION_KV_PATH, "utf8")
+      const parsed = JSON.parse(raw)
+      return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {}
+    } catch {
+      return {}
+    }
+  }
+
+  private async resolveSameSessionThreadRootSessionID(
+    sessionID: string,
+    sessionStates: Map<string, SameSessionBackgroundState>,
+    threadStates: Map<string, SameSessionThreadState>,
+  ): Promise<string | undefined> {
+    const direct = sessionStates.get(sessionID)
+    if (direct?.threadRootSessionID) return direct.threadRootSessionID
+    if (direct && (direct.backgroundModeEnabled || direct.trackedTaskRefs.length > 0)) return sessionID
+    if (threadStates.has(sessionID)) return sessionID
+
+    for (const threadState of threadStates.values()) {
+      if (threadState.foregroundSessionID === sessionID) return threadState.rootSessionID
+    }
+
+    for (const [candidateSessionID, state] of sessionStates.entries()) {
+      if (state.trackedTaskRefs.some((ref) => ref.inspectionHostSessionID === sessionID)) {
+        return state.threadRootSessionID || candidateSessionID
+      }
+    }
+
+    let currentID = sessionID
+    for (let depth = 0; depth < 10; depth++) {
+      try {
+        const session = await this.client.session.get({ path: { id: currentID } })
+        const parentID = session?.data?.parentID
+        if (!parentID) return undefined
+
+        const parentState = sessionStates.get(parentID)
+        if (parentState?.threadRootSessionID) return parentState.threadRootSessionID
+        if (parentState && (parentState.backgroundModeEnabled || parentState.trackedTaskRefs.length > 0)) return parentID
+        if (threadStates.has(parentID)) return parentID
+
+        currentID = parentID
+      } catch {
+        return undefined
+      }
+    }
+
+    return undefined
+  }
+
+  private async getSameSessionThreadContext(sessionID: string): Promise<SameSessionThreadContext> {
+    const kvState = await this.readSameSessionKV()
+    const sessionStates = new Map<string, SameSessionBackgroundState>()
+    const threadStates = new Map<string, SameSessionThreadState>()
+
+    for (const [key, value] of Object.entries(kvState)) {
+      if (key.startsWith(`${SAME_SESSION_STATE_PREFIX}:session:`)) {
+        const resolvedSessionID = key.slice(buildSameSessionStateKey("").length)
+        if (resolvedSessionID) sessionStates.set(resolvedSessionID, normalizeSameSessionBackgroundState(value))
+        continue
+      }
+
+      if (key.startsWith(`${SAME_SESSION_STATE_PREFIX}:thread:`)) {
+        const rootSessionID = key.slice(buildSameSessionThreadKey("").length)
+        if (rootSessionID) threadStates.set(rootSessionID, normalizeSameSessionThreadState(value, rootSessionID))
+      }
+    }
+
+    const rootSessionID = await this.resolveSameSessionThreadRootSessionID(sessionID, sessionStates, threadStates)
+    if (!rootSessionID) return { tasks: [] }
+
+    const relevantStates = Array.from(sessionStates.entries()).filter(([candidateSessionID, state]) => {
+      if (state.trackedTaskRefs.length === 0) return false
+      if (state.threadRootSessionID) return state.threadRootSessionID === rootSessionID
+      return candidateSessionID === rootSessionID
+    })
+
+    const tasks = new Map<string, SameSessionTaskRecord>()
+    for (const [trackedSessionID, state] of relevantStates) {
+      let messages: Array<{ info?: any; parts?: Part[] }> = []
+      try {
+        messages = await this.getSessionMessages(trackedSessionID)
+      } catch {
+        messages = []
+      }
+
+      const userMessages = new Map<string, { info?: any; parts?: Part[] }>()
+      const userMessagesByToken = new Map<string, { info?: any; parts?: Part[] }>()
+      const assistantByParent = new Map<string, { info?: any; parts?: Part[] }>()
+
+      for (const message of messages) {
+        const role = message.info?.role
+        const messageID = message.info?.id
+        if (role === "user" && messageID) {
+          userMessages.set(messageID, message)
+          const token = extractBackgroundToken(message.parts)
+          if (token) userMessagesByToken.set(token, message)
+          continue
+        }
+
+        if (role !== "assistant") continue
+        const parentID = message.info?.parentID
+        if (!parentID) continue
+        const previous = assistantByParent.get(parentID)
+        const previousCreated = this.getMessageCreatedTimestamp(previous?.info)?.getTime() ?? 0
+        const currentCreated = this.getMessageCreatedTimestamp(message.info)?.getTime() ?? 0
+        if (!previous || currentCreated >= previousCreated) assistantByParent.set(parentID, message)
+      }
+
+      for (const ref of state.trackedTaskRefs) {
+        const userMessage =
+          (ref.parentUserMessageID ? userMessages.get(ref.parentUserMessageID) : undefined) ||
+          (ref.bgTaskToken ? userMessagesByToken.get(ref.bgTaskToken) : undefined)
+        const parentUserMessageID = userMessage?.info?.id ?? ref.parentUserMessageID
+        const assistantMessage =
+          (parentUserMessageID ? assistantByParent.get(parentUserMessageID) : undefined) ||
+          (ref.assistantMessageID ? messages.find((item) => item.info?.id === ref.assistantMessageID) : undefined)
+        const promptText = truncateBlock(this.renderMessageBody(userMessage?.parts), 4000)
+        const outputText = truncateBlock(this.renderMessageBody(assistantMessage?.parts), 8000)
+        const error = stringifyStructured(assistantMessage?.info?.error)
+        const completedAt = this.getMessageTimestamp({ time: assistantMessage?.info?.time?.completed })
+        const startedAt = assistantMessage ? this.getMessageCreatedTimestamp(assistantMessage.info) : undefined
+        const status: SameSessionTaskStatus = error
+          ? "error"
+          : completedAt
+            ? "done"
+            : assistantMessage || ref.assistantMessageID
+              ? "running"
+              : "queued"
+
+        const record: SameSessionTaskRecord = {
+          id: ref.id,
+          source: ref.source,
+          sequence: normalizePositiveInt(ref.sequence),
+          title: ref.title || summarize(promptText || "Same-session background task", 120) || "Same-session background task",
+          status,
+          sessionID: trackedSessionID,
+          rootSessionID,
+          promptText,
+          outputText,
+          error,
+          parentUserMessageID,
+          assistantMessageID: assistantMessage?.info?.id ?? ref.assistantMessageID,
+          inspectionHostSessionID: ref.inspectionHostSessionID,
+          bgTaskToken: ref.bgTaskToken,
+          createdAt: Number.isFinite(ref.createdAt) ? new Date(ref.createdAt) : undefined,
+          detachedAt: Number.isFinite(ref.detachedAt) ? new Date(ref.detachedAt) : undefined,
+          queuedAt: userMessage ? this.getMessageTimestamp(userMessage.info) : Number.isFinite(ref.createdAt) ? new Date(ref.createdAt) : undefined,
+          startedAt,
+          completedAt,
+          metadataOnly: messages.length === 0,
+        }
+
+        const existing = tasks.get(record.id)
+        if (!existing || (!existing.promptText && record.promptText) || (!existing.outputText && record.outputText)) {
+          tasks.set(record.id, record)
+        }
+      }
+    }
+
+    return {
+      rootSessionID,
+      threadState: threadStates.get(rootSessionID),
+      tasks: Array.from(tasks.values()).sort(compareSameSessionTasks),
+    }
+  }
+
+  async listSameSessionTasks(sessionID: string): Promise<SameSessionThreadContext> {
+    return this.getSameSessionThreadContext(sessionID)
+  }
+
   private extractPartText(part: any): string {
     if (!part) return ""
     if (typeof part.text === "string") return part.text
@@ -791,6 +1135,28 @@ class DelegationManager {
     if (typeof raw === "number") return new Date(raw)
     if (typeof raw === "string") return new Date(raw)
     return undefined
+  }
+
+  private getMessageCreatedTimestamp(info: any): Date | undefined {
+    const raw = info?.time?.created ?? info?.time
+    if (!raw) return undefined
+    if (typeof raw === "number") return new Date(raw)
+    if (typeof raw === "string") return new Date(raw)
+    return undefined
+  }
+
+  private renderMessageBody(parts: Part[] | undefined): string {
+    return (parts ?? [])
+      .map((part: any) => {
+        if (part?.type === "tool") {
+          const toolName = part.tool || part.name || "tool"
+          const toolText = this.extractPartText(part)
+          return `[tool:${toolName}]${toolText ? `\n${toolText}` : ""}`
+        }
+        return this.extractPartText(part)
+      })
+      .join("\n")
+      .trim()
   }
 
   private buildProgressFromMessages(messages: Array<{ info?: any; parts?: Part[] }>, previous?: DelegationProgress): DelegationProgress {
@@ -851,18 +1217,7 @@ class DelegationManager {
     for (const message of messages) {
       const role = message.info?.role ?? "unknown"
       const timestamp = this.getMessageTimestamp(message.info)?.toISOString() ?? "N/A"
-      const parts = message.parts ?? []
-      const body = parts
-        .map((part: any) => {
-          if (part?.type === "tool") {
-            const toolName = part.tool || part.name || "tool"
-            const toolText = this.extractPartText(part)
-            return `[tool:${toolName}]${toolText ? `\n${toolText}` : ""}`
-          }
-          return this.extractPartText(part)
-        })
-        .join("\n")
-        .trim()
+      const body = this.renderMessageBody(message.parts)
       if (!body) continue
       blocks.push(`## ${role} @ ${timestamp}\n\n${body}`)
     }
@@ -2003,6 +2358,81 @@ ${content}`
     const all = await this.listDelegations(sessionID)
     return all.filter((item) => item.status !== "running" && item.status !== "pending").slice(-RECENT_COMPLETED_LIMIT)
   }
+
+  async readSameSessionTask(sessionID: string, selector: { id?: string; sequence?: number }): Promise<string> {
+    const context = await this.getSameSessionThreadContext(sessionID)
+    if (context.tasks.length === 0) {
+      return 'No same-session background tasks found for this logical thread. These tools only cover `/bg-current` and the inline `promptAsync` same-session path, not `delegate()` work.'
+    }
+
+    let task: SameSessionTaskRecord | undefined
+    if (selector.id) {
+      task = context.tasks.find((item) => item.id === selector.id)
+      if (task && selector.sequence !== undefined && task.sequence !== selector.sequence) {
+        throw new Error(`same_session_task_read selector mismatch. id="${selector.id}" belongs to sequence ${task.sequence ?? "N/A"}, not ${selector.sequence}.`)
+      }
+    }
+
+    if (!task && selector.sequence !== undefined) {
+      task = context.tasks.find((item) => item.sequence === selector.sequence)
+    }
+
+    if (!task) {
+      const selectorText = selector.id ? `id "${selector.id}"` : `sequence ${selector.sequence}`
+      throw new Error(`Same-session task ${selectorText} was not found in the current logical thread. Use same_session_task_list() first.`)
+    }
+
+    const lines = [
+      `# Same-session Background Task`,
+      ``,
+      `| Field | Value |`,
+      `|-------|-------|`,
+      `| ID | \`${task.id}\` |`,
+      `| Sequence | ${task.sequence ? `#${task.sequence}` : "N/A"} |`,
+      `| Status | ${formatSameSessionTaskStatusBadge(task.status)} |`,
+      `| Source | ${task.source} |`,
+      `| Session | \`${task.sessionID}\` |`,
+      `| Root Session | \`${task.rootSessionID}\` |`,
+      `| Thread Title | ${context.threadState?.title || "N/A"} |`,
+      `| Parent User Message | ${task.parentUserMessageID ? `\`${task.parentUserMessageID}\`` : "N/A"} |`,
+      `| Assistant Message | ${task.assistantMessageID ? `\`${task.assistantMessageID}\`` : "N/A"} |`,
+      `| Inspection Host | ${task.inspectionHostSessionID ? `\`${task.inspectionHostSessionID}\`` : "N/A"} |`,
+      `| Queued | ${task.queuedAt?.toISOString() || task.createdAt?.toISOString() || "N/A"} |`,
+      `| Detached | ${task.detachedAt?.toISOString() || "N/A"} |`,
+      `| Started | ${task.startedAt?.toISOString() || "N/A"} |`,
+      `| Completed | ${task.completedAt?.toISOString() || "N/A"} |`,
+    ]
+
+    if (task.title) lines.push(``, `## Title`, ``, task.title)
+
+    lines.push(``, `> This is a same-session background task created by \`/bg-current\` or by the inline same-session \`promptAsync\` path, not a \`delegate()\` child session.`)
+
+    if (task.metadataOnly) {
+      lines.push(``, `> Message bodies were not available from the local session store/API, so this summary falls back to tracked metadata only.`)
+    }
+
+    if (task.promptText) {
+      lines.push(``, `## Prompt`, ``, "```text", task.promptText, "```")
+    } else {
+      lines.push(``, `## Prompt`, ``, `_Prompt body unavailable; tracked title: ${task.title || "N/A"}_`)
+    }
+
+    if (task.error) {
+      lines.push(``, `## Error`, ``, "```text", task.error, "```")
+    }
+
+    if (task.outputText) {
+      lines.push(``, `## Output`, ``, "```text", task.outputText, "```")
+    } else if (task.status === "queued") {
+      lines.push(``, `## Output`, ``, `_This task is still queued and has no assistant output yet._`)
+    } else if (task.status === "running") {
+      lines.push(``, `## Output`, ``, `_This task is still running or its live assistant message is not yet available from the current store._`)
+    } else {
+      lines.push(``, `## Output`, ``, `_No assistant output body was available for this task._`)
+    }
+
+    return lines.join("\n")
+  }
 }
 
 function formatDelegationContext(
@@ -2037,6 +2467,30 @@ function formatDelegationContext(
   sections.push('Use `delegation_open("id")` to navigate into a child session when it exists.')
   sections.push('Use `delegation_read("id")` to access full delegation output.')
   sections.push("</delegation-context>")
+  return sections.join("\n")
+}
+
+function formatSameSessionTaskContext(context: SameSessionThreadContext): string {
+  if (context.tasks.length === 0) return ""
+
+  const sections: string[] = ["<same-session-task-context>", "## Same-Session Background Tasks", ""]
+  if (context.threadState?.title) sections.push(`**Thread:** ${context.threadState.title}`)
+  if (context.rootSessionID) sections.push(`**Root Session:** \`${context.rootSessionID}\``)
+  sections.push("")
+
+  for (const task of context.tasks.slice(0, 6)) {
+    const label = task.sequence ? `#${task.sequence}` : task.id
+    const title = task.title ? ` — ${task.title}` : ""
+    const promptSummary = task.promptText ? `\n  ↳ ${summarize(task.promptText, 160)}` : ""
+    sections.push(`- **${label}** [${task.status}]${title}\n  ${task.source} | session \`${task.sessionID}\`${promptSummary}`)
+  }
+
+  sections.push(
+    "",
+    "> These tasks come from `/bg-current` and the inline same-session `promptAsync` path, not `delegate()`.",
+    "> Use `same_session_task_list()` to refresh and `same_session_task_read(sequence=<n>)` or `same_session_task_read(id=\"...\")` to inspect prompt/output.",
+    "</same-session-task-context>",
+  )
   return sections.join("\n")
 }
 
@@ -2301,6 +2755,72 @@ Use sparingly. Do NOT use this as a polling loop while waiting for completion no
   })
 }
 
+function createSameSessionTaskList(manager: DelegationManager) {
+  return tool({
+    description: `List same-session background tasks visible from the current logical thread/session.
+
+These are tasks created by /bg-current or by the inline same-session prompt path in the TUI. This tool is read-only and does NOT replace delegation_* semantics.`,
+    args: {},
+    async execute(_args: Record<string, never>, toolCtx: ToolContext): Promise<string> {
+      if (!toolCtx?.sessionID) return "❌ same_session_task_list requires sessionID. This is a system error."
+
+      const context = await manager.listSameSessionTasks(toolCtx.sessionID)
+      if (context.tasks.length === 0) {
+        return 'No same-session background tasks found for this logical thread. Use delegation_list() for delegate() work, or `/bg-current` plus the inline same-session prompt path to create these tasks first.'
+      }
+
+      const header = [
+        `## Same-session background tasks`,
+        "",
+        context.threadState?.title ? `Thread: ${context.threadState.title}` : undefined,
+        context.rootSessionID ? `Root session: \`${context.rootSessionID}\`` : undefined,
+        `These tasks come from \`/bg-current\` and the inline same-session \`promptAsync\` path, not \`delegate()\`.`,
+        "",
+      ]
+        .filter(Boolean)
+        .join("\n")
+
+      const lines = context.tasks.map((task) => {
+        const title = task.title ? ` — ${task.title}` : ""
+        const identity = task.sequence ? `#${task.sequence}` : `\`${task.id}\``
+        const prompt = task.promptText ? `\n  ↳ ${summarize(task.promptText, 180)}` : ""
+        const readCommands = task.sequence
+          ? `\n  ↗ read: \`same_session_task_read(sequence=${task.sequence})\` | by id: \`same_session_task_read(id="${task.id}")\``
+          : `\n  ↗ read: \`same_session_task_read(id="${task.id}")\``
+        const meta = [formatSameSessionTaskStatusBadge(task.status), task.source, `session: ${task.sessionID}`].join(" | ")
+        return `- **${identity}**${title}\n  ${meta}${readCommands}${prompt}`
+      })
+
+      return `${header}${lines.join("\n")}`
+    },
+  })
+}
+
+function createSameSessionTaskRead(manager: DelegationManager) {
+  return tool({
+    description: `Read one same-session background task by sequence and/or id.
+
+This inspects read-only task metadata plus the related prompt/output stored in the source session messages for /bg-current tasks and inline same-session promptAsync tasks.`,
+    args: {
+      sequence: tool.schema.number().optional().describe("Optional same-session task sequence number, for example 1 for UI task #1."),
+      id: tool.schema.string().optional().describe("Optional same-session task id, for example session-run:msg_xxx or session-run:token:xxx."),
+    },
+    async execute(args: { sequence?: number; id?: string }, toolCtx: ToolContext): Promise<string> {
+      if (!toolCtx?.sessionID) return "❌ same_session_task_read requires sessionID. This is a system error."
+      if (args.sequence === undefined && !args.id) return "❌ same_session_task_read requires sequence and/or id."
+
+      try {
+        return await manager.readSameSessionTask(toolCtx.sessionID, {
+          sequence: normalizePositiveInt(args.sequence),
+          id: args.id?.trim() || undefined,
+        })
+      } catch (error) {
+        return `❌ same_session_task_read failed:\n\n${error instanceof Error ? error.message : "Unknown error"}`
+      }
+    },
+  })
+}
+
 const DELEGATION_RULES = `<task-notification>
 <delegation-system>
 
@@ -2309,6 +2829,8 @@ const DELEGATION_RULES = `<task-notification>
 You have tools for parallel background work:
 - \`delegate(prompt, agent)\` - Launch a background task and get an ID immediately
 - \`delegate_isolated(prompt, agent, name?)\` - Launch write-capable work in an isolated worktree for manual review
+- \`same_session_task_list()\` - List same-session background tasks created via \`/bg-current\` or the inline same-session \`promptAsync\` path
+- \`same_session_task_read(sequence?, id?)\` - Read one same-session background task by UI sequence or tracked ID
 - \`delegation_open(id)\` - Jump into the child session when it exists
 - \`delegation_read(id)\` - Retrieve the full persisted result
 - \`delegation_tail(id)\` - Retrieve only new incremental output/status from a running delegation
@@ -2325,6 +2847,7 @@ You have tools for parallel background work:
 |------|----------|----------|
 | \`delegate\` | Async, background, persisted to disk | Read-only work where you can continue productively while it runs |
 | \`delegate_isolated\` | Async, isolated OpenCode worktree, persisted diff artifacts | master-dev needs parallel implementation without touching the main workspace |
+| \`same_session_task_list/read\` | Read-only inspection of same-session background tasks tracked by the TUI | You need to inspect \`/bg-current\` or inline same-session \`promptAsync\` work without changing delegation contracts |
 | \`task\` | Synchronous, blocks until complete | You need the result before continuing, or the work can write/edit/execute with risk |
 
 ## Critical Constraints
@@ -2333,6 +2856,7 @@ You have tools for parallel background work:
 - \`delegate\` is restricted by caller/target policy and max nested depth 1.
 - Approved nested read-only paths: master-dev -> any specialist/read-only agent; frontend/backend -> explorer or code-inspector; ui-web-designer -> explorer; reviewer -> code-inspector.
 - Never use \`delegate\` for write-capable implementation work.
+- \`same_session_task_*\` tools are read-only helpers for tasks created via \`/bg-current\` or the inline same-session \`promptAsync\` path; they do NOT change \`delegation_*\` meaning or lifecycle.
 - \`delegate_isolated\` is restricted to master-dev and allowed write-capable targets. It never auto-merges; review artifacts first.
 - \`delegation_apply\` is restricted to master-dev, requires an \`accepted\` isolated delegation, and requires a clean main workspace.
 - \`delegation_accept\` and \`delegation_discard\` are also restricted to master-dev.
@@ -2360,6 +2884,12 @@ Do NOT assume the delegated agent can infer hidden context from the parent conve
 2. Continue productive work while it runs in the background
 3. Receive a compact notification with ID and status only
 4. Use \`delegation_open(id)\` to jump into the child session, \`delegation_tail(id)\` for incremental progress, and \`delegation_read(id)\` when you need the full result
+
+For same-session background tasks launched from the TUI:
+- use \`same_session_task_list()\` to discover visible tasks for the current logical thread,
+- then use \`same_session_task_read(sequence=<n>)\` or \`same_session_task_read(id=\"...\")\` to inspect prompt/output.
+
+These are not child delegations, so \`delegation_open/read/tail\` do not apply unless the work was actually created with \`delegate()\`.
 
 For \`delegate_isolated\`, wait for \`review_pending\`, then inspect the persisted summary, worktree path, changed files, and \`diff.patch\`.
 After review:
@@ -2404,6 +2934,8 @@ export const BackgroundAgents: Plugin = async (ctx) => {
   return {
     tool: {
       delegate: createDelegate(manager),
+      same_session_task_list: createSameSessionTaskList(manager),
+      same_session_task_read: createSameSessionTaskRead(manager),
       delegation_open: createDelegationOpen(manager),
       delegation_read: createDelegationRead(manager),
       delegation_tail: createDelegationTail(manager),
@@ -2439,9 +2971,11 @@ export const BackgroundAgents: Plugin = async (ctx) => {
         }))
 
       const completed = await manager.getRecentCompletedDelegations(input.sessionID)
-      if (running.length === 0 && completed.length === 0) return
+      const sameSession = await manager.listSameSessionTasks(input.sessionID)
+      if (running.length === 0 && completed.length === 0 && sameSession.tasks.length === 0) return
 
-      output.context.push(formatDelegationContext(running, completed))
+      if (running.length > 0 || completed.length > 0) output.context.push(formatDelegationContext(running, completed))
+      if (sameSession.tasks.length > 0) output.context.push(formatSameSessionTaskContext(sameSession))
     },
 
     event: async ({ event }: { event: Event }): Promise<void> => {

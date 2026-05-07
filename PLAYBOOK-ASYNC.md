@@ -8,9 +8,12 @@ Guía práctica para usar la delegación async global configurada en `~/.config/
 |---|---|---|
 | `delegate(prompt, agent)` | investigación, inspección, review o diseño read-only | solo agentes read-only, matriz de permisos, nested máximo 1 nivel secundario; puede quedar `pending` si no hay cupo |
 | `delegate_isolated(prompt, agent, name?)` | implementación write-capable paralela en worktree aislado | solo `master-dev`, sin auto-merge, queda en `review_pending` |
+| `same_session_task_list()` | listar tasks same-session creadas por `/bg-current` o por el prompt inline que usa `promptAsync` | read-only; visible solo para el hilo lógico/sesión actual; no reemplaza `delegation_*` |
+| `same_session_task_read(sequence?, id?)` | leer una task same-session específica por `#` o ID | devuelve prompt/output derivados de la sesión origen; sigue siendo read-only |
 | `delegation_read(id, wait?)` | leer resultado completo persistido o estado actual | por default no bloquea si sigue corriendo; `wait=true` bloquea intencionalmente |
 | `delegation_tail(id)` | leer solo novedades/progreso de una delegación | ideal para seguir una ejecución viva sin releer todo |
 | `/bg-tasks` | abrir la lista TUI de delegaciones del proyecto actual | pensado para sesiones TUI foreground; permite abrir sesión hija cuando exista |
+| `/bg-current` | marcar la corrida actual como background en la misma sesión | solo TUI foreground; no toca runtime, habilita background same-session |
 | `delegation_cancel(id, all=true)` | cancelar delegaciones pendientes o running | útil si el trabajo dejó de ser necesario o fue mal planteado |
 | `delegation_continue(id, prompt)` | retomar una delegación read-only completada en la misma sesión | follow-up con continuidad de contexto; no aplica a isolated write |
 | `delegation_accept(id)` | aceptar una delegación aislada | solo `master-dev`, requiere `review_pending`, conserva worktree |
@@ -65,6 +68,28 @@ El segundo nivel ya no debe seguir delegando.
 - `delegation_tail(id)` muestra novedades incrementales y progreso reciente,
 - en TUI foreground, `/bg-tasks` muestra un resumen persistente y permite abrir la sesión hija cuando haya `sessionID`,
 - evitar usar `delegation_list()` como polling continuo.
+
+## 3.2 Background same-session de la corrida foreground actual
+
+Cuando ya lanzaste una corrida normal y querés seguir trabajando sin esperar, podés usar:
+
+- `/bg-current`
+- el prompt inline de la misma sesión, que pasa a usar `promptAsync` una vez activo el modo background
+
+Eso hace **background same-session de UI**, no migración de ejecución:
+
+1. la corrida actual sigue corriendo server-side,
+2. la sesión actual queda marcada en busy-mode para background same-session,
+3. los nuevos prompts se encolan con `promptAsync`,
+4. `/bg-tasks` muestra tanto delegaciones como tasks same-session,
+5. `same_session_task_list()` y `same_session_task_read(...)` dejan inspeccionar esas tasks desde agentes/tools sin tocar `delegation_*`.
+
+Límites importantes:
+
+- no convierte la corrida actual en `delegate`,
+- no mueve el estado interno de la ejecución a otra sesión,
+- `delegation_open/read/tail` siguen reservadas para delegaciones reales,
+- si una task same-session cae en `ask` o una pregunta, la UI TUI puede marcarla aparte; la surface textual nueva sigue siendo solo de lectura.
 
 ## 4. Flujo write-capable aislado
 

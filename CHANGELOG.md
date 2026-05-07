@@ -10,6 +10,9 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - comando global `/memory-init` para sembrar baseline curada de memoria Engram por repo
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
+- plugin TUI `plugins/background-agents-tui/index.ts` extendido para mostrar tasks same-session además de delegaciones
+- comando TUI global `/bg-current` y modo same-session con prompt inline vía `promptAsync`
+- tools read-only `same_session_task_list` y `same_session_task_read` para inspeccionar tasks same-session desde agentes/tools sin tocar `delegation_*`
 
 ### Changed
 
@@ -29,6 +32,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - agentes globales clave ahora refuerzan estabilidad de idioma: responder en el idioma actual del usuario sin drift accidental
 - install/sync ahora podan backups viejos del stack con retención base de 5 y preservación de snapshots marcados con `.pin`
 - `README.md`, `README-AGENTS.md` y `STACK-MANIFEST.json` documentan las nuevas capacidades globales
+- `README.md`, `README-AGENTS.md`, `INSTALLATION.md` y `PLAYBOOK-ASYNC.md` ahora documentan el background same-session con `/bg-current`, el prompt inline vía `promptAsync`, su relación con `/bg-tasks` y la nueva surface `same_session_task_*`
 
 ## [0.8.8] - 2026-05-03
 
