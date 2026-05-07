@@ -73,8 +73,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
 - `/memory-init`
-- `/bg-current` (solo TUI foreground; marca la corrida actual como background en la misma sesión)
-- el prompt inline de la TUI puede encolar trabajo same-session vía `promptAsync` una vez activo el modo background
 - `/bg-tasks` (solo TUI foreground)
 - `/check-local-overlays`
 - `/check-code-patterns [args]`
@@ -95,7 +93,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
 - El stack global puede emitir notificaciones del SO cuando OpenCode espera respuesta, permiso o finalización. En Linux/GNOME Terminal, el click intenta traer la terminal y, si hay contexto suficiente, la pestaña exacta; en X11 puede apoyarse en `wmctrl` o `xdotool`.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
-- La UX async se divide entre plugin server de delegaciones y plugin TUI de foreground. Para task packet, lifecycle, nested, artifacts, apply/review de delegaciones, background same-session en TUI y las tools `same_session_task_list/read`, referirse a `delegacion-async-opencode` y `PLAYBOOK-ASYNC.md`.
+- La UX async se divide entre plugin server y plugin TUI. Para task packet, lifecycle, nested, artifacts y apply/review de delegaciones, referirse a `delegacion-async-opencode` y `PLAYBOOK-ASYNC.md`.
 - Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.
 - Las herramientas de worktree y scheduler deben usarse solo bajo pedido explícito del usuario.
 - Playwright MCP queda en modo headless/no interactivo por defecto; si una inspección visual headed/manual realmente conviene, debe pedirse confirmación explícita en foreground.

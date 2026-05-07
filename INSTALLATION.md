@@ -110,16 +110,9 @@ Dentro de esa sesión, usar:
 
 ```text
 /bg-tasks
-/bg-current
 ```
 
-Esos comandos te permiten validar dos cosas distintas:
-
-- `/bg-tasks`: abre la lista TUI de delegaciones del proyecto actual y permite navegar a la sesión hija cuando exista `sessionID`,
-- `/bg-current`: mientras una sesión está `busy`, marca la corrida actual como background en la misma sesión,
-- después de `/bg-current`, el prompt inline de la sesión foreground pasa a encolar trabajo same-session vía `promptAsync`.
-
-Después, desde agentes/tools de esa misma sesión lógica, `same_session_task_list()` y `same_session_task_read(...)` permiten inspeccionar esas tasks same-session sin cambiar el contrato de `delegation_*`.
+Ese comando abre la lista TUI de delegaciones del proyecto actual y permite navegar a la sesión hija cuando exista `sessionID`.
 
 La idea es:
 
@@ -183,8 +176,7 @@ Eso **no afecta**:
 - `delegation_tail`,
 - `delegation_cancel`,
 - `delegation_continue`,
-- `/bg-tasks` dentro de una TUI foreground ya conectada,
-- `/bg-current` y el prompt inline same-session vía `promptAsync` en una sesión foreground busy.
+- `/bg-tasks` dentro de una TUI foreground ya conectada.
 
 ## Qué NO migra automáticamente
 
