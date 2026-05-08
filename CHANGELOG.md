@@ -6,7 +6,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
-- plugins globales `plugins/env-guard.ts`, `plugins/agent-identity.ts` y `plugins/engram-memory-hints.ts`
+- plugins globales `plugins/env-guard.ts` y `plugins/agent-identity.ts`
 - comando global `/memory-init` para sembrar baseline curada de memoria Engram por repo
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
@@ -19,11 +19,14 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md`, `PLAYBOOK-KNOWLEDGE.md` y `STACK-MANIFEST.json` documentan el nuevo knowledge layer global y la separación Engram vs Qdrant
 - el knowledge layer ahora expone una separación interna más explícita por componente: `install-knowledge-engram.sh`, `install-knowledge-qdrant.sh`, `knowledge_status_engram.sh`, `knowledge_status_qdrant.sh` y playbooks dedicados por componente
+- `engram-memory-hints.ts` sale del stack base y pasa al addon knowledge; el stack base introduce `memoria-durable-opencode` y deja `memoria-engram-opencode` como skill backend-specific del addon
+- `install-opencode-stack.sh` deja de renderizar el MCP de Engram; esa inyección pasa al addon `super-turing-opencode-knowledge`
 - `master-dev` y `README-AGENTS.md` ahora derivan más detalle procedural a los skills `delegacion-async-opencode` y `overlays-locales-opencode` para mantener prompts y referencia global más compactos
 - `planner`, `frontend-web-developer` y `ui-web-designer` ahora condensan más contexto base y derivan detalle de memoria, Playwright y Stitch a skills dedicados para economizar contexto sin perder capacidad operativa
 - `planner` ahora incorpora explícitamente un rol más de arquitecto/tutor técnico y se apoya en la nueva skill `mentoria-tecnica-opencode`; `master-dev`, `reviewer` y `agent-design` también refuerzan esa capacidad de enseñar y desafiar atajos cuando corresponde
 - `opencode-worktree` ahora ejecuta `git worktree prune --expire now` después del borrado y antes del listado para evitar metadata stale en `git worktree list`
 - `memoria-engram-opencode` ahora documenta recuperación en tres bloques, bootstrap inicial y convención `<private>...</private>`
+- se introduce `memoria-durable-opencode` como skill backend-agnostic y `memoria-engram-opencode` pasa al addon knowledge como skill backend-specific
 - `master-dev` y `planner` ahora refuerzan recuperación de memoria en tres bloques, `/memory-init` y privacidad al persistir memoria
 - `master-dev` ahora reconoce herramientas globales de worktree y scheduler bajo pedido explícito del usuario
 - agentes globales clave ahora refuerzan estabilidad de idioma: responder en el idioma actual del usuario sin drift accidental

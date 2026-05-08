@@ -45,7 +45,7 @@ Skills sugeridas:
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
 - `knowledge-governance-opencode`
-- `memoria-engram-opencode`
+- `memoria-durable-opencode`
 
 Entrega esperada:
 - objetivo,

@@ -59,7 +59,7 @@ Skills sugeridas:
 - `contratos-api-y-datos`
 - `verificacion-antes-de-cerrar`
 - `revision-por-etapas`
-- `memoria-engram-opencode`
+- `memoria-durable-opencode`
 - `workflow-ticket-handoff`
 
 

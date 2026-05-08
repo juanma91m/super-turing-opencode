@@ -56,7 +56,7 @@ Skills sugeridas:
 - `debugging-sistematico`
 - `verificacion-antes-de-cerrar`
 - `knowledge-governance-opencode`
-- `memoria-engram-opencode`
+- `memoria-durable-opencode`
 
 Entrega esperada:
 - objetivo,

@@ -1,12 +1,12 @@
 ---
-description: Bootstrap memoria Engram del repo actual con hallazgos durables y curados.
+description: Bootstrap memoria durable del repo actual con hallazgos durables y curados.
 agent: planner
 subtask: false
 ---
 Inicializá la memoria persistida del proyecto actual.
 
 Objetivo:
-- crear una baseline chica pero útil en Engram para este repo,
+- crear una baseline chica pero útil en el backend de memoria durable disponible para este repo,
 - separar memoria de `perfil usuario`, `conocimiento proyecto` y `hallazgos relevantes`,
 - guardar solo conocimiento durable, reusable y accionable,
 - no implementar código ni tocar configuración salvo que el usuario lo pida aparte.

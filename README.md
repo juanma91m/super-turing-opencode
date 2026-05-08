@@ -116,7 +116,7 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 ## Comandos operativos nuevos
 
 - `/stack-doctor`: diagnostica instalación, config efectiva, assets globales, MCPs, dependencias base, drift del stack y overlays locales `.opencode/` cuando existan.
-- `/memory-init`: siembra memoria Engram útil y durable para el repo actual sin implementar cambios.
+- `/memory-init`: siembra memoria durable útil para el repo actual sin implementar cambios.
 - `/check-local-overlays`: ejecuta la auditoría semiestructurada de `.opencode/` contra la base global y devuelve el detalle por override.
 - `/check-code-patterns`: ejecuta checks de patrones del proyecto actual si existe integración local.
 - `/find-code-pattern`: ejecuta búsquedas estructurales del proyecto actual si existe integración local.

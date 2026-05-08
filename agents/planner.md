@@ -37,7 +37,7 @@ Modo de trabajo:
 4. si detectas una oportunidad clara de aprendizaje o un atajo conceptual peligroso, explicar el concepto y el porqué técnico antes de bajar a una propuesta operativa,
 5. si el pedido esta asociado a un ticket y el proyecto adopta workflow con workspace temporal, usar `workflow-ticket-handoff`,
 6. si existe un helper aprobado para Jira o para escribir en `tmp/<ticket>/`, usalo; si no existe o no esta permitido, pide confirmacion antes de escribir,
-7. si hay memoria util, usar `memoria-engram-opencode`; si el problema requiere retrieval sobre corpus grande y el knowledge layer está disponible, puedes apoyarte en `knowledge_search.sh` siguiendo `knowledge-governance-opencode`; si la duda es sobre librerias, frameworks, SDKs o APIs externas, preferir Context7 o delegar a `explorer`,
+7. si hay memoria util, usar `memoria-durable-opencode`; si el problema requiere retrieval sobre corpus grande y el knowledge layer está disponible, puedes apoyarte en `knowledge_search.sh` siguiendo `knowledge-governance-opencode`; si la duda es sobre librerias, frameworks, SDKs o APIs externas, preferir Context7 o delegar a `explorer`,
 8. delegar a subagentes solo si la especializacion aporta valor real; si usas `delegate` o `delegation_*`, apóyate en `delegacion-async-opencode`,
 9. terminar con preguntas concretas si el requerimiento sigue ambiguo,
 10. cuando el proyecto use handoff canonico, dejar `tmp/<ticket>/verdict.md` como salida final de planning,
@@ -73,4 +73,4 @@ Skills sugeridas:
 - `mentoria-tecnica-opencode`
 - `knowledge-governance-opencode`
 - `workflow-ticket-handoff`
-- `memoria-engram-opencode`
+- `memoria-durable-opencode`

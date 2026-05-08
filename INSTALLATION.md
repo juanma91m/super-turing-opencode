@@ -9,7 +9,7 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 - skills globales,
 - plugins async server/TUI,
 - helpers Jira/session cleanup,
-- configuración MCP para Context7, Engram, Playwright y Stitch,
+- configuración MCP para Context7, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
 
 ## Prerrequisitos mínimos
@@ -39,7 +39,7 @@ Ese comando:
 - instala dependencias npm del stack,
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
-- genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs según disponibilidad local,
+- genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs base según disponibilidad local,
 - asegura `~/.config/opencode/tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
@@ -63,6 +63,11 @@ bash scripts/install.sh --engram-only
 bash scripts/install.sh --qdrant-only
 bash scripts/install.sh --assets-only
 ```
+
+Importante:
+
+- `sync-opencode-stack.sh` no debería tocar `opencode.json`,
+- pero `install-opencode-stack.sh` sí regenera `opencode.json`; si reinstalás la base y además usás el addon knowledge, luego conviene rerunear `super-turing-opencode-knowledge/scripts/install.sh` para reinyectar el MCP de Engram.
 
 ### 4. Completar secretos opcionales
 

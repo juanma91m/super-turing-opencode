@@ -144,18 +144,10 @@ maybe_install_playwright() {
 }
 
 render_opencode_config() {
-  local engram_bin="$HOME/.opencode/bin/engram"
   local stitch_key="$TARGET_DIR/stitch-api-key"
-  local engram_enabled="false"
   local stitch_enabled="false"
   local playwright_enabled="false"
   local playwright_exec=""
-
-  if [[ -x "$engram_bin" ]]; then
-    engram_enabled="true"
-  else
-    warn "No se encontró Engram en $engram_bin; MCP Engram quedará deshabilitado. Si lo necesitás, instalá el addon super-turing-opencode-knowledge"
-  fi
 
   if [[ -f "$stitch_key" ]]; then
     stitch_enabled="true"
@@ -179,8 +171,6 @@ render_opencode_config() {
     return 0
   fi
 
-  ENGRAM_ENABLED="$engram_enabled" \
-  ENGRAM_BIN="$engram_bin" \
   PLAYWRIGHT_ENABLED="$playwright_enabled" \
   PLAYWRIGHT_EXECUTABLE="$playwright_exec" \
   STITCH_ENABLED="$stitch_enabled" \
@@ -189,7 +179,6 @@ render_opencode_config() {
 import json
 import os
 
-engram_enabled = os.environ["ENGRAM_ENABLED"] == "true"
 playwright_enabled = os.environ["PLAYWRIGHT_ENABLED"] == "true"
 stitch_enabled = os.environ["STITCH_ENABLED"] == "true"
 
@@ -211,15 +200,6 @@ config = {
         },
     },
     "mcp": {
-        "engram": {
-            "type": "local",
-            "command": [
-                os.environ["ENGRAM_BIN"],
-                "mcp",
-                "--tools=mem_save,mem_search,mem_context,mem_session_summary,mem_get_observation,mem_suggest_topic_key,mem_update,mem_delete",
-            ],
-            "enabled": engram_enabled,
-        },
         "context7": {
             "type": "local",
             "command": [

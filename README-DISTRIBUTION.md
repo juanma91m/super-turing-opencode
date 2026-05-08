@@ -10,7 +10,7 @@ Tener un bundle reproducible que instale:
 - skills globales,
 - plugin async,
 - documentación operativa,
-- integración MCP con Context7, Engram, Stitch y Playwright,
+- integración MCP con Context7, Stitch y Playwright,
 - política headless para Playwright,
 - sin copiar secretos ni estado local innecesario.
 
@@ -116,6 +116,8 @@ bash scripts/install-opencode-stack.sh
 
 Los addons externos opcionales se instalan después del bootstrap del stack base y no forman parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
 
+Importante: si reinstalás la base con `install-opencode-stack.sh`, el `opencode.json` se regenera y cualquier wiring MCP agregado por un addon puede necesitar reinyectarse después. En particular, si usás `super-turing-opencode-knowledge`, conviene rerunear su `scripts/install.sh` tras un reinstall de la base.
+
 Opciones útiles:
 
 ```bash
@@ -170,7 +172,6 @@ Esto:
 - intenta correr `stack-doctor` al final cuando el target es `~/.config/opencode/`,
 - deja Context7 configurado globalmente vía `npx -y @upstash/context7-mcp@latest` para docs de librerias/APIs,
 - habilita o deshabilita otros MCPs según disponibilidad local:
-  - Engram: habilitado si existe `~/.opencode/bin/engram` después del bootstrap
   - Stitch: habilitado si existe `stitch-api-key`
   - Playwright: habilitado si se pudo detectar/instalar Chromium
 

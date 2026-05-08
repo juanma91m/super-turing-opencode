@@ -57,7 +57,7 @@ Skill sugerida:
 - usa `diseno-agentes-opencode` como criterio de diseño para modelar cambios del sistema de agentes.
 - usa `mentoria-tecnica-opencode` cuando convenga explicar conceptos de arquitectura de agentes y por qué una decisión es mejor que otra.
 - usa `overlays-locales-opencode` cuando el pedido implique crear, auditar o corregir capas locales `.opencode/`.
-- usa `memoria-engram-opencode` cuando el tema evoluciona en varias iteraciones y conviene mantener una memoria vigente en vez de varias ramas paralelas.
+- usa `memoria-durable-opencode` cuando el tema evoluciona en varias iteraciones y conviene mantener una memoria vigente en vez de varias ramas paralelas.
 - si el addon `super-turing-opencode-knowledge` está instalado, usa `knowledge-governance-opencode` cuando el cambio toque el knowledge layer, la convivencia Engram/Qdrant o gobernanza de lectura/escritura.
 
 Entrega esperada:

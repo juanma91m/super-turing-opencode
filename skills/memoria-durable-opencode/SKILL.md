@@ -1,6 +1,6 @@
 ---
-name: memoria-engram-opencode
-description: Define como usar Engram en OpenCode con memoria curada, clasificacion por buckets, source_agent y purga segura.
+name: memoria-durable-opencode
+description: Define como usar memoria durable en OpenCode sin acoplar la política a un backend específico.
 compatibility: opencode
 ---
 ## Cuando usarme
@@ -26,11 +26,11 @@ compatibility: opencode
 - Convencion: persistirlo como `agent:<source_agent>`.
 - Priorizar memorias de agentes afines, pero nunca como filtro excluyente si el contenido mas util viene de otro agente.
 
-## Naturaleza de Engram
-- Tratar Engram como working memory entre sesiones, no como auditoria completa ni historial detallado de iteraciones.
+## Naturaleza de la memoria durable
+- Tratar la memoria durable como working memory entre sesiones, no como auditoria completa ni historial detallado de iteraciones.
 - Si una tarea necesita trazabilidad fuerte, intercambio por git o artefactos revisables por humanos, complementar con archivos del proyecto o documentacion local.
-- Esta skill cubre **politica de uso** de Engram (qué guardar, cómo leer, cómo promover o purgar), no el lifecycle runtime del componente. Para instalación, rebuild y estado del backend, referirse al knowledge layer y al playbook del componente Engram.
-- No usar Engram como corpus grande de retrieval: si el stack tiene knowledge layer con Qdrant, esa capa queda para material amplio y regenerable; Engram sigue siendo memoria curada.
+- No usar el backend de memoria durable como corpus grande de retrieval: si el stack tiene un knowledge layer con Qdrant u otro retrieval backend, esa capa queda para material amplio y regenerable; la memoria durable sigue siendo curada.
+- Esta skill cubre **politica de uso** (qué guardar, cómo leer, cómo promover o purgar). Los detalles runtime/backend del proveedor concreto de memoria pertenecen a su addon o capa operativa específica.
 
 ## Lectura en dos pasos
 - Para contexto reciente: `mem_context` primero.
