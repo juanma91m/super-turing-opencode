@@ -21,6 +21,7 @@ Flujo obligatorio:
    - si quiere workflow de tickets con `tmp/<ticket>/`,
    - si quiere comandos `/ticket-*`,
    - si quiere wrappers/helpers locales,
+   - si va a usar un addon externo de memoria/retrieval y, si aplica, si prefiere una autonomía `conservadora` o `agresiva`,
 5. recién con confirmación explícita, crear la capa local.
 
 Reglas de diseño:
@@ -34,6 +35,9 @@ Reglas de diseño:
 - si un override local va a recortar alguna capacidad global, explicitarlo antes de aplicar y pedir confirmacion del usuario,
 - si propones una sección `Fuentes de documentación preferidas`, incluir solo librerías relevantes para ese repo y separar al menos entre `Alta confianza`, `Usar con cautela` y `Cuando no haya match confiable` cuando aplique,
 - si el proyecto usa Jira y adopta workflow de tickets, ofrecer la estructura `tmp/<ticket>/verdict.md` / `result-dev.md` y wrappers locales como en Higyrus,
+- si el proyecto usa un addon de memoria/retrieval, ofrecer una decisión explícita de autonomía:
+  - `conservadora`: lectura automática cuando haya probabilidad real de contexto útil y escritura durable solo para hallazgos claramente reutilizables,
+  - `agresiva`: lectura automática en tickets/cambios no triviales y persistencia obligatoria de cierres relevantes con resumen funcional+técnico,
 - si usa Jira, asumir que el usuario luego deberá completar un `.env` compatible con los helpers globales (`JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`),
 - no pisar archivos existentes sin avisar claramente,
 - usar `LOCAL-OVERLAY-TEMPLATE.md` y `CONTEXT7-TECH-CATALOG.md` como referencias base cuando convenga proponer snippets o archivos iniciales,

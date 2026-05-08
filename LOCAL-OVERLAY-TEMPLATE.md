@@ -88,6 +88,22 @@ Usar cuando el proyecto necesita herramientas ejecutables locales, por ejemplo:
 - `.opencode/rules/semgrep/`
 - patterns o catálogos equivalentes para ast-grep
 
+### Autonomía opcional de memoria/retrieval
+
+Si el proyecto instala un addon externo de memoria/retrieval, definir explícitamente el modo de autonomía esperado.
+
+Sugerencia práctica:
+
+- **conservador/intermedio** para el stack global reusable:
+  - lectura autónoma cuando haya alta probabilidad de contexto previo útil,
+  - escritura durable solo si el hallazgo es claramente reusable,
+  - no indexar corpus automáticamente por reflejo.
+- **agresivo** para overlays específicos de proyecto cuando el dominio lo justifica:
+  - lectura autónoma al abrir tickets o módulos no triviales,
+  - persistencia obligatoria al cerrar tickets relevantes,
+  - resúmenes con `What/Why/Where/Learned` tanto funcionales como técnicos,
+  - corpus recuperable curado localmente cuando haga falta.
+
 ## Checklist mínimo por override
 
 Antes de dar por bueno un archivo local que sombrea uno global, revisar:
