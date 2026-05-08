@@ -7,7 +7,7 @@ Stack portable y versionable de OpenCode con:
 - skills globales,
 - skills de debugging, verificacion y review por etapas,
 - plugin async con delegación read-only y worktrees aislados,
-- integración con Engram parcheado,
+- compatibilidad opcional con `super-turing-opencode-knowledge` para memoria/retrieval cuando el addon está instalado,
 - helpers opcionales para Jira/tickets y cleanup de sesiones,
 - integración con Playwright headless,
 - integración opcional con Stitch,
@@ -23,7 +23,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `commands/`: comandos reutilizables para tickets y mantenimiento
 - `skills/`: skills globales
 - `plugins/`: plugins async server/TUI
-- `patches/`: patches versionados sobre dependencias externas (por ahora Engram)
+- `patches/`: reservado para patches versionados sobre dependencias externas cuando el stack base realmente los necesite
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
 - `LOCAL-OVERLAY-TEMPLATE.md`: plantilla base para overlays locales aditivos por proyecto
@@ -46,7 +46,6 @@ bash scripts/install-opencode-stack.sh
 Ese script:
 
 - instala dependencias npm del stack,
-- instala o recompila Engram parcheado si hace falta,
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - regenera `opencode.json` según capacidades locales,
@@ -95,7 +94,7 @@ Notas:
 - el sync compara repo vs target y copia **solo** archivos gestionados que difieren,
 - los archivos modificados en destino se respaldan en `.stack-sync-backups/`,
 - los backups viejos del stack se podan automáticamente con retención base de 5 snapshots por bucket, preservando cualquier snapshot marcado con `.pin`,
-- no reinstala Engram ni Playwright,
+- no reinstala Playwright ni addons externos,
 - no regenera `opencode.json`,
 - asegura `tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - este repo también trae un `opencode.json` local con allowlists para `sync-opencode-stack.sh`, `install-opencode-stack.sh`, `opencode debug config` y git de mantenimiento habitual, para evitar prompts innecesarios al trabajar sobre el source-of-truth,
@@ -127,6 +126,11 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: playbook completo de uso diario para overlays locales, `/check-local-overlays` y `/stack-doctor`.
 - `PLAYBOOK-CODE-PATTERNS.md`: playbook de cuándo y cómo integrar Semgrep/ast-grep sin meter reglas de proyecto en global.
 
+## Addons opcionales fuera del stack base
+
+- `super-turing-opencode-notifier`: notificaciones nativas del SO.
+- `super-turing-opencode-knowledge`: runtime y assets operativos de Engram/Qdrant. El stack base mantiene por ahora solo una capa fina de compatibilidad cognitiva.
+
 ## Tools globales nuevos
 
 - `worktree_create` / `worktree_list` / `worktree_delete`: flujo global para trabajo paralelo por ticket usando git worktrees con config repo-local `.opencode/worktree.jsonc`, sync configurable y apertura best-effort de terminal nueva.
@@ -144,9 +148,7 @@ Si necesitás ese flujo de forma confiable, usar una sesión con server/attach. 
 ## Supuestos actuales
 
 - `opencode` ya está instalado en la máquina destino
-- el bootstrap automático de Go está pensado inicialmente para Linux x86_64
 - Stitch sigue siendo opcional y requiere `stitch-api-key`
-- la memoria persistida de Engram (`~/.engram/engram.db`) se migra aparte
 
 ## Flujo recomendado de mantenimiento
 

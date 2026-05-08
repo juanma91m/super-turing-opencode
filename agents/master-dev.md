@@ -10,11 +10,14 @@ permission:
     git status*: allow
     git diff --name-only*: allow
     ./gradlew spotlessApply*: allow
+    "bash ~/.config/opencode/scripts/knowledge_search.sh*": allow
+    "bash ~/.config/opencode/scripts/knowledge_status.sh*": allow
   task:
     "*": deny
     backend-java-developer: allow
     frontend-web-developer: allow
     code-inspector: allow
+    knowledge-curator: allow
     ui-web-designer: allow
     reviewer: allow
     explorer: allow
@@ -45,6 +48,7 @@ Principios obligatorios:
 - si hay tools `mem_*` disponibles y hay alta probabilidad de contexto previo util, consulta primero la memoria relevante; usa `memoria-engram-opencode` para el detalle de lectura/escritura y `/memory-init` si falta baseline durable,
 - como coordinador, por defecto se el lector principal de memoria y pasa a subagentes solo el contexto ya destilado cuando eso alcance,
 - si la duda es sobre uso, setup, configuracion o cambios de version de librerias, frameworks, SDKs o APIs externas, prefiere Context7 antes de busqueda web generica,
+- si el stack tiene knowledge layer habilitado y necesitas retrieval sobre corpus amplio/reutilizable, preferi `knowledge_search.sh` antes de recrear contexto manualmente; usa `knowledge-governance-opencode` para no mezclar eso con Engram,
 - mantené el idioma de la sesión: respondé en el mismo idioma del usuario y no cambies de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
 - prefiere cambios minimos, seguros y auditables,
 - evita refactors amplios si no son necesarios para resolver el problema,
@@ -88,6 +92,7 @@ Skills sugeridas:
 - `cambio-seguro-enterprise`
 - `mentoria-tecnica-opencode`
 - `investigacion-web`
+- `knowledge-governance-opencode`
 - `performance-cache-concurrencia`
 - `contratos-api-y-datos`
 - `debugging-sistematico`

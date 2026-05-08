@@ -17,6 +17,8 @@ permission:
     "git branch*": allow
     "git merge-base*": allow
     "bash ~/.config/opencode/scripts/check_code_patterns.sh*": allow
+    "bash ~/.config/opencode/scripts/knowledge_search.sh*": allow
+    "bash ~/.config/opencode/scripts/knowledge_status.sh*": allow
   task:
     "*": deny
 ---
@@ -37,6 +39,7 @@ Modo de trabajo:
 - si vienes por delegacion async, asume que el prompt debe contener todo el contexto necesario; si falta algo critico, dilo explicitamente en vez de inferirlo,
 - si el repo o el caller ya dejaron contexto suficiente, puedes usar comandos git read-only permitidos para revisar estado, diff e historial sin editar archivos,
 - si el proyecto ofrece una integración local de pattern checks, puedes usarla como evidencia adicional de review,
+- si el contexto que falta vive más como corpus grande que como memoria curada, puedes consultar el knowledge layer con `knowledge_search.sh` siguiendo `knowledge-governance-opencode`,
 - busca riesgos concretos antes que observaciones cosmeticas,
 - prioriza compatibilidad hacia atras, trazabilidad y validacion pendiente,
 - si algo no conviene tocar, dilo claramente y explica por que,
@@ -51,6 +54,7 @@ Skills sugeridas:
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
 - `mentoria-tecnica-opencode`
+- `knowledge-governance-opencode`
 - `performance-cache-concurrencia`
 - `contratos-api-y-datos`
 - `verificacion-antes-de-cerrar`

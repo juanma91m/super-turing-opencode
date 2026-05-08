@@ -8,7 +8,6 @@ TARGET_DIR="${HOME}/.config/opencode"
 DRY_RUN=0
 SKIP_NPM_INSTALL=0
 SKIP_PLAYWRIGHT_INSTALL=0
-SKIP_ENGRAM_INSTALL=0
 VALIDATE=1
 
 MANAGED_FILES=()
@@ -23,7 +22,6 @@ Options:
   --target-dir <path>         Target OpenCode config directory (default: ~/.config/opencode)
   --dry-run                   Show actions without writing files
   --skip-npm-install          Do not run npm install in target directory
-  --skip-engram-install       Do not install/rebuild Engram from patched source
   --skip-playwright-install   Do not try to install Playwright Chromium if missing
   --no-validate               Do not run opencode debug config after install
   -h, --help                  Show this help
@@ -156,7 +154,7 @@ render_opencode_config() {
   if [[ -x "$engram_bin" ]]; then
     engram_enabled="true"
   else
-    warn "No se encontró Engram en $engram_bin; MCP Engram quedará deshabilitado"
+    warn "No se encontró Engram en $engram_bin; MCP Engram quedará deshabilitado. Si lo necesitás, instalá el addon super-turing-opencode-knowledge"
   fi
 
   if [[ -f "$stitch_key" ]]; then
@@ -292,25 +290,6 @@ install_npm_dependencies() {
   (cd "$TARGET_DIR" && npm install)
 }
 
-install_engram_if_needed() {
-  if [[ "$SKIP_ENGRAM_INSTALL" -eq 1 ]]; then
-    return 0
-  fi
-
-  if [[ "$DRY_RUN" -eq 1 ]]; then
-    log "Dry-run: se omite ejecución real de install-engram.sh"
-    return 0
-  fi
-
-  if [[ ! -f "$TARGET_DIR/scripts/install-engram.sh" ]]; then
-    warn "No se encontró scripts/install-engram.sh en el target; se omite instalación de Engram"
-    return 0
-  fi
-
-  log "Instalando/recompilando Engram parcheado"
-  bash "$TARGET_DIR/scripts/install-engram.sh"
-}
-
 validate_config() {
   if [[ "$VALIDATE" -ne 1 ]]; then
     return 0
@@ -373,10 +352,6 @@ while [[ "$#" -gt 0 ]]; do
       SKIP_NPM_INSTALL=1
       shift
       ;;
-    --skip-engram-install)
-      SKIP_ENGRAM_INSTALL=1
-      shift
-      ;;
     --skip-playwright-install)
       SKIP_PLAYWRIGHT_INSTALL=1
       shift
@@ -418,7 +393,6 @@ for rel_path in "${MANAGED_FILES[@]}"; do
 done
 
 install_npm_dependencies
-install_engram_if_needed
 render_opencode_config
 ensure_tui_plugin_config
 prune_backups

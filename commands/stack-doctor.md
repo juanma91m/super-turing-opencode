@@ -18,6 +18,7 @@ Checklist mínimo:
 - plugin async cargado,
 - MCP Context7 presente/habilitado para documentación externa de librerías/APIs,
 - binario Engram presente y funcional si está configurado,
+- si el usuario instaló `super-turing-opencode-knowledge`, verificar que sus componentes Engram/Qdrant estén presentes y usables,
 - Playwright Chromium presente si corresponde,
 - Stitch key presente/ausente,
 - comandos/agents/skills globales clave presentes,

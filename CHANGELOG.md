@@ -10,11 +10,15 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - comando global `/memory-init` para sembrar baseline curada de memoria Engram por repo
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
+- knowledge layer global `super-turing-opencode-knowledge` integrado por ahora dentro del stack base, con subagente `knowledge-curator`, skill `knowledge-governance-opencode`, wrappers `knowledge_*`, playbook dedicado y soporte Qdrant local file-based sin daemon
+- manifest `knowledge/global_seed_paths.txt`, script `knowledge_seed_global.sh` y comando `/knowledge-index-global` para reindexado repetible del corpus global curado
 
 ### Changed
 
 - el notifier del SO deja de formar parte del stack base y pasa al addon externo `super-turing-opencode-notifier`
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier
+- `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md`, `PLAYBOOK-KNOWLEDGE.md` y `STACK-MANIFEST.json` documentan el nuevo knowledge layer global y la separación Engram vs Qdrant
+- el knowledge layer ahora expone una separación interna más explícita por componente: `install-knowledge-engram.sh`, `install-knowledge-qdrant.sh`, `knowledge_status_engram.sh`, `knowledge_status_qdrant.sh` y playbooks dedicados por componente
 - `master-dev` y `README-AGENTS.md` ahora derivan más detalle procedural a los skills `delegacion-async-opencode` y `overlays-locales-opencode` para mantener prompts y referencia global más compactos
 - `planner`, `frontend-web-developer` y `ui-web-designer` ahora condensan más contexto base y derivan detalle de memoria, Playwright y Stitch a skills dedicados para economizar contexto sin perder capacidad operativa
 - `planner` ahora incorpora explícitamente un rol más de arquitecto/tutor técnico y se apoya en la nueva skill `mentoria-tecnica-opencode`; `master-dev`, `reviewer` y `agent-design` también refuerzan esa capacidad de enseñar y desafiar atajos cuando corresponde
@@ -25,6 +29,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - agentes globales clave ahora refuerzan estabilidad de idioma: responder en el idioma actual del usuario sin drift accidental
 - install/sync ahora podan backups viejos del stack con retención base de 5 y preservación de snapshots marcados con `.pin`
 - `README.md`, `README-AGENTS.md` y `STACK-MANIFEST.json` documentan las nuevas capacidades globales
+- `install-opencode-stack.sh` ahora puede bootstrappear la capa local de knowledge y el repo fuente suma allowlists para ese mantenimiento
 
 ## [0.8.8] - 2026-05-03
 

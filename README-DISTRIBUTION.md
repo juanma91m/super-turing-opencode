@@ -35,8 +35,6 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `STACK-MANIFEST.json`
 - `package.json`
 - `package-lock.json`
-- `patches/engram-source-agent.patch`
-- `scripts/install-engram.sh`
 - `scripts/install-opencode-stack.sh`
 - `scripts/sync-opencode-stack.sh`
 - `scripts/jira_helper.sh`
@@ -57,8 +55,6 @@ Estos elementos son **machine-local** o sensibles:
 - `opencode.json` generado para una máquina específica
 - backups temporales como `.stack-backups/`
 - browser cache de Playwright en `~/.cache/ms-playwright/`
-- binario local de Engram en `~/.opencode/bin/engram`
-- base de datos local de Engram en `~/.engram/engram.db`
 
 ## Modelo recomendado
 
@@ -69,7 +65,7 @@ La idea es tratar este directorio como un repo/versionable de stack:
 3. el installer copia assets y **renderiza** `opencode.json` para la máquina destino,
 4. los secretos y rutas locales quedan fuera del bundle.
 
-Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
+Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados. El knowledge layer ahora entra en esa categoría y vive en `super-turing-opencode-knowledge`.
 
 ## Modelo de especialización local por proyecto
 
@@ -104,9 +100,7 @@ Para instrucciones al pie desde `git clone`, ver también `INSTALLATION.md`.
 
 - `opencode` instalado
 - `node`, `npm` y `npx`
-- opcional: binario Engram ya compilado en `~/.opencode/bin/engram`
 - opcional: `stitch-api-key` en `~/.config/opencode/stitch-api-key`
-- para instalación automática de Engram: `git`, `python3`, `curl` y `tar`
 
 ### Paso 1
 
@@ -136,7 +130,6 @@ bash scripts/install-opencode-stack.sh --skip-npm-install
 Si hace falta, copiar manualmente:
 
 - `~/.config/opencode/stitch-api-key`
-- `~/.opencode/bin/engram`
 
 ### Paso 4
 
@@ -169,8 +162,6 @@ Esto:
 - hace backup de archivos reemplazados en `.stack-backups/`,
 - poda backups viejos automáticamente (retención base 5) y preserva snapshots marcados con `.pin`,
 - instala dependencias npm del plugin si corresponde,
-- instala o recompila Engram parcheado desde upstream + patch versionado,
-- si falta Go, intenta instalar una copia local en `~/.local/opt/go` (soporte automático inicial para Linux x86_64),
 - detecta Playwright Chromium en user-space,
 - si no lo encuentra, intenta instalarlo con `npx playwright install chromium`,
 - genera `opencode.json` con rutas locales de la máquina,
@@ -185,7 +176,7 @@ Esto:
 
 ## Cuándo usar install vs sync
 
-- `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base, reinstalación de Engram, o setup inicial de Playwright.
+- `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base o setup inicial de Playwright.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
 
 ## Limitación conocida de `delegate_isolated`
@@ -214,15 +205,9 @@ Solo conviene usarlos cuando:
   - `JIRA_EMAIL`
   - `JIRA_API_TOKEN`
 
-## Migración de memoria Engram
+## Migración del addon knowledge
 
-Importante: **instalar el stack no equivale a migrar la memoria persistida**.
-
-Si querés llevarte también la memoria histórica, además del stack deberías migrar:
-
-- `~/.engram/engram.db`
-
-Eso conviene tratarlo como una migración separada, porque es estado persistido y no configuración portable.
+Si además usás `super-turing-opencode-knowledge`, su estado persistido (`~/.engram/engram.db`, `~/.local/share/super-turing-opencode-knowledge/`, etc.) se migra por separado del stack base.
 
 ## Siguiente nivel recomendado
 

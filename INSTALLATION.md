@@ -9,7 +9,6 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 - skills globales,
 - plugins async server/TUI,
 - helpers Jira/session cleanup,
-- Engram parcheado (si hace falta compilarlo),
 - configuración MCP para Context7, Engram, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
 
@@ -19,7 +18,6 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 - `git`
 - `node`, `npm`, `npx`
 - `python3`
-- `curl` y `tar` si el script debe instalar Go automáticamente para compilar Engram
 
 ## Instalación paso a paso
 
@@ -39,7 +37,6 @@ bash scripts/install-opencode-stack.sh
 Ese comando:
 
 - instala dependencias npm del stack,
-- clona/aplica patch/recompila Engram si hace falta,
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs según disponibilidad local,
@@ -49,7 +46,25 @@ Ese comando:
 
 El stack base no incluye addons externos opcionales.
 
-### 3. Completar secretos opcionales
+### 3. Addon opcional: knowledge / persistencia
+
+Si querés sumar Engram y/o Qdrant como capability separada:
+
+```bash
+git clone https://github.com/juanma91m/super-turing-opencode-knowledge.git
+cd super-turing-opencode-knowledge
+bash scripts/install.sh --all
+```
+
+Variantes:
+
+```bash
+bash scripts/install.sh --engram-only
+bash scripts/install.sh --qdrant-only
+bash scripts/install.sh --assets-only
+```
+
+### 4. Completar secretos opcionales
 
 #### Stitch
 
@@ -171,9 +186,10 @@ Eso **no afecta**:
 
 ## Qué NO migra automáticamente
 
-- `~/.engram/engram.db`
 - `~/.cache/ms-playwright/`
 - secretos fuera del repo (`stitch-api-key`, `.env` de proyectos, etc.)
+
+Si además usás `super-turing-opencode-knowledge`, su estado local se migra aparte.
 
 ## Problemas frecuentes
 

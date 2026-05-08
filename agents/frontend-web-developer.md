@@ -13,6 +13,8 @@ permission:
     git status*: allow
     git diff --name-only*: allow
     ./gradlew spotlessApply*: allow
+    "bash ~/.config/opencode/scripts/knowledge_search.sh*": allow
+    "bash ~/.config/opencode/scripts/knowledge_status.sh*": allow
   task:
     "*": deny
 ---
@@ -32,6 +34,7 @@ Modo de trabajo:
 - entiende primero el objetivo, el flujo de usuario, los estados de pantalla y el patron de UI ya usado,
 - responde en el mismo idioma del usuario y no cambies de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
 - si hay tools `mem_*` disponibles y puede haber historial útil, apóyate en el contexto que te entregue `master-dev` y usa `memoria-engram-opencode` cuando el historial pueda cambiar la decisión,
+- si necesitás retrieval sobre documentación o corpus reusable más grande que la memoria curada, podés usar `knowledge_search.sh` siguiendo `knowledge-governance-opencode`,
 - sigue el stack, librerias, componentes y convenciones existentes del proyecto,
 - implementa solo lo necesario para resolver el objetivo,
 - considera loading, empty states, errores, accesibilidad, validaciones de presentacion y trazabilidad,
@@ -52,6 +55,7 @@ Skills sugeridas:
 - `cambio-seguro-enterprise`
 - `debugging-sistematico`
 - `verificacion-antes-de-cerrar`
+- `knowledge-governance-opencode`
 - `memoria-engram-opencode`
 
 Entrega esperada:

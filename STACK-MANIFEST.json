@@ -3,15 +3,6 @@
   "name": "jmagnaterra-opencode-stack",
   "version": "0.8.8",
   "components": {
-    "engram": {
-      "upstreamRepo": "https://github.com/Gentleman-Programming/engram.git",
-      "upstreamRef": "64bf163d0b9b8533c4b5c9a2566db8464f75eac3",
-      "patchFile": "patches/engram-source-agent.patch"
-    },
-    "goBootstrap": {
-      "version": "1.26.2",
-      "autoInstall": "linux-x86_64"
-    },
     "playwright": {
       "mode": "headless",
       "browser": "chromium user-space"
@@ -45,7 +36,6 @@
     "commands/ticket-refresh.md",
     "commands/ticket-validate.md",
     "commands/ticket-verdict.md",
-    "patches/engram-source-agent.patch",
     "scripts/jira_api_read.py",
     "scripts/jira_helper.sh",
     "scripts/prune_stack_backups.py",
@@ -54,7 +44,6 @@
     "scripts/check_code_patterns.sh",
     "scripts/find_code_pattern.sh",
     "scripts/ensure_tui_plugin.py",
-    "scripts/install-engram.sh",
     "scripts/install-opencode-stack.sh",
     "scripts/session_cleanup.py",
     "scripts/session_cleanup.sh",
@@ -105,15 +94,11 @@
     ".stack-backups/"
   ],
   "machineLocalState": [
-    "~/.cache/ms-playwright/",
-    "~/.opencode/bin/engram",
-    "~/.engram/engram.db"
+    "~/.cache/ms-playwright/"
   ],
   "notes": [
     "plan y build forman parte del esquema efectivo de agentes pero no viven como archivos custom en agents/",
     "el installer genera opencode.json por máquina destino y no copia secretos",
-    "la memoria persistida de Engram se migra por separado si hace falta",
-    "install-engram.sh recompone Engram desde upstream + patch versionado en vez de depender de un binario preexistente",
     "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial",
     "plan queda deshabilitado en favor del agente custom planner",
     "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales",
@@ -121,6 +106,7 @@
     "delegaciones async ahora soportan pending, cancelación, tail incremental y continuación read-only manteniendo el modelo de review manual en isolated-write",
     "delegate_isolated requiere /experimental/worktree; INSTALLATION.md y PLAYBOOK-ASYNC documentan el uso preferido en sesiones server-backed",
     "la UX async visual en TUI se activa con el plugin background-agents-tui via tui.json; install/sync aseguran esa entrada sin pisar otros campos del archivo",
-    "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync"
+    "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync",
+    "el knowledge layer y el runtime de persistencia viven ahora en el addon separado super-turing-opencode-knowledge; el stack base conserva temporalmente solo una capa fina de compatibilidad cognitiva"
   ]
 }

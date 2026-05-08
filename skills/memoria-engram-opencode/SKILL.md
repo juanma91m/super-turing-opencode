@@ -29,6 +29,8 @@ compatibility: opencode
 ## Naturaleza de Engram
 - Tratar Engram como working memory entre sesiones, no como auditoria completa ni historial detallado de iteraciones.
 - Si una tarea necesita trazabilidad fuerte, intercambio por git o artefactos revisables por humanos, complementar con archivos del proyecto o documentacion local.
+- Esta skill cubre **politica de uso** de Engram (qué guardar, cómo leer, cómo promover o purgar), no el lifecycle runtime del componente. Para instalación, rebuild y estado del backend, referirse al knowledge layer y al playbook del componente Engram.
+- No usar Engram como corpus grande de retrieval: si el stack tiene knowledge layer con Qdrant, esa capa queda para material amplio y regenerable; Engram sigue siendo memoria curada.
 
 ## Lectura en dos pasos
 - Para contexto reciente: `mem_context` primero.
