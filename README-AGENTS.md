@@ -91,7 +91,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
 - Si Engram está habilitado, la memoria debe mantenerse curada y `master-dev` actúa como lector principal por defecto; para lectura/escritura detallada, usar `memoria-engram-opencode`.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
-- El stack global puede emitir notificaciones del SO cuando OpenCode espera respuesta, permiso o finalización. En Linux/GNOME Terminal, el click intenta traer la terminal y, si hay contexto suficiente, la pestaña exacta; en X11 puede apoyarse en `wmctrl` o `xdotool`.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
 - La UX async se divide entre plugin server y plugin TUI. Para task packet, lifecycle, nested, artifacts y apply/review de delegaciones, referirse a `delegacion-async-opencode` y `PLAYBOOK-ASYNC.md`.
 - Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.

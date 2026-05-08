@@ -6,19 +6,15 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
-- plugins globales `plugins/opencode-notify.ts`, `plugins/env-guard.ts`, `plugins/agent-identity.ts` y `plugins/engram-memory-hints.ts`
+- plugins globales `plugins/env-guard.ts`, `plugins/agent-identity.ts` y `plugins/engram-memory-hints.ts`
 - comando global `/memory-init` para sembrar baseline curada de memoria Engram por repo
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
 
 ### Changed
 
-- `opencode-notify` ahora reduce el ruido: notifica en español cuando OpenCode espera respuesta humana, cuando espera un permiso `Allow/Reject`, o cuando la tarea terminó por completo, con título `OpenCode: <sesión>` y app-name/urgency explícitos en Linux
-- `opencode-notify` ahora intenta click-to-focus best-effort en Linux/GNOME Terminal sin abrir una pestaña o sesión específica, manteniendo fallback al flujo estable cuando el servidor de notificaciones no soporta acciones
-- `opencode-notify` ahora puede usar `wmctrl` o `xdotool` como fallback opcional de focus en Linux/X11 cuando GNOME no entrega activation token al click de la notificación
-- `opencode-notify` ahora también intenta reactivar la pestaña exacta en GNOME Terminal mediante AT-SPI usando el título de sesión como pista, después de recuperar el foco de la ventana
-- `install-opencode-stack.sh` ahora avisa cuando detecta GNOME en Linux y faltan `wmctrl`/`xdotool`, para facilitar el click-to-focus del notifier en sesiones X11
-- `sync-opencode-stack.sh` ahora también avisa cuando detecta GNOME en Linux y faltan `wmctrl`/`xdotool`, para no perder esa recomendación después del bootstrap inicial
+- el notifier del SO deja de formar parte del stack base y pasa al addon externo `super-turing-opencode-notifier`
+- `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier
 - `master-dev` y `README-AGENTS.md` ahora derivan más detalle procedural a los skills `delegacion-async-opencode` y `overlays-locales-opencode` para mantener prompts y referencia global más compactos
 - `planner`, `frontend-web-developer` y `ui-web-designer` ahora condensan más contexto base y derivan detalle de memoria, Playwright y Stitch a skills dedicados para economizar contexto sin perder capacidad operativa
 - `planner` ahora incorpora explícitamente un rol más de arquitecto/tutor técnico y se apoya en la nueva skill `mentoria-tecnica-opencode`; `master-dev`, `reviewer` y `agent-design` también refuerzan esa capacidad de enseñar y desafiar atajos cuando corresponde

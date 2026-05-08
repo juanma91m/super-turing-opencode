@@ -69,6 +69,8 @@ La idea es tratar este directorio como un repo/versionable de stack:
 3. el installer copia assets y **renderiza** `opencode.json` para la máquina destino,
 4. los secretos y rutas locales quedan fuera del bundle.
 
+Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
+
 ## Modelo de especialización local por proyecto
 
 Este stack global está pensado para ser la base reusable. Cuando un repo necesite especialización local con `.opencode/`, el patrón recomendado es:
@@ -118,9 +120,7 @@ Ejecutar:
 bash scripts/install-opencode-stack.sh
 ```
 
-En Linux, si el installer detecta **GNOME**, puede advertir también sobre `wmctrl` y `xdotool` como ayuda opcional para el click-to-focus del notifier; en GNOME/X11 esa recomendación es especialmente útil.
-
-El mismo aviso puede aparecer también durante `sync-opencode-stack.sh`, para no depender solo del bootstrap inicial.
+Los addons externos opcionales se instalan después del bootstrap del stack base y no forman parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
 
 Opciones útiles:
 

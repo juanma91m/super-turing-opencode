@@ -47,16 +47,7 @@ Ese comando:
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
-Si el installer detecta **GNOME** en Linux, también puede sugerir instalar `wmctrl` y `xdotool`.
-
-- en **GNOME/X11** esa recomendación es útil para mejorar el click-to-focus del notifier global,
-- en **Wayland** el click-to-focus sigue siendo más best-effort y ese fallback no aplica igual.
-
-Ejemplo en Debian/Ubuntu:
-
-```bash
-sudo apt install wmctrl xdotool
-```
+El stack base no incluye addons externos opcionales.
 
 ### 3. Completar secretos opcionales
 

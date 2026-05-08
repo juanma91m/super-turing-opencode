@@ -64,77 +64,6 @@ warn() {
   printf '[opencode-stack][warn] %s\n' "$*" >&2
 }
 
-join_by_space() {
-  local IFS=' '
-  printf '%s' "$*"
-}
-
-is_gnome_desktop() {
-  local desktop="${XDG_CURRENT_DESKTOP:-}:${XDG_SESSION_DESKTOP:-}"
-  desktop="$(printf '%s' "$desktop" | tr '[:upper:]' '[:lower:]')"
-  [[ "$desktop" == *gnome* ]]
-}
-
-focus_helpers_install_hint() {
-  local packages=("$@")
-  local package_list
-  package_list="$(join_by_space "${packages[@]}")"
-
-  if command -v apt-get >/dev/null 2>&1; then
-    printf 'sudo apt install %s' "$package_list"
-    return 0
-  fi
-
-  if command -v dnf >/dev/null 2>&1; then
-    printf 'sudo dnf install %s' "$package_list"
-    return 0
-  fi
-
-  if command -v pacman >/dev/null 2>&1; then
-    printf 'sudo pacman -S %s' "$package_list"
-    return 0
-  fi
-
-  if command -v zypper >/dev/null 2>&1; then
-    printf 'sudo zypper install %s' "$package_list"
-    return 0
-  fi
-
-  printf '%s' "$package_list"
-}
-
-maybe_warn_gnome_focus_helpers() {
-  local missing=()
-  local hint
-  local package_list
-  local session_type="${XDG_SESSION_TYPE:-desconocido}"
-
-  if [[ "$(uname -s)" != "Linux" ]]; then
-    return 0
-  fi
-
-  if ! is_gnome_desktop; then
-    return 0
-  fi
-
-  command -v wmctrl >/dev/null 2>&1 || missing+=("wmctrl")
-  command -v xdotool >/dev/null 2>&1 || missing+=("xdotool")
-
-  if [[ "${#missing[@]}" -eq 0 ]]; then
-    return 0
-  fi
-
-  hint="$(focus_helpers_install_hint "${missing[@]}")"
-  package_list="$(join_by_space "${missing[@]}")"
-
-  if [[ "$session_type" == "x11" ]]; then
-    warn "Entorno GNOME/X11 detectado. Para mejorar el click-to-focus del notifier conviene instalar ${package_list}. Sugerencia: ${hint}"
-    return 0
-  fi
-
-  warn "Entorno GNOME detectado (sesión ${session_type}). Si también usás GNOME/X11, conviene instalar ${package_list} para mejorar el click-to-focus del notifier. Sugerencia: ${hint}"
-}
-
 run() {
   if [[ "$DRY_RUN" -eq 1 ]]; then
     printf '[dry-run] %s\n' "$*"
@@ -475,8 +404,6 @@ load_managed_files
 
 log "Source dir: $SOURCE_DIR"
 log "Target dir: $TARGET_DIR"
-
-maybe_warn_gnome_focus_helpers
 
 run mkdir -p "$TARGET_DIR"
 

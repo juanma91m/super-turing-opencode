@@ -67,7 +67,6 @@ Ese script:
 - helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
 - delegaciones async con cola, cancelación, progreso incremental y continuación read-only
-- notificaciones nativas del SO solo cuando OpenCode espera respuesta humana, cuando espera un permiso `Allow/Reject`, o cuando la tarea terminó y ya acepta un nuevo prompt, usando `OpenCode: <sesión>` como título; en Linux/GNOME Terminal el click intenta traer la terminal y, si puede, la pestaña exacta al frente en modo best-effort, y en X11 puede apoyarse opcionalmente en `wmctrl` o `xdotool` si están instalados
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - identidad y atribución multiagente para sesiones complejas
 - bootstrap de memoria curada con `/memory-init`
@@ -96,11 +95,11 @@ Notas:
 - el sync compara repo vs target y copia **solo** archivos gestionados que difieren,
 - los archivos modificados en destino se respaldan en `.stack-sync-backups/`,
 - los backups viejos del stack se podan automáticamente con retención base de 5 snapshots por bucket, preservando cualquier snapshot marcado con `.pin`,
-- si el sync detecta **GNOME** en Linux y faltan `wmctrl`/`xdotool`, avisa con una sugerencia de instalación para mejorar el click-to-focus del notifier (especialmente en GNOME/X11),
 - no reinstala Engram ni Playwright,
 - no regenera `opencode.json`,
 - asegura `tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - este repo también trae un `opencode.json` local con allowlists para `sync-opencode-stack.sh`, `install-opencode-stack.sh`, `opencode debug config` y git de mantenimiento habitual, para evitar prompts innecesarios al trabajar sobre el source-of-truth,
+- no instala ni sincroniza addons externos opcionales,
 - no debería usarse para secretos ni para migrar memoria.
 
 ## Regla de trabajo

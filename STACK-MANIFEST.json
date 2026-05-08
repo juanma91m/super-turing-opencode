@@ -63,7 +63,6 @@
     "plugins/agent-identity.ts",
     "plugins/engram-memory-hints.ts",
     "plugins/env-guard.ts",
-    "plugins/opencode-notify.ts",
     "plugins/opencode-scheduler.ts",
     "plugins/opencode-worktree.ts",
     "plugins/background-agents-tui/index.ts",
@@ -121,6 +120,7 @@
     "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
     "delegaciones async ahora soportan pending, cancelación, tail incremental y continuación read-only manteniendo el modelo de review manual en isolated-write",
     "delegate_isolated requiere /experimental/worktree; INSTALLATION.md y PLAYBOOK-ASYNC documentan el uso preferido en sesiones server-backed",
-    "la UX async visual en TUI se activa con el plugin background-agents-tui via tui.json; install/sync aseguran esa entrada sin pisar otros campos del archivo"
+    "la UX async visual en TUI se activa con el plugin background-agents-tui via tui.json; install/sync aseguran esa entrada sin pisar otros campos del archivo",
+    "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync"
   ]
 }
