@@ -7,7 +7,6 @@ Stack portable y versionable de OpenCode con:
 - skills globales,
 - skills de debugging, verificacion y review por etapas,
 - plugin async con delegación read-only y worktrees aislados,
-- compatibilidad opcional con `super-turing-opencode-knowledge` para memoria/retrieval cuando el addon está instalado,
 - helpers opcionales para Jira/tickets y cleanup de sesiones,
 - integración con Playwright headless,
 - integración opcional con Stitch,
@@ -68,7 +67,6 @@ Ese script:
 - delegaciones async con cola, cancelación, progreso incremental y continuación read-only
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - identidad y atribución multiagente para sesiones complejas
-- bootstrap de memoria curada con `/memory-init`
 - workflow de worktrees por ticket con herramientas globales para crear/listar/borrar worktrees
 - scheduler global para jobs recurrentes explícitos con logs, locks y timeout opcional
 
@@ -116,7 +114,6 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 ## Comandos operativos nuevos
 
 - `/stack-doctor`: diagnostica instalación, config efectiva, assets globales, MCPs, dependencias base, drift del stack y overlays locales `.opencode/` cuando existan.
-- `/memory-init`: siembra memoria durable útil para el repo actual sin implementar cambios.
 - `/check-local-overlays`: ejecuta la auditoría semiestructurada de `.opencode/` contra la base global y devuelve el detalle por override.
 - `/check-code-patterns`: ejecuta checks de patrones del proyecto actual si existe integración local.
 - `/find-code-pattern`: ejecuta búsquedas estructurales del proyecto actual si existe integración local.
@@ -129,7 +126,6 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 ## Addons opcionales fuera del stack base
 
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
-- `super-turing-opencode-knowledge`: runtime y assets operativos de Engram/Qdrant. El stack base mantiene por ahora solo una capa fina de compatibilidad cognitiva.
 
 ## Tools globales nuevos
 

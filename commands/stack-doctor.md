@@ -17,8 +17,6 @@ Checklist mínimo:
 - `node`, `npm`, `npx`, `python3` disponibles,
 - plugin async cargado,
 - MCP Context7 presente/habilitado para documentación externa de librerías/APIs,
-- binario Engram presente y funcional si está configurado,
-- si el usuario instaló `super-turing-opencode-knowledge`, verificar que sus componentes Engram/Qdrant estén presentes y usables,
 - Playwright Chromium presente si corresponde,
 - Stitch key presente/ausente,
 - comandos/agents/skills globales clave presentes,
@@ -33,7 +31,7 @@ Checklist mínimo:
 
 Reglas:
 - no modificar nada; solo diagnosticar,
-- no persistir memorias en Engram desde este comando,
+- no persistir memorias durables desde este comando,
 - no pegar la salida cruda completa de `opencode debug config` si contiene secretos resueltos; resumir hallazgos y redactar valores sensibles,
 - si algo opcional falta, clasificarlo como advertencia y no como error fatal,
 - separar hallazgos en: OK, warnings, errores, siguientes pasos,

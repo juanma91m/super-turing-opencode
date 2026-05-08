@@ -25,7 +25,6 @@
     "package-lock.json",
     "commands/sessions-clean.md",
     "commands/sessions-list.md",
-    "commands/memory-init.md",
     "commands/check-local-overlays.md",
     "commands/check-code-patterns.md",
     "commands/find-code-pattern.md",
@@ -74,7 +73,6 @@
     "skills/diseno-ui-web/SKILL.md",
     "skills/implementacion-frontend-web/SKILL.md",
     "skills/investigacion-web/SKILL.md",
-    "skills/memoria-durable-opencode/SKILL.md",
     "skills/mentoria-tecnica-opencode/SKILL.md",
     "skills/overlays-locales-opencode/SKILL.md",
     "skills/performance-cache-concurrencia/SKILL.md",
@@ -106,6 +104,6 @@
     "delegate_isolated requiere /experimental/worktree; INSTALLATION.md y PLAYBOOK-ASYNC documentan el uso preferido en sesiones server-backed",
     "la UX async visual en TUI se activa con el plugin background-agents-tui via tui.json; install/sync aseguran esa entrada sin pisar otros campos del archivo",
     "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync",
-    "el knowledge layer y el runtime de persistencia viven ahora en el addon separado super-turing-opencode-knowledge; el stack base conserva temporalmente solo una capa fina de compatibilidad cognitiva"
+    "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base"
   ]
 }

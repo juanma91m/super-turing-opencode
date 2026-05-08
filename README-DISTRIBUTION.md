@@ -65,7 +65,7 @@ La idea es tratar este directorio como un repo/versionable de stack:
 3. el installer copia assets y **renderiza** `opencode.json` para la máquina destino,
 4. los secretos y rutas locales quedan fuera del bundle.
 
-Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados. El knowledge layer ahora entra en esa categoría y vive en `super-turing-opencode-knowledge`.
+Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
 
 ## Modelo de especialización local por proyecto
 
@@ -115,8 +115,6 @@ bash scripts/install-opencode-stack.sh
 ```
 
 Los addons externos opcionales se instalan después del bootstrap del stack base y no forman parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
-
-Importante: si reinstalás la base con `install-opencode-stack.sh`, el `opencode.json` se regenera y cualquier wiring MCP agregado por un addon puede necesitar reinyectarse después. En particular, si usás `super-turing-opencode-knowledge`, conviene rerunear su `scripts/install.sh` tras un reinstall de la base.
 
 Opciones útiles:
 
@@ -206,9 +204,6 @@ Solo conviene usarlos cuando:
   - `JIRA_EMAIL`
   - `JIRA_API_TOKEN`
 
-## Migración del addon knowledge
-
-Si además usás `super-turing-opencode-knowledge`, su estado persistido (`~/.engram/engram.db`, `~/.local/share/super-turing-opencode-knowledge/`, etc.) se migra por separado del stack base.
 
 ## Siguiente nivel recomendado
 

@@ -7,7 +7,7 @@
  * - persist full results to disk
  * - keep notifications compact
  * - survive compaction
- * - keep Engram for curated semantic memory, not raw async output
+ * - keep durable memory backends for curated semantic memory, not raw async output
  */
 
 import * as crypto from "node:crypto"
@@ -2336,7 +2336,7 @@ You have tools for parallel background work:
 - \`delegate_isolated\` is restricted to master-dev and allowed write-capable targets. It never auto-merges; review artifacts first.
 - \`delegation_apply\` is restricted to master-dev, requires an \`accepted\` isolated delegation, and requires a clean main workspace.
 - \`delegation_accept\` and \`delegation_discard\` are also restricted to master-dev.
-- If a delegation result contains durable knowledge, save a curated summary to Engram with \`mem_save\` instead of storing the raw output there.
+- If a delegation result contains durable knowledge, save a curated summary to the durable memory backend with \`mem_save\` instead of storing the raw output there.
 
 ## Context Contract (MANDATORY)
 
@@ -2348,7 +2348,7 @@ Include, when relevant:
 - Scope: what is in and out of scope
 - Relevant facts/evidence already known
 - Exact file paths, directories, or artifacts to inspect
-- Relevant Engram references or memory findings if they matter
+- Relevant durable memory references or memory findings if they matter
 - Expected output shape (bullets, report, checklist, etc.)
 - Output budget (for example: max 5 bullets, max 15 lines, or concise only)
 

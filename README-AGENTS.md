@@ -55,7 +55,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
-- `memoria-durable-opencode`: define política de memoria durable sin acoplarla a un backend específico.
 - `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
 - `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
 - `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI con foco en headless, polling y evitar regeneraciones ciegas.
@@ -72,7 +71,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
-- `/memory-init`
 - `/bg-tasks` (solo TUI foreground)
 - `/check-local-overlays`
 - `/check-code-patterns [args]`
@@ -89,9 +87,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - El workflow `tmp/<ticket>/verdict.md` -> implementación -> `result-dev.md` es reusable pero opcional: activarlo solo cuando el proyecto adopta ese patrón.
 - `master-dev` lidera el trabajo técnico general; `ui-web-designer` define UX, `frontend-web-developer` implementa presentación y `backend-java-developer` cubre backend/datos. Delegar solo cuando la especialización aporte foco real.
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
-- Si hay backend de memoria durable habilitado, la memoria debe mantenerse curada y `master-dev` actúa como lector principal por defecto; para lectura/escritura detallada, usar `memoria-durable-opencode`.
-- Si instalás `super-turing-opencode-knowledge`, el stack puede sumar retrieval gobernado sobre Qdrant y runtime separado para Engram. La política cognitiva de memoria sigue temporalmente en el stack base, pero los assets operativos viven en el addon.
-
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
 - La UX async se divide entre plugin server y plugin TUI. Para task packet, lifecycle, nested, artifacts y apply/review de delegaciones, referirse a `delegacion-async-opencode` y `PLAYBOOK-ASYNC.md`.
@@ -101,13 +96,3 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - Para distribuir este stack a otra máquina, versionar `agents/`, `skills/`, `plugins/`, docs y manifest; no versionar secretos ni estado local (`stitch-api-key`, `node_modules/`, etc.).
 - Los backups del stack se podan automáticamente con retención base de 5 snapshots por bucket y soporte de `.pin`.
 - Cuando uses `opencode debug config`, no compartas la salida cruda si contiene secretos resueltos; resumila y redactá valores sensibles.
-
-## Capacidades opcionales vía addons
-
-Si además de `super-turing-opencode` instalás `super-turing-opencode-knowledge`, se agregan:
-
-- subagente `knowledge-curator`,
-- skill `knowledge-governance-opencode`,
-- skill backend-specific `memoria-engram-opencode`,
-- comandos `/knowledge-index-global`, `/knowledge-search`, `/knowledge-status`, `/knowledge-store-global`,
-- wrappers y playbooks operativos de Engram/Qdrant en `~/.config/opencode/scripts/`.

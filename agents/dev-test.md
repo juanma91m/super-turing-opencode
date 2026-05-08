@@ -51,4 +51,3 @@ Skills sugeridas:
 - `debugging-sistematico`
 - `verificacion-antes-de-cerrar`
 - `workflow-ticket-handoff`
-- `memoria-durable-opencode`

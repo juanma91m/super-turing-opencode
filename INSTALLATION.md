@@ -46,30 +46,7 @@ Ese comando:
 
 El stack base no incluye addons externos opcionales.
 
-### 3. Addon opcional: knowledge / persistencia
-
-Si querés sumar Engram y/o Qdrant como capability separada:
-
-```bash
-git clone https://github.com/juanma91m/super-turing-opencode-knowledge.git
-cd super-turing-opencode-knowledge
-bash scripts/install.sh --all
-```
-
-Variantes:
-
-```bash
-bash scripts/install.sh --engram-only
-bash scripts/install.sh --qdrant-only
-bash scripts/install.sh --assets-only
-```
-
-Importante:
-
-- `sync-opencode-stack.sh` no debería tocar `opencode.json`,
-- pero `install-opencode-stack.sh` sí regenera `opencode.json`; si reinstalás la base y además usás el addon knowledge, luego conviene rerunear `super-turing-opencode-knowledge/scripts/install.sh` para reinyectar el MCP de Engram.
-
-### 4. Completar secretos opcionales
+### 3. Completar secretos opcionales
 
 #### Stitch
 
@@ -194,7 +171,6 @@ Eso **no afecta**:
 - `~/.cache/ms-playwright/`
 - secretos fuera del repo (`stitch-api-key`, `.env` de proyectos, etc.)
 
-Si además usás `super-turing-opencode-knowledge`, su estado local se migra aparte.
 
 ## Problemas frecuentes
 
