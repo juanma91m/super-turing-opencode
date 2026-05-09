@@ -50,4 +50,3 @@ Skills sugeridas:
 - `cambio-seguro-enterprise`
 - `debugging-sistematico`
 - `verificacion-antes-de-cerrar`
-- `workflow-ticket-handoff`

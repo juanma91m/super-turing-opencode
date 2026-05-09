@@ -7,8 +7,6 @@ Este archivo documenta el **esquema efectivo de agentes** disponible en esta ins
 
 Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.md`
 
-Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
-
 Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 
 ## Agentes base de OpenCode presentes en el esquema efectivo
@@ -53,34 +51,25 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
 - `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
-- `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
 - `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI con foco en headless, polling y evitar regeneraciones ciegas.
 - `verificacion-antes-de-cerrar`: evita declarar cierre o éxito sin evidencia fresca.
-- `workflow-ticket-handoff`: define el patron reusable `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md` para trabajo guiado por tickets.
 - `revision-por-etapas`: separa revisión de cumplimiento funcional vs revisión de calidad/riesgo técnico.
 
 ## Comandos globales reutilizables
 
-- `/ticket-plan <ticket>`
-- `/ticket-refresh <ticket>`
-- `/ticket-verdict <ticket>`
-- `/ticket-implement <ticket>`
-- `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
-- `/check-local-overlays`
 - `/check-code-patterns [args]`
 - `/find-code-pattern [args]`
 - `/stack-doctor`
-- `/init-project-agent-layer <path>`
 
 ## Criterios globales resumidos
 
 - Mantener agentes globales genéricos, reutilizables y sin dominio de proyecto; lo específico debe vivir en el `AGENTS.md` local o en overlays del repo.
 - Distinguir siempre entre agentes base de OpenCode y agentes custom del stack; `agent-design` debe proteger esa separación.
 - Para docs externas de librerías o APIs, Context7 es la fuente preferida cuando esté disponible; IDs canónicos, versiones objetivo o fuentes privadas deben quedar en la capa local del proyecto.
-- Si un agente, skill o comando local sombrea uno global, el override debe ser aditivo y reinyectar explícitamente comportamiento, permisos seguros y guardrails útiles; para checklist, drift y `__replace__`, referirse a `overlays-locales-opencode`, `PLAYBOOK-LOCAL-OVERLAYS.md` y `LOCAL-OVERLAY-TEMPLATE.md`.
-- El workflow `tmp/<ticket>/verdict.md` -> implementación -> `result-dev.md` es reusable pero opcional: activarlo solo cuando el proyecto adopta ese patrón.
+- Si un agente, skill o comando local sombrea uno global, el override debe ser aditivo y reinyectar explícitamente comportamiento, permisos seguros y guardrails útiles.
+- Los workflows de tickets, Jira y templating de proyectos específicos quedaron fuera del stack base y viven en `super-turing-opencode-ticketing`.
 - `master-dev` lidera el trabajo técnico general; `ui-web-designer` define UX, `frontend-web-developer` implementa presentación y `backend-java-developer` cubre backend/datos. Delegar solo cuando la especialización aporte foco real.
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.

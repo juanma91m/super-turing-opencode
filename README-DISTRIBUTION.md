@@ -22,10 +22,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `skills/`
 - `plugins/`
 - `README-AGENTS.md`
-- `CONTEXT7-TECH-CATALOG.md`
-- `LOCAL-OVERLAY-TEMPLATE.md`
 - `PLAYBOOK-CODE-PATTERNS.md`
-- `PLAYBOOK-LOCAL-OVERLAYS.md`
 - `README-DISTRIBUTION.md`
 - `CHANGELOG.md`
 - `README.md`
@@ -35,10 +32,6 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `package-lock.json`
 - `scripts/install-opencode-stack.sh`
 - `scripts/sync-opencode-stack.sh`
-- `scripts/jira_helper.sh`
-- `scripts/jira_api_read.py`
-- `scripts/check_local_overlays.sh`
-- `scripts/check_local_overlays.py`
 - `scripts/check_code_patterns.sh`
 - `scripts/find_code_pattern.sh`
 - `scripts/session_cleanup.sh`
@@ -64,6 +57,7 @@ La idea es tratar este directorio como un repo/versionable de stack:
 4. los secretos y rutas locales quedan fuera del bundle.
 
 Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
+Los workflows de tickets, Jira y templating de proyectos específicos viven fuera de este bundle base en `super-turing-opencode-ticketing`.
 
 ## Modelo de especialización local por proyecto
 
@@ -163,8 +157,7 @@ Esto:
 - detecta Playwright Chromium en user-space,
 - si no lo encuentra, intenta instalarlo con `npx playwright install chromium`,
 - genera `opencode.json` con rutas locales de la máquina,
-- deja disponible un set global de comandos `/ticket-*` y `/sessions-*`,
-- instala helpers reutilizables para Jira/tickets y limpieza de sesiones,
+- instala helpers reutilizables de mantenimiento base,
 - intenta correr `stack-doctor` al final cuando el target es `~/.config/opencode/`,
 - deja Context7 configurado globalmente vía `npx -y @upstash/context7-mcp@latest` para docs de librerias/APIs,
 - habilita o deshabilita otros MCPs según disponibilidad local:
@@ -176,28 +169,16 @@ Esto:
 - `super-turing-opencode-notifier` para notificaciones nativas del SO.
 - `super-turing-opencode-knowledge` para memoria durable y retrieval.
 - `super-turing-opencode-background` como addon externo separado cuando se necesita esa capacidad.
+- `super-turing-opencode-ticketing` para Jira, workflows de tickets y templating de proyectos específicos.
 
 ## Cuándo usar install vs sync
 
 - `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base o setup inicial de Playwright.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
 
-## Helpers opcionales de Jira
+## Workflows y helpers opcionales fuera del stack base
 
-El stack ahora incluye helpers genéricos para Jira/tickets:
-
-- `scripts/jira_helper.sh`
-- `scripts/jira_api_read.py`
-
-No son obligatorios para todos los proyectos.
-Solo conviene usarlos cuando:
-
-- el proyecto realmente trabaja contra Jira,
-- quiere adoptar el patrón `tmp/<ticket>/...`,
-- y tiene credenciales configuradas vía `.env` o `JIRA_ENV_FILE` con:
-  - `JIRA_BASE_URL`
-  - `JIRA_EMAIL`
-  - `JIRA_API_TOKEN`
+Los workflows de tickets, Jira y templating de proyectos específicos se distribuyen por fuera del stack base en `super-turing-opencode-ticketing`.
 
 
 ## Siguiente nivel recomendado

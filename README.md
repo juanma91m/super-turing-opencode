@@ -18,15 +18,13 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 ## Layout
 
 - `agents/`: agentes y subagentes custom
-- `commands/`: comandos reutilizables para tickets y mantenimiento
+- `commands/`: comandos reutilizables de mantenimiento base
 - `skills/`: skills globales
 - `plugins/`: plugins globales del stack base
 - `patches/`: reservado para patches versionados sobre dependencias externas cuando el stack base realmente los necesite
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
-- `LOCAL-OVERLAY-TEMPLATE.md`: plantilla base para overlays locales aditivos por proyecto
 - `PLAYBOOK-CODE-PATTERNS.md`: guía operativa para integrar Semgrep y ast-grep por proyecto
-- `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
 - `STACK-MANIFEST.json`: versión y assets administrados
@@ -53,14 +51,11 @@ Ese script:
 
 - `planner`: planner tecnico/funcional generico para trabajo previo a implementacion
 - `dev-test`: validador tecnico reutilizable
-- `workflow-ticket-handoff`: skill para el patron `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md`
 - `debugging-sistematico`: skill para depurar con causa raiz antes de fixear
 - `verificacion-antes-de-cerrar`: skill para exigir evidencia fresca antes de declarar cierre
 - `revision-por-etapas`: skill para review en dos etapas (cumplimiento y luego calidad/riesgo)
-- comandos globales `/ticket-*` y `/sessions-*`
-- comandos operativos `/stack-doctor`, `/check-local-overlays` y `/init-project-agent-layer`
-- helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
-- helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
+- comandos globales `/sessions-*`
+- comandos operativos `/stack-doctor`
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - identidad y atribución multiagente para sesiones complejas
@@ -110,19 +105,15 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 ## Comandos operativos nuevos
 
 - `/stack-doctor`: diagnostica instalación, config efectiva, assets globales, MCPs, dependencias base, drift del stack y overlays locales `.opencode/` cuando existan.
-- `/check-local-overlays`: ejecuta la auditoría semiestructurada de `.opencode/` contra la base global y devuelve el detalle por override.
 - `/check-code-patterns`: ejecuta checks de patrones del proyecto actual si existe integración local.
 - `/find-code-pattern`: ejecuta búsquedas estructurales del proyecto actual si existe integración local.
-- `/init-project-agent-layer <path>`: inspecciona un proyecto y propone o aplica una capa local de agentes/OpenCode reutilizando lo global, especializando solo lo necesario y sembrando IDs de Context7 cuando el stack detectado lo justifique.
-- `CONTEXT7-TECH-CATALOG.md`: catálogo curado de tecnologías -> IDs canónicos de Context7 para inicializar `AGENTS.md` locales con confianza y notas de drift.
-- `LOCAL-OVERLAY-TEMPLATE.md`: referencia rápida para construir overrides locales aditivos sin perder guardrails globales.
-- `PLAYBOOK-LOCAL-OVERLAYS.md`: playbook completo de uso diario para overlays locales, `/check-local-overlays` y `/stack-doctor`.
 - `PLAYBOOK-CODE-PATTERNS.md`: playbook de cuándo y cómo integrar Semgrep/ast-grep sin meter reglas de proyecto en global.
 
 ## Addons opcionales fuera del stack base
 
 - `super-turing-opencode-notifier`
 - `super-turing-opencode-background`
+- `super-turing-opencode-ticketing`
 
 ## Tools globales nuevos
 
