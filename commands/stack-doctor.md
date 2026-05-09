@@ -15,7 +15,7 @@ Objetivo:
 Checklist mínimo:
 - `opencode` disponible y `opencode debug config` funcionando,
 - `node`, `npm`, `npx`, `python3` disponibles,
-- plugin async cargado,
+- addons externos opcionales detectados cuando existan,
 - MCP Context7 presente/habilitado para documentación externa de librerías/APIs,
 - Playwright Chromium presente si corresponde,
 - Stitch key presente/ausente,

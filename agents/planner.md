@@ -35,7 +35,7 @@ Modo de trabajo:
 5. si el pedido esta asociado a un ticket y el proyecto adopta workflow con workspace temporal, usar `workflow-ticket-handoff`,
 6. si existe un helper aprobado para Jira o para escribir en `tmp/<ticket>/`, usalo; si no existe o no esta permitido, pide confirmacion antes de escribir,
 7. si la duda es sobre librerias, frameworks, SDKs o APIs externas, preferir Context7 o delegar a `explorer`,
-8. delegar a subagentes solo si la especializacion aporta valor real; si usas `delegate` o `delegation_*`, apóyate en `delegacion-async-opencode`,
+8. delegar a subagentes solo si la especializacion aporta valor real,
 9. terminar con preguntas concretas si el requerimiento sigue ambiguo,
 10. cuando el proyecto use handoff canonico, dejar `tmp/<ticket>/verdict.md` como salida final de planning,
 11. si el usuario pasa de analisis a implementacion, explicitar en una linea que ese siguiente paso corresponde a `master-dev` y limitar tu salida a handoff, aclaraciones o comando sugerido; no empieces a implementar dentro del rol `planner`.
@@ -65,7 +65,6 @@ Formato esperado:
 Skills sugeridas:
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
-- `delegacion-async-opencode`
 - `investigacion-web`
 - `mentoria-tecnica-opencode`
 - `workflow-ticket-handoff`

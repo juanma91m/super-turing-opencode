@@ -16,7 +16,6 @@
     "LOCAL-OVERLAY-TEMPLATE.md",
     "PLAYBOOK-CODE-PATTERNS.md",
     "PLAYBOOK-LOCAL-OVERLAYS.md",
-    "PLAYBOOK-ASYNC.md",
     "README.md",
     "README-AGENTS.md",
     "README-DISTRIBUTION.md",
@@ -42,17 +41,14 @@
     "scripts/check_local_overlays.sh",
     "scripts/check_code_patterns.sh",
     "scripts/find_code_pattern.sh",
-    "scripts/ensure_tui_plugin.py",
     "scripts/install-opencode-stack.sh",
     "scripts/session_cleanup.py",
     "scripts/session_cleanup.sh",
     "scripts/sync-opencode-stack.sh",
-    "plugins/background-agents.ts",
     "plugins/agent-identity.ts",
     "plugins/env-guard.ts",
     "plugins/opencode-scheduler.ts",
     "plugins/opencode-worktree.ts",
-    "plugins/background-agents-tui/index.ts",
     "agents/agent-design.md",
     "agents/backend-java-developer.md",
     "agents/code-inspector.md",
@@ -68,7 +64,6 @@
     "skills/cambio-seguro-enterprise/SKILL.md",
     "skills/contratos-api-y-datos/SKILL.md",
     "skills/debugging-sistematico/SKILL.md",
-    "skills/delegacion-async-opencode/SKILL.md",
     "skills/diseno-agentes-opencode/SKILL.md",
     "skills/diseno-ui-web/SKILL.md",
     "skills/implementacion-frontend-web/SKILL.md",
@@ -82,8 +77,7 @@
     "skills/workflow-ticket-handoff/SKILL.md"
   ],
   "generatedFiles": [
-    "opencode.json",
-    "tui.json"
+    "opencode.json"
   ],
   "machineLocalFiles": [
     "stitch-api-key",
@@ -100,9 +94,6 @@
     "plan queda deshabilitado en favor del agente custom planner",
     "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales",
     "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
-    "delegaciones async ahora soportan pending, cancelación, tail incremental y continuación read-only manteniendo el modelo de review manual en isolated-write",
-    "delegate_isolated requiere /experimental/worktree; INSTALLATION.md y PLAYBOOK-ASYNC documentan el uso preferido en sesiones server-backed",
-    "la UX async visual en TUI se activa con el plugin background-agents-tui via tui.json; install/sync aseguran esa entrada sin pisar otros campos del archivo",
     "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync",
     "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base"
   ]

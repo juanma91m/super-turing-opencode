@@ -13,8 +13,7 @@
       "bash scripts/sync-opencode-stack.sh*": "allow",
       "bash \"scripts/sync-opencode-stack.sh\"*": "allow",
       "bash scripts/install-opencode-stack.sh*": "allow",
-      "bash \"scripts/install-opencode-stack.sh\"*": "allow",
-      "python3 scripts/ensure_tui_plugin.py*": "allow"
+      "bash \"scripts/install-opencode-stack.sh\"*": "allow"
     }
   }
 }

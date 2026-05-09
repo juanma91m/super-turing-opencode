@@ -6,7 +6,6 @@ Stack portable y versionable de OpenCode con:
 - planner y validador tecnico reutilizables,
 - skills globales,
 - skills de debugging, verificacion y review por etapas,
-- plugin async con delegación read-only y worktrees aislados,
 - helpers opcionales para Jira/tickets y cleanup de sesiones,
 - integración con Playwright headless,
 - integración opcional con Stitch,
@@ -21,7 +20,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `agents/`: agentes y subagentes custom
 - `commands/`: comandos reutilizables para tickets y mantenimiento
 - `skills/`: skills globales
-- `plugins/`: plugins async server/TUI
+- `plugins/`: plugins globales del stack base
 - `patches/`: reservado para patches versionados sobre dependencias externas cuando el stack base realmente los necesite
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
@@ -29,7 +28,6 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `PLAYBOOK-CODE-PATTERNS.md`: guía operativa para integrar Semgrep y ast-grep por proyecto
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
-- `PLAYBOOK-ASYNC.md`: playbook operativo async
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
 - `STACK-MANIFEST.json`: versión y assets administrados
 - `CHANGELOG.md`: cambios relevantes del stack
@@ -64,7 +62,6 @@ Ese script:
 - helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
 - helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
-- delegaciones async con cola, cancelación, progreso incremental y continuación read-only
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - identidad y atribución multiagente para sesiones complejas
 - workflow de worktrees por ticket con herramientas globales para crear/listar/borrar worktrees
@@ -94,7 +91,6 @@ Notas:
 - los backups viejos del stack se podan automáticamente con retención base de 5 snapshots por bucket, preservando cualquier snapshot marcado con `.pin`,
 - no reinstala Playwright ni addons externos,
 - no regenera `opencode.json`,
-- asegura `tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - este repo también trae un `opencode.json` local con allowlists para `sync-opencode-stack.sh`, `install-opencode-stack.sh`, `opencode debug config` y git de mantenimiento habitual, para evitar prompts innecesarios al trabajar sobre el source-of-truth,
 - no instala ni sincroniza addons externos opcionales,
 - no debería usarse para secretos ni para migrar memoria.
@@ -125,21 +121,13 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 
 ## Addons opcionales fuera del stack base
 
-- `super-turing-opencode-notifier`: notificaciones nativas del SO.
+- `super-turing-opencode-notifier`
+- `super-turing-opencode-background`
 
 ## Tools globales nuevos
 
 - `worktree_create` / `worktree_list` / `worktree_delete`: flujo global para trabajo paralelo por ticket usando git worktrees con config repo-local `.opencode/worktree.jsonc`, sync configurable y apertura best-effort de terminal nueva.
 - `schedule_job` / `list_jobs` / `get_job` / `run_job` / `job_logs` / `delete_job`: automatización recurrente explícita por scope de workdir, con logs, locks, timeout opcional y ejecución no interactiva. Backend inicial: cron supervisado.
-
-## Nota sobre `delegate_isolated`
-
-`delegate_isolated` depende de la API de worktrees de OpenCode.
-
-- en sesiones server-backed funciona como se espera,
-- en algunos `opencode run` locales directos puede fallar porque `/experimental/worktree` no está expuesto.
-
-Si necesitás ese flujo de forma confiable, usar una sesión con server/attach. Ver `INSTALLATION.md` y `PLAYBOOK-ASYNC.md`.
 
 ## Supuestos actuales
 

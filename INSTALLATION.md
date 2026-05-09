@@ -7,7 +7,7 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 - agentes y subagentes globales,
 - commands globales,
 - skills globales,
-- plugins async server/TUI,
+- plugins globales del stack base,
 - helpers Jira/session cleanup,
 - configuración MCP para Context7, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
@@ -40,7 +40,6 @@ Ese comando:
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs base según disponibilidad local,
-- asegura `~/.config/opencode/tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
@@ -88,20 +87,6 @@ Opcionalmente, correr:
 opencode debug config
 ```
 
-Y si querés validar la UX visual async en una TUI foreground real:
-
-```bash
-opencode ~/.local/src/opencode-stack
-```
-
-Dentro de esa sesión, usar:
-
-```text
-/bg-tasks
-```
-
-Ese comando abre la lista TUI de delegaciones del proyecto actual y permite navegar a la sesión hija cuando exista `sessionID`.
-
 La idea es:
 
 - el installer ya intenta ejecutar `stack-doctor`,
@@ -140,32 +125,6 @@ bash scripts/sync-opencode-stack.sh --status
 bash scripts/sync-opencode-stack.sh
 ```
 
-## Nota importante sobre `delegate_isolated`
-
-`delegate_isolated` usa la API `/experimental/worktree` de OpenCode.
-
-### Funciona mejor en sesiones server-backed
-
-Por ejemplo:
-
-```bash
-opencode serve --port 4104
-opencode run --attach http://127.0.0.1:4104 --agent master-dev "..."
-```
-
-### Limitación conocida
-
-En algunos usos de `opencode run` local directo (sin `--attach`), la API de worktree puede no estar expuesta y `delegate_isolated` fallará con un mensaje claro indicando que necesita una sesión con soporte de worktree.
-
-Eso **no afecta**:
-
-- `delegate` read-only,
-- `delegation_read`,
-- `delegation_tail`,
-- `delegation_cancel`,
-- `delegation_continue`,
-- `/bg-tasks` dentro de una TUI foreground ya conectada.
-
 ## Qué NO migra automáticamente
 
 - `~/.cache/ms-playwright/`
@@ -181,7 +140,3 @@ Tratar su salida como sensible.
 ### El repo fuente está dirty pero el activo no tiene drift
 
 Eso significa que tu `~/.config/opencode/` ya fue sincronizado con el working tree actual, pero todavía no committeaste esos cambios en el repo fuente.
-
-### `delegate_isolated` falla con worktree API unreachable
-
-Usar una sesión server-backed (`opencode serve` + `--attach`) para ese flujo.

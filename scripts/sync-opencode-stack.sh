@@ -130,11 +130,6 @@ apply_changes() {
   timestamp="$(date +%Y%m%d-%H%M%S)"
   backup_dir="$TARGET_DIR/.stack-sync-backups/$timestamp"
 
-  if [[ -e "$TARGET_DIR/tui.json" ]]; then
-    run mkdir -p "$(dirname "$backup_dir/tui.json")"
-    run cp "$TARGET_DIR/tui.json" "$backup_dir/tui.json"
-  fi
-
   for rel_path in "${TO_CREATE[@]}"; do
     src="$SOURCE_DIR/$rel_path"
     dst="$TARGET_DIR/$rel_path"
@@ -150,29 +145,6 @@ apply_changes() {
     run mkdir -p "$(dirname "$dst")"
     run cp "$src" "$dst"
   done
-}
-
-ensure_tui_plugin_config() {
-  if [[ "$STATUS_ONLY" -eq 1 || "$DRY_RUN" -eq 1 ]]; then
-    return 0
-  fi
-
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 ]]; then
-    return 0
-  fi
-
-  if ! command -v python3 >/dev/null 2>&1; then
-    warn "python3 no está disponible; no se pudo asegurar tui.json"
-    return 0
-  fi
-
-  if [[ ! -f "$TARGET_DIR/scripts/ensure_tui_plugin.py" ]]; then
-    warn "No se encontró scripts/ensure_tui_plugin.py en el target; se omite ajuste de tui.json"
-    return 0
-  fi
-
-  log "Asegurando tui.json con el plugin TUI async"
-  python3 "$TARGET_DIR/scripts/ensure_tui_plugin.py" "$TARGET_DIR"
 }
 
 validate_config() {
@@ -265,7 +237,6 @@ print_plan
 
 if [[ "$STATUS_ONLY" -eq 0 ]]; then
   apply_changes
-  ensure_tui_plugin_config
   prune_backups
   validate_config
   if [[ "$DRY_RUN" -eq 1 ]]; then
