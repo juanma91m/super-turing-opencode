@@ -1,6 +1,6 @@
 # Instalación del stack OpenCode
 
-Esta guía está pensada para un tercero que quiere instalar **todo** el stack desde este repo, empezando por un `git clone` limpio.
+Esta guía está pensada para un tercero que quiere instalar el **stack base** desde este repo, empezando por un `git clone` limpio.
 
 ## Qué instala
 
@@ -44,6 +44,45 @@ Ese comando:
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
 El stack base no incluye addons externos opcionales.
+
+## Instalación completa de distribución (base + addons)
+
+Si además querés que el mismo flujo clone/actualice e instale los addons externos recomendados, usá:
+
+```bash
+bash scripts/install-opencode-distribution.sh
+```
+
+Por defecto ese wrapper instala:
+
+- stack base,
+- `super-turing-opencode-notifier`,
+- `super-turing-opencode-knowledge`,
+- `super-turing-opencode-ticketing`.
+
+El addon `super-turing-opencode-background` queda fuera del default porque no tiene un install universal honesto: requiere un checkout fuente compatible de OpenCode para aplicar su patch de host. Si lo querés incluir, el wrapper soporta:
+
+```bash
+bash scripts/install-opencode-distribution.sh \
+  --with-background \
+  --background-opencode-root /ruta/al/opencode-checkout
+```
+
+Y si además querés takeover sobre `~/.opencode`:
+
+```bash
+bash scripts/install-opencode-distribution.sh \
+  --with-background \
+  --background-opencode-root /ruta/al/opencode-checkout \
+  --background-adopt-local-install \
+  --background-bun-path /ruta/a/bun
+```
+
+Importante:
+
+- `install-opencode-stack.sh` sigue siendo **base-only**,
+- `sync-opencode-stack.sh` sigue siendo **base-only**,
+- `install-opencode-distribution.sh` es un wrapper de orquestación para bootstrap completo, no el nuevo owner de los addons.
 
 ### 3. Completar secretos opcionales
 

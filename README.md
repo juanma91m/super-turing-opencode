@@ -41,6 +41,12 @@ Guía completa paso a paso: `INSTALLATION.md`
 bash scripts/install-opencode-stack.sh
 ```
 
+Si además querés bootstrappear de una vez el stack base **más** los addons externos recomendados, existe un wrapper de distribución:
+
+```bash
+bash scripts/install-opencode-distribution.sh
+```
+
 Ese script:
 
 - instala dependencias npm del stack,
@@ -114,6 +120,7 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 
 ## Addons opcionales fuera del stack base
 
+- `super-turing-opencode-knowledge`
 - `super-turing-opencode-notifier`
 - `super-turing-opencode-background`
 - `super-turing-opencode-ticketing`

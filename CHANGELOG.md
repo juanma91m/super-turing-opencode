@@ -6,6 +6,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- script `scripts/install-opencode-distribution.sh` para bootstrappear el stack base y orquestar addons externos recomendados desde el repo fuente
 - plugins globales `plugins/env-guard.ts` y `plugins/agent-identity.ts`
 - comando global `/memory-init` para sembrar baseline curada de memoria Engram por repo
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
@@ -15,6 +16,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `README.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md`, `STACK-MANIFEST.json` y `opencode.json` ahora documentan y permiten el nuevo wrapper de distribución sin mezclar addons dentro del lifecycle base de install/sync
 - el notifier del SO deja de formar parte del stack base y pasa al addon externo `super-turing-opencode-notifier`
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md`, `PLAYBOOK-KNOWLEDGE.md` y `STACK-MANIFEST.json` documentan el nuevo knowledge layer global y la separación Engram vs Qdrant

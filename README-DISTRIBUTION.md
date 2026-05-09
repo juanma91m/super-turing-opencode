@@ -31,6 +31,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `package.json`
 - `package-lock.json`
 - `scripts/install-opencode-stack.sh`
+- `scripts/install-opencode-distribution.sh`
 - `scripts/sync-opencode-stack.sh`
 - `scripts/check_code_patterns.sh`
 - `scripts/find_code_pattern.sh`
@@ -106,7 +107,8 @@ Ejecutar:
 bash scripts/install-opencode-stack.sh
 ```
 
-Los addons externos opcionales se instalan después del bootstrap del stack base y no forman parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
+Los addons externos opcionales siguen sin formar parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
+Si querés bootstrap completo de distribución desde el repo base, el wrapper explícito es `scripts/install-opencode-distribution.sh`, que orquesta repos/addons externos sin convertirlos en parte del lifecycle base.
 
 Opciones útiles:
 
@@ -170,6 +172,19 @@ Esto:
 - `super-turing-opencode-knowledge` para memoria durable y retrieval.
 - `super-turing-opencode-background` como addon externo separado cuando se necesita esa capacidad.
 - `super-turing-opencode-ticketing` para Jira, workflows de tickets y templating de proyectos específicos.
+
+Para una instalación “suite completa” desde el repo base:
+
+```bash
+bash scripts/install-opencode-distribution.sh
+```
+
+Ese wrapper:
+
+- usa este checkout como source of truth del stack base,
+- clona o hace `git pull --ff-only` de addons hermanos en el workspace,
+- instala notifier/knowledge/ticketing por defecto,
+- y puede incluir background solo bajo pedido explícito porque requiere un checkout compatible de OpenCode.
 
 ## Cuándo usar install vs sync
 

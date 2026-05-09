@@ -27,6 +27,7 @@
     "scripts/prune_stack_backups.py",
     "scripts/check_code_patterns.sh",
     "scripts/find_code_pattern.sh",
+    "scripts/install-opencode-distribution.sh",
     "scripts/install-opencode-stack.sh",
     "scripts/session_cleanup.py",
     "scripts/session_cleanup.sh",
@@ -78,7 +79,7 @@
     "plan queda deshabilitado en favor del agente custom planner",
     "los helpers Jira, workflows de tickets y templating de proyectos específicos viven en super-turing-opencode-ticketing",
     "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
-    "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync",
+    "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync; el wrapper scripts/install-opencode-distribution.sh solo los orquesta explícitamente desde el repo fuente",
     "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base"
   ]
 }
