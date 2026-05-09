@@ -1,19 +1,22 @@
 # opencode-stack
 
-Stack portable y versionable de OpenCode con:
+Stack base portable y versionable de OpenCode.
 
-- agentes y subagentes custom,
-- planner y validador tecnico reutilizables,
-- skills globales,
-- skills de debugging, verificacion y review por etapas,
-- helpers opcionales para Jira/tickets y cleanup de sesiones,
+Este repo contiene el **control plane genérico** de la instalación custom:
+
+- agentes y subagentes reutilizables,
+- skills globales de análisis, implementación, review y debugging,
+- plugins base del stack,
+- tooling operativo genérico,
 - integración con Playwright headless,
 - integración opcional con Stitch,
-- installer reproducible para desplegar el stack en otra máquina.
+- installer y sync reproducibles para desplegar el stack en otra máquina.
+
+No es un repo de workflows específicos por dominio. Las capacidades opcionales o más opinadas (por ejemplo background tasks, notifier, knowledge, ticketing/Jira o templating de proyectos) viven en addons separados.
 
 ## Objetivo
 
-Este repo es el **source of truth** del entorno OpenCode custom. La instalación activa vive en `~/.config/opencode/`, pero se considera un deploy derivado de este repo.
+Este repo es el **source of truth** del stack base de OpenCode. La instalación activa vive en `~/.config/opencode/`, pero se considera un deploy derivado de este repo.
 
 ## Layout
 
