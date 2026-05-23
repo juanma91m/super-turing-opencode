@@ -6,36 +6,24 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
-- script `scripts/install-opencode-distribution.sh` para bootstrappear el stack base y orquestar addons externos recomendados desde el repo fuente
 - plugins globales `plugins/env-guard.ts` y `plugins/agent-identity.ts`
-- comando global `/memory-init` para sembrar baseline curada de memoria Engram por repo
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
-- knowledge layer global `super-turing-opencode-knowledge` integrado por ahora dentro del stack base, con subagente `knowledge-curator`, skill `knowledge-governance-opencode`, wrappers `knowledge_*`, playbook dedicado y soporte Qdrant local file-based sin daemon
-- manifest `knowledge/global_seed_paths.txt`, script `knowledge_seed_global.sh` y comando `/knowledge-index-global` para reindexado repetible del corpus global curado
+- skill global `sdd-tdd-bdd-pragmatico` para conectar especificación, comportamiento esperado y estrategia de validación sin imponer workflow rígido
 
 ### Changed
 
-- `README.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md`, `STACK-MANIFEST.json` y `opencode.json` ahora documentan y permiten el nuevo wrapper de distribución sin mezclar addons dentro del lifecycle base de install/sync
 - el notifier del SO deja de formar parte del stack base y pasa al addon externo `super-turing-opencode-notifier`
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier
-- `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md`, `PLAYBOOK-KNOWLEDGE.md` y `STACK-MANIFEST.json` documentan el nuevo knowledge layer global y la separación Engram vs Qdrant
-- el knowledge layer ahora expone una separación interna más explícita por componente: `install-knowledge-engram.sh`, `install-knowledge-qdrant.sh`, `knowledge_status_engram.sh`, `knowledge_status_qdrant.sh` y playbooks dedicados por componente
-- `engram-memory-hints.ts` sale del stack base y pasa al addon knowledge; el stack base introduce `memoria-durable-opencode` y deja `memoria-engram-opencode` como skill backend-specific del addon
-- `install-opencode-stack.sh` deja de renderizar el MCP de Engram; esa inyección pasa al addon `super-turing-opencode-knowledge`
-- `super-turing-opencode-background` pasa a ser dueño exclusivo del dominio async/background; el stack base deja de cargar plugins, skill/playbook y wiring TUI de esa capacidad
-- `README.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md`, `commands/stack-doctor.md`, `STACK-MANIFEST.json` y `opencode.json` ajustan el boundary del stack base para no retener restos operativos de background
+- `master-dev` y `README-AGENTS.md` ahora derivan más detalle procedural a los skills `delegacion-async-opencode` y `overlays-locales-opencode` para mantener prompts y referencia global más compactos
 - `planner`, `frontend-web-developer` y `ui-web-designer` ahora condensan más contexto base y derivan detalle de memoria, Playwright y Stitch a skills dedicados para economizar contexto sin perder capacidad operativa
 - `planner` ahora incorpora explícitamente un rol más de arquitecto/tutor técnico y se apoya en la nueva skill `mentoria-tecnica-opencode`; `master-dev`, `reviewer` y `agent-design` también refuerzan esa capacidad de enseñar y desafiar atajos cuando corresponde
 - `opencode-worktree` ahora ejecuta `git worktree prune --expire now` después del borrado y antes del listado para evitar metadata stale en `git worktree list`
-- `memoria-engram-opencode` ahora documenta recuperación en tres bloques, bootstrap inicial y convención `<private>...</private>`
-- se introduce `memoria-durable-opencode` como skill backend-agnostic y `memoria-engram-opencode` pasa al addon knowledge como skill backend-specific
-- `master-dev` y `planner` ahora refuerzan recuperación de memoria en tres bloques, `/memory-init` y privacidad al persistir memoria
 - `master-dev` ahora reconoce herramientas globales de worktree y scheduler bajo pedido explícito del usuario
 - agentes globales clave ahora refuerzan estabilidad de idioma: responder en el idioma actual del usuario sin drift accidental
 - install/sync ahora podan backups viejos del stack con retención base de 5 y preservación de snapshots marcados con `.pin`
 - `README.md`, `README-AGENTS.md` y `STACK-MANIFEST.json` documentan las nuevas capacidades globales
-- `install-opencode-stack.sh` ahora puede bootstrappear la capa local de knowledge y el repo fuente suma allowlists para ese mantenimiento
+- `planner`, `master-dev`, `reviewer`, `dev-test`, `backend-java-developer` y `frontend-web-developer` ahora sugieren y aplican de forma pragmática SDD/TDD/BDD; `workflow-ticket-handoff`, `revision-por-etapas`, `verificacion-antes-de-cerrar` y los comandos `/ticket-*` incorporan trazabilidad opcional de criterios, escenarios y validación
 
 ## [0.8.8] - 2026-05-03
 

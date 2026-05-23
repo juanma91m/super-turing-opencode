@@ -13,7 +13,8 @@
 ## Etapa 1: cumplimiento contra intención
 Preguntas guía:
 - ¿Cumple el objetivo pedido?
-- ¿Respeta plan, spec, handoff explícito o alcance definido?
+- ¿Respeta plan, spec, `verdict.md` o alcance explícito?
+- ¿Cubre los criterios de aceptación o escenarios clave, si existían?
 - ¿Falta algo importante?
 - ¿Agregó comportamiento no pedido o abrió scope nuevo?
 
@@ -29,10 +30,11 @@ Preguntas guía:
 - Si falla la etapa 1, marcarlo primero antes de discutir cosmética o micro-mejoras.
 - Separar bloqueantes de no bloqueantes.
 - Citar evidencia por cada observación importante.
-- Si existe un workflow externo de tickets o handoff, usar sus artefactos como referencias primarias de intención y cierre.
+- Si existe workflow de tickets, usar `verdict.md` y `result-dev.md` como referencias primarias de intención y cierre.
 
 ## Salida esperada
 - etapa 1: cumplimiento,
+- criterios o escenarios cubiertos/desviados cuando existan,
 - etapa 2: calidad/riesgos,
 - evidencia,
 - validaciones faltantes,

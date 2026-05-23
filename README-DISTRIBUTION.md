@@ -8,6 +8,7 @@ Tener un bundle reproducible que instale:
 
 - agentes y subagentes custom,
 - skills globales,
+- plugin async,
 - documentación operativa,
 - integración MCP con Context7, Stitch y Playwright,
 - política headless para Playwright,
@@ -22,7 +23,11 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `skills/`
 - `plugins/`
 - `README-AGENTS.md`
+- `CONTEXT7-TECH-CATALOG.md`
+- `LOCAL-OVERLAY-TEMPLATE.md`
 - `PLAYBOOK-CODE-PATTERNS.md`
+- `PLAYBOOK-LOCAL-OVERLAYS.md`
+- `PLAYBOOK-ASYNC.md`
 - `README-DISTRIBUTION.md`
 - `CHANGELOG.md`
 - `README.md`
@@ -31,8 +36,11 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `package.json`
 - `package-lock.json`
 - `scripts/install-opencode-stack.sh`
-- `scripts/install-opencode-distribution.sh`
 - `scripts/sync-opencode-stack.sh`
+- `scripts/jira_helper.sh`
+- `scripts/jira_api_read.py`
+- `scripts/check_local_overlays.sh`
+- `scripts/check_local_overlays.py`
 - `scripts/check_code_patterns.sh`
 - `scripts/find_code_pattern.sh`
 - `scripts/session_cleanup.sh`
@@ -58,7 +66,6 @@ La idea es tratar este directorio como un repo/versionable de stack:
 4. los secretos y rutas locales quedan fuera del bundle.
 
 Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
-Los workflows de tickets, Jira y templating de proyectos específicos viven fuera de este bundle base en `super-turing-opencode-ticketing`.
 
 ## Modelo de especialización local por proyecto
 
@@ -107,8 +114,7 @@ Ejecutar:
 bash scripts/install-opencode-stack.sh
 ```
 
-Los addons externos opcionales siguen sin formar parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
-Si querés bootstrap completo de distribución desde el repo base, el wrapper explícito es `scripts/install-opencode-distribution.sh`, que orquesta repos/addons externos sin convertirlos en parte del lifecycle base.
+Los addons externos opcionales se instalan después del bootstrap del stack base y no forman parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
 
 Opciones útiles:
 
@@ -159,41 +165,44 @@ Esto:
 - detecta Playwright Chromium en user-space,
 - si no lo encuentra, intenta instalarlo con `npx playwright install chromium`,
 - genera `opencode.json` con rutas locales de la máquina,
-- instala helpers reutilizables de mantenimiento base,
+- deja disponible un set global de comandos `/ticket-*` y `/sessions-*`,
+- instala helpers reutilizables para Jira/tickets y limpieza de sesiones,
 - intenta correr `stack-doctor` al final cuando el target es `~/.config/opencode/`,
 - deja Context7 configurado globalmente vía `npx -y @upstash/context7-mcp@latest` para docs de librerias/APIs,
 - habilita o deshabilita otros MCPs según disponibilidad local:
   - Stitch: habilitado si existe `stitch-api-key`
   - Playwright: habilitado si se pudo detectar/instalar Chromium
 
-## Addons externos recomendados según capability
-
-- `super-turing-opencode-notifier` para notificaciones nativas del SO.
-- `super-turing-opencode-knowledge` para memoria durable y retrieval.
-- `super-turing-opencode-background` como addon externo separado cuando se necesita esa capacidad.
-- `super-turing-opencode-ticketing` para Jira, workflows de tickets y templating de proyectos específicos.
-
-Para una instalación “suite completa” desde el repo base:
-
-```bash
-bash scripts/install-opencode-distribution.sh
-```
-
-Ese wrapper:
-
-- usa este checkout como source of truth del stack base,
-- clona o hace `git pull --ff-only` de addons hermanos en el workspace,
-- instala notifier/knowledge/ticketing por defecto,
-- y puede incluir background solo bajo pedido explícito porque requiere un checkout compatible de OpenCode.
-
 ## Cuándo usar install vs sync
 
 - `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base o setup inicial de Playwright.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
 
-## Workflows y helpers opcionales fuera del stack base
+## Limitación conocida de `delegate_isolated`
 
-Los workflows de tickets, Jira y templating de proyectos específicos se distribuyen por fuera del stack base en `super-turing-opencode-ticketing`.
+`delegate_isolated` requiere que la sesión tenga acceso a la API `/experimental/worktree` de OpenCode.
+
+- En sesiones server-backed funciona bien.
+- En algunos `opencode run` locales directos puede no estar disponible.
+
+En ese caso, el sistema ahora devuelve un error explícito recomendando usar `opencode serve` + `opencode run --attach ...` para ese flujo.
+
+## Helpers opcionales de Jira
+
+El stack ahora incluye helpers genéricos para Jira/tickets:
+
+- `scripts/jira_helper.sh`
+- `scripts/jira_api_read.py`
+
+No son obligatorios para todos los proyectos.
+Solo conviene usarlos cuando:
+
+- el proyecto realmente trabaja contra Jira,
+- quiere adoptar el patrón `tmp/<ticket>/...`,
+- y tiene credenciales configuradas vía `.env` o `JIRA_ENV_FILE` con:
+  - `JIRA_BASE_URL`
+  - `JIRA_EMAIL`
+  - `JIRA_API_TOKEN`
 
 
 ## Siguiente nivel recomendado

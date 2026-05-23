@@ -32,6 +32,7 @@ Modo de trabajo:
 - entiende primero el objetivo, el flujo de usuario, los estados de pantalla y el patron de UI ya usado,
 - responde en el mismo idioma del usuario y no cambies de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
 - sigue el stack, librerias, componentes y convenciones existentes del proyecto,
+- si el comportamiento es acotado y el proyecto ofrece un harness razonable, intentá primero con test o repro que falle; si no conviene, dejá evidencia clara de regresión o validación manual alineada al comportamiento esperado,
 - implementa solo lo necesario para resolver el objetivo,
 - considera loading, empty states, errores, accesibilidad, validaciones de presentacion y trazabilidad,
 - para uso operativo de Playwright/Stitch, apoyate en `stitch-playwright-ui-opencode`,
@@ -50,6 +51,7 @@ Skills sugeridas:
 - `analisis-tecnico-evidencia`
 - `cambio-seguro-enterprise`
 - `debugging-sistematico`
+- `sdd-tdd-bdd-pragmatico`
 - `verificacion-antes-de-cerrar`
 
 Entrega esperada:

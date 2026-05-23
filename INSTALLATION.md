@@ -1,13 +1,13 @@
 # Instalación del stack OpenCode
 
-Esta guía está pensada para un tercero que quiere instalar el **stack base** desde este repo, empezando por un `git clone` limpio.
+Esta guía está pensada para un tercero que quiere instalar **todo** el stack desde este repo, empezando por un `git clone` limpio.
 
 ## Qué instala
 
 - agentes y subagentes globales,
 - commands globales,
 - skills globales,
-- plugins globales del stack base,
+- plugins async server/TUI,
 - helpers Jira/session cleanup,
 - configuración MCP para Context7, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
@@ -40,49 +40,11 @@ Ese comando:
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs base según disponibilidad local,
+- asegura `~/.config/opencode/tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
 El stack base no incluye addons externos opcionales.
-
-## Instalación completa de distribución (base + addons)
-
-Si además querés que el mismo flujo clone/actualice e instale los addons externos recomendados, usá:
-
-```bash
-bash scripts/install-opencode-distribution.sh
-```
-
-Por defecto ese wrapper instala:
-
-- stack base,
-- `super-turing-opencode-notifier`,
-- `super-turing-opencode-knowledge`,
-- `super-turing-opencode-ticketing`.
-
-El addon `super-turing-opencode-background` queda fuera del default porque no tiene un install universal honesto: requiere un checkout fuente compatible de OpenCode para aplicar su patch de host. Si lo querés incluir, el wrapper soporta:
-
-```bash
-bash scripts/install-opencode-distribution.sh \
-  --with-background \
-  --background-opencode-root /ruta/al/opencode-checkout
-```
-
-Y si además querés takeover sobre `~/.opencode`:
-
-```bash
-bash scripts/install-opencode-distribution.sh \
-  --with-background \
-  --background-opencode-root /ruta/al/opencode-checkout \
-  --background-adopt-local-install \
-  --background-bun-path /ruta/a/bun
-```
-
-Importante:
-
-- `install-opencode-stack.sh` sigue siendo **base-only**,
-- `sync-opencode-stack.sh` sigue siendo **base-only**,
-- `install-opencode-distribution.sh` es un wrapper de orquestación para bootstrap completo, no el nuevo owner de los addons.
 
 ### 3. Completar secretos opcionales
 
@@ -126,10 +88,34 @@ Opcionalmente, correr:
 opencode debug config
 ```
 
+Y si querés validar la UX visual async en una TUI foreground real:
+
+```bash
+opencode ~/.local/src/opencode-stack
+```
+
+Dentro de esa sesión, usar:
+
+```text
+/bg-tasks
+```
+
+Ese comando abre la lista TUI de delegaciones del proyecto actual y permite navegar a la sesión hija cuando exista `sessionID`.
+
 La idea es:
 
 - el installer ya intenta ejecutar `stack-doctor`,
 - y si querés revisar de nuevo después de corregir algo del entorno, corrés ese mismo comando manualmente hasta que el diagnóstico quede sano.
+
+Si además estás dentro de un repo que tiene `.opencode/`, podés correr una auditoría focalizada del overlay local con:
+
+```bash
+opencode run --command check-local-overlays --agent agent-design --dir "$(pwd)" --dangerously-skip-permissions
+```
+
+Para entender cuándo usar `AGENTS.md`, cuándo overridear y cómo interpretar `OK` / `warning` / `error`, ver también:
+
+- `PLAYBOOK-LOCAL-OVERLAYS.md`
 
 Si un proyecto incorpora pattern checks con Semgrep/ast-grep, la guía global de uso e integración está en:
 
@@ -154,6 +140,32 @@ bash scripts/sync-opencode-stack.sh --status
 bash scripts/sync-opencode-stack.sh
 ```
 
+## Nota importante sobre `delegate_isolated`
+
+`delegate_isolated` usa la API `/experimental/worktree` de OpenCode.
+
+### Funciona mejor en sesiones server-backed
+
+Por ejemplo:
+
+```bash
+opencode serve --port 4104
+opencode run --attach http://127.0.0.1:4104 --agent master-dev "..."
+```
+
+### Limitación conocida
+
+En algunos usos de `opencode run` local directo (sin `--attach`), la API de worktree puede no estar expuesta y `delegate_isolated` fallará con un mensaje claro indicando que necesita una sesión con soporte de worktree.
+
+Eso **no afecta**:
+
+- `delegate` read-only,
+- `delegation_read`,
+- `delegation_tail`,
+- `delegation_cancel`,
+- `delegation_continue`,
+- `/bg-tasks` dentro de una TUI foreground ya conectada.
+
 ## Qué NO migra automáticamente
 
 - `~/.cache/ms-playwright/`
@@ -169,3 +181,7 @@ Tratar su salida como sensible.
 ### El repo fuente está dirty pero el activo no tiene drift
 
 Eso significa que tu `~/.config/opencode/` ya fue sincronizado con el working tree actual, pero todavía no committeaste esos cambios en el repo fuente.
+
+### `delegate_isolated` falla con worktree API unreachable
+
+Usar una sesión server-backed (`opencode serve` + `--attach`) para ese flujo.

@@ -13,9 +13,10 @@
 
 ## Regla central
 - Si no corriste la verificación en este trabajo y no leíste el resultado, no afirmes que está bien.
+- Si existe comportamiento esperado, criterio o escenario explícito, la verificación debe conectarse con eso y no solo con un comando “verde”.
 
 ## Flujo obligatorio
-1. Identificar qué comando o evidencia prueba realmente la afirmación.
+1. Identificar qué comando o evidencia prueba realmente la afirmación o el comportamiento esperado.
 2. Ejecutar la verificación completa y fresca.
 3. Leer salida, exit code y fallos concretos.
 4. Comparar resultado contra la afirmación que querías hacer.
@@ -28,6 +29,7 @@
 - Linter ok no implica build ok.
 - Build ok no implica tests ok.
 - Cambio aplicado no implica bug resuelto.
+- Un test verde desconectado del comportamiento esperado tampoco implica cierre.
 - Si un formatter modifica archivos, revalidar sobre ese estado final.
 - No expresar cierre, satisfacción ni éxito antes de verificar.
 

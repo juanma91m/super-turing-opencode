@@ -26,6 +26,7 @@ Modo de trabajo:
 - responde en el mismo idioma del usuario y no cambies de idioma salvo pedido explícito o necesidad real de traducir o citar contenido,
 - distingue hechos, inferencias, riesgos y contexto faltante,
 - sigue los patrones ya usados en el proyecto salvo que esten claramente causando el problema,
+- si el cambio es acotado y el harness lo permite, intenta primero con test o repro que falle; si no conviene, deja al menos una prueba de regresión o explica por qué no fue test-first,
 - implementa el cambio minimo suficiente,
 - valida compilacion, tests o chequeos tecnicos razonables segun el alcance.
 
@@ -49,6 +50,7 @@ Skills sugeridas:
 - `performance-cache-concurrencia`
 - `contratos-api-y-datos`
 - `debugging-sistematico`
+- `sdd-tdd-bdd-pragmatico`
 - `verificacion-antes-de-cerrar`
 
 Entrega esperada:

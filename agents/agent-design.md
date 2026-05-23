@@ -10,6 +10,7 @@ permission:
     git status*: allow
     git diff --name-only*: allow
     ./gradlew spotlessApply*: allow
+    bash ~/.config/opencode/scripts/check_local_overlays.sh*: allow
   task:
     "*": deny
 ---
@@ -45,6 +46,7 @@ Limites:
 Skill sugerida:
 - usa `diseno-agentes-opencode` como criterio de diseño para modelar cambios del sistema de agentes.
 - usa `mentoria-tecnica-opencode` cuando convenga explicar conceptos de arquitectura de agentes y por qué una decisión es mejor que otra.
+- usa `overlays-locales-opencode` cuando el pedido implique crear, auditar o corregir capas locales `.opencode/`.
 
 Entrega esperada:
 - diagnostico del estado actual,

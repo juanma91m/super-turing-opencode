@@ -68,7 +68,7 @@ Usarla para:
 ### Planner
 
 - no las corre por defecto,
-- decide en el handoff o plan activo si el cambio necesita pattern checks o búsqueda estructural.
+- decide en `verdict.md` si el ticket necesita pattern checks o búsqueda estructural.
 
 ### Code-inspector
 
@@ -87,8 +87,8 @@ Usarla para:
 
 ### Dev-test
 
-- puede correr `check-code-patterns` como parte de validación **solo si el cambio lo amerita**,
-- no volverlo obligatorio para cualquier tarea chica.
+- puede correr `check-code-patterns` como parte de validación **solo si el ticket lo amerita**,
+- no volverlo obligatorio para cualquier ticket chico.
 
 ## 6. Cuándo activarlas
 
@@ -106,7 +106,7 @@ No conviene activarlas por reflejo en tareas triviales.
 
 ## 7. Artefactos sugeridos
 
-Si el proyecto usa artefactos de handoff o tracking para cambios complejos, conviene guardar:
+Si el ticket es complejo, conviene guardar en `tmp/<ticket>/`:
 
 - `pattern-checks.md` o `pattern-checks.json`
 - `pattern-search.md`

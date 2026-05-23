@@ -5,7 +5,11 @@ Este archivo documenta el **esquema efectivo de agentes** disponible en esta ins
 - agentes **base** provistos por OpenCode,
 - agentes y subagentes **custom globales** instalados en `~/.config/opencode/`.
 
+Playbook operativo async: `~/.config/opencode/PLAYBOOK-ASYNC.md`
+
 Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.md`
+
+Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
 
 Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 
@@ -47,33 +51,47 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `analisis-tecnico-evidencia`: separa hechos, inferencias, riesgos e informacion faltante.
 - `cambio-seguro-enterprise`: prioriza cambios minimos, seguros y auditables en sistemas enterprise o legacy.
 - `debugging-sistematico`: obliga a investigar causa raiz antes de proponer fixes.
+- `delegacion-async-opencode`: resume el workflow async de OpenCode para delegaciones read-only e isolated-write con task packet, lifecycle y review segura.
 - `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
 - `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
+- `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
 - `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI con foco en headless, polling y evitar regeneraciones ciegas.
+- `sdd-tdd-bdd-pragmatico`: conecta especificación, comportamiento esperado y estrategia de pruebas sin imponer ceremonias rígidas.
 - `verificacion-antes-de-cerrar`: evita declarar cierre o éxito sin evidencia fresca.
+- `workflow-ticket-handoff`: define el patron reusable `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md` para trabajo guiado por tickets.
 - `revision-por-etapas`: separa revisión de cumplimiento funcional vs revisión de calidad/riesgo técnico.
 
 ## Comandos globales reutilizables
 
+- `/ticket-plan <ticket>`
+- `/ticket-refresh <ticket>`
+- `/ticket-verdict <ticket>`
+- `/ticket-implement <ticket>`
+- `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
+- `/bg-tasks` (solo TUI foreground)
+- `/check-local-overlays`
 - `/check-code-patterns [args]`
 - `/find-code-pattern [args]`
 - `/stack-doctor`
+- `/init-project-agent-layer <path>`
 
 ## Criterios globales resumidos
 
 - Mantener agentes globales genéricos, reutilizables y sin dominio de proyecto; lo específico debe vivir en el `AGENTS.md` local o en overlays del repo.
 - Distinguir siempre entre agentes base de OpenCode y agentes custom del stack; `agent-design` debe proteger esa separación.
 - Para docs externas de librerías o APIs, Context7 es la fuente preferida cuando esté disponible; IDs canónicos, versiones objetivo o fuentes privadas deben quedar en la capa local del proyecto.
-- Si un agente, skill o comando local sombrea uno global, el override debe ser aditivo y reinyectar explícitamente comportamiento, permisos seguros y guardrails útiles.
-- Los workflows de tickets, Jira y templating de proyectos específicos quedaron fuera del stack base y viven en `super-turing-opencode-ticketing`.
+- Si un agente, skill o comando local sombrea uno global, el override debe ser aditivo y reinyectar explícitamente comportamiento, permisos seguros y guardrails útiles; para checklist, drift y `__replace__`, referirse a `overlays-locales-opencode`, `PLAYBOOK-LOCAL-OVERLAYS.md` y `LOCAL-OVERLAY-TEMPLATE.md`.
+- El workflow `tmp/<ticket>/verdict.md` -> implementación -> `result-dev.md` es reusable pero opcional: activarlo solo cuando el proyecto adopta ese patrón.
 - `master-dev` lidera el trabajo técnico general; `ui-web-designer` define UX, `frontend-web-developer` implementa presentación y `backend-java-developer` cubre backend/datos. Delegar solo cuando la especialización aporte foco real.
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
+- SDD/TDD/BDD se aplican como heurística pragmática: usar criterios de aceptación, escenarios y test-first cuando aclaran o reducen riesgo; no forzarlos en microcambios triviales ni en zonas donde el harness vuelva el ritual más caro que útil.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
+- La UX async se divide entre plugin server y plugin TUI. Para task packet, lifecycle, nested, artifacts y apply/review de delegaciones, referirse a `delegacion-async-opencode` y `PLAYBOOK-ASYNC.md`.
 - Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.
 - Las herramientas de worktree y scheduler deben usarse solo bajo pedido explícito del usuario.
 - Playwright MCP queda en modo headless/no interactivo por defecto; si una inspección visual headed/manual realmente conviene, debe pedirse confirmación explícita en foreground.
