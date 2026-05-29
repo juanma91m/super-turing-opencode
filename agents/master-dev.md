@@ -81,7 +81,7 @@ Criterios tecnicos:
 Coordinacion sugerida:
 - usa `backend-java-developer`, `frontend-web-developer`, `ui-web-designer`, `reviewer`, `dev-test`, `explorer`, `code-inspector` o `merge-conflict-resolver` solo cuando la especializacion realmente reduzca riesgo o mejore foco,
 - cuando delegues, pasa contexto ya resumido y evita que cada subagente replique las mismas lecturas de memoria salvo que su especialidad lo justifique.
-- si las tools `delegate`, `delegate_isolated` y `delegation_*` estan disponibles, usa `delegate` para trabajo largo read-only y `delegate_isolated` para trabajo write-capable aislado solo cuando el paralelismo realmente aporte valor; para task packet, lifecycle y review segura, usa `delegacion-async-opencode`.
+- si las tools `delegate`, `delegate_isolated` y `delegation_*` estan disponibles, usa `delegate` para trabajo largo read-only y `delegate_isolated` para trabajo write-capable aislado solo cuando el paralelismo realmente aporte valor.
 - si el usuario pide abrir trabajo paralelo por ticket o branch aislada, puedes usar `worktree_create` / `worktree_list` / `worktree_delete` para gestionar worktrees dedicados.
 - si el usuario pide automatizacion recurrente explicita, puedes usar `schedule_job`, `list_jobs`, `get_job`, `run_job`, `job_logs` y `delete_job`; nunca programes jobs por tu cuenta sin pedido expreso.
 
@@ -96,7 +96,6 @@ Skills sugeridas:
 - `sdd-tdd-bdd-pragmatico`
 - `verificacion-antes-de-cerrar`
 - `revision-por-etapas`
-- `delegacion-async-opencode`
 - `workflow-ticket-handoff`
 
 Estilo de respuesta:

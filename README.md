@@ -7,7 +7,6 @@ Stack portable y versionable de OpenCode con:
 - skills globales,
 - skills de debugging, verificacion y review por etapas,
 - skill global para SDD/TDD/BDD pragmático y trazabilidad spec -> cambio -> validación,
-- plugin async con delegación read-only y worktrees aislados,
 - helpers opcionales para Jira/tickets y cleanup de sesiones,
 - integración con Playwright headless,
 - integración opcional con Stitch,
@@ -22,7 +21,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `agents/`: agentes y subagentes custom
 - `commands/`: comandos reutilizables para tickets y mantenimiento
 - `skills/`: skills globales
-- `plugins/`: plugins async server/TUI
+- `plugins/`: plugins globales base del stack
 - `patches/`: reservado para patches versionados sobre dependencias externas cuando el stack base realmente los necesite
 - `scripts/`: installers y utilidades de bootstrap
 - `README-AGENTS.md`: esquema de agentes efectivo
@@ -31,7 +30,6 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
 - `COMPOSITION-MANIFEST.md`: mapa maestro del modelo de composición entre stack base, addons globales, runtime background y overlays locales
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
-- `PLAYBOOK-ASYNC.md`: playbook operativo async
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
 - `STACK-MANIFEST.json`: versión y assets administrados
 - `CHANGELOG.md`: cambios relevantes del stack
@@ -67,7 +65,6 @@ Ese script:
 - helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
 - helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
-- delegaciones async con cola, cancelación, progreso incremental y continuación read-only
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - identidad y atribución multiagente para sesiones complejas
 - workflow de worktrees por ticket con herramientas globales para crear/listar/borrar worktrees
@@ -128,7 +125,10 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 
 ## Addons opcionales fuera del stack base
 
+- `super-turing-opencode-background`: runtime gestionado, patch host/core versionado y UX async/background.
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
+
+El stack base puede convivir con esos addons, pero no los distribuye ni los instala por sí mismo.
 
 Para la composición real entre stack base, addons globales, runtime background y overlays locales, ver también `COMPOSITION-MANIFEST.md`.
 
@@ -136,15 +136,6 @@ Para la composición real entre stack base, addons globales, runtime background 
 
 - `worktree_create` / `worktree_list` / `worktree_delete`: flujo global para trabajo paralelo por ticket usando git worktrees con config repo-local `.opencode/worktree.jsonc`, sync configurable y apertura best-effort de terminal nueva.
 - `schedule_job` / `list_jobs` / `get_job` / `run_job` / `job_logs` / `delete_job`: automatización recurrente explícita por scope de workdir, con logs, locks, timeout opcional y ejecución no interactiva. Backend inicial: cron supervisado.
-
-## Nota sobre `delegate_isolated`
-
-`delegate_isolated` depende de la API de worktrees de OpenCode.
-
-- en sesiones server-backed funciona como se espera,
-- en algunos `opencode run` locales directos puede fallar porque `/experimental/worktree` no está expuesto.
-
-Si necesitás ese flujo de forma confiable, usar una sesión con server/attach. Ver `INSTALLATION.md` y `PLAYBOOK-ASYNC.md`.
 
 ## Supuestos actuales
 

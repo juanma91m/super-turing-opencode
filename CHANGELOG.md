@@ -14,6 +14,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- el stack base deja de distribuir los assets canónicos de background async; esa capacidad pasa a depender del addon externo `super-turing-opencode-background`
 - el notifier del SO deja de formar parte del stack base y pasa al addon externo `super-turing-opencode-notifier`
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier
 - `master-dev` y `README-AGENTS.md` ahora derivan más detalle procedural a los skills `delegacion-async-opencode` y `overlays-locales-opencode` para mantener prompts y referencia global más compactos

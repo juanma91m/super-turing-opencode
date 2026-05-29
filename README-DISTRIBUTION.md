@@ -8,7 +8,6 @@ Tener un bundle reproducible que instale:
 
 - agentes y subagentes custom,
 - skills globales,
-- plugin async,
 - documentación operativa,
 - integración MCP con Context7, Stitch y Playwright,
 - política headless para Playwright,
@@ -27,7 +26,6 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `LOCAL-OVERLAY-TEMPLATE.md`
 - `PLAYBOOK-CODE-PATTERNS.md`
 - `PLAYBOOK-LOCAL-OVERLAYS.md`
-- `PLAYBOOK-ASYNC.md`
 - `README-DISTRIBUTION.md`
 - `CHANGELOG.md`
 - `README.md`
@@ -66,6 +64,8 @@ La idea es tratar este directorio como un repo/versionable de stack:
 4. los secretos y rutas locales quedan fuera del bundle.
 
 Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
+
+En particular, la capacidad async/background con patch host/core y runtime gestionado vive en `super-turing-opencode-background`, no en el bundle base.
 
 Para el modelo de composición efectivo entre stack base, addons globales, runtime background y overlays locales, ver `COMPOSITION-MANIFEST.md`.
 
@@ -179,15 +179,6 @@ Esto:
 
 - `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base o setup inicial de Playwright.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
-
-## Limitación conocida de `delegate_isolated`
-
-`delegate_isolated` requiere que la sesión tenga acceso a la API `/experimental/worktree` de OpenCode.
-
-- En sesiones server-backed funciona bien.
-- En algunos `opencode run` locales directos puede no estar disponible.
-
-En ese caso, el sistema ahora devuelve un error explícito recomendando usar `opencode serve` + `opencode run --attach ...` para ese flujo.
 
 ## Helpers opcionales de Jira
 

@@ -7,7 +7,6 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 - agentes y subagentes globales,
 - commands globales,
 - skills globales,
-- plugins async server/TUI,
 - helpers Jira/session cleanup,
 - configuración MCP para Context7, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
@@ -40,11 +39,19 @@ Ese comando:
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs base según disponibilidad local,
-- asegura `~/.config/opencode/tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
 El stack base no incluye addons externos opcionales.
+
+Si querés la capacidad async/background completa, instalar además `super-turing-opencode-background`.
+
+Ese addon es el dueño canónico de:
+
+- delegaciones async/background,
+- patch host/core requerido por versión,
+- UX TUI de Background Tasks,
+- managed local install en `~/.opencode`.
 
 ### 3. Completar secretos opcionales
 
@@ -88,20 +95,6 @@ Opcionalmente, correr:
 opencode debug config
 ```
 
-Y si querés validar la UX visual async en una TUI foreground real:
-
-```bash
-opencode ~/.local/src/opencode-stack
-```
-
-Dentro de esa sesión, usar:
-
-```text
-/bg-tasks
-```
-
-Ese comando abre la lista TUI de delegaciones del proyecto actual y permite navegar a la sesión hija cuando exista `sessionID`.
-
 La idea es:
 
 - el installer ya intenta ejecutar `stack-doctor`,
@@ -139,32 +132,6 @@ Usar:
 bash scripts/sync-opencode-stack.sh --status
 bash scripts/sync-opencode-stack.sh
 ```
-
-## Nota importante sobre `delegate_isolated`
-
-`delegate_isolated` usa la API `/experimental/worktree` de OpenCode.
-
-### Funciona mejor en sesiones server-backed
-
-Por ejemplo:
-
-```bash
-opencode serve --port 4104
-opencode run --attach http://127.0.0.1:4104 --agent master-dev "..."
-```
-
-### Limitación conocida
-
-En algunos usos de `opencode run` local directo (sin `--attach`), la API de worktree puede no estar expuesta y `delegate_isolated` fallará con un mensaje claro indicando que necesita una sesión con soporte de worktree.
-
-Eso **no afecta**:
-
-- `delegate` read-only,
-- `delegation_read`,
-- `delegation_tail`,
-- `delegation_cancel`,
-- `delegation_continue`,
-- `/bg-tasks` dentro de una TUI foreground ya conectada.
 
 ## Qué NO migra automáticamente
 

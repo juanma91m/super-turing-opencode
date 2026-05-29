@@ -22,7 +22,7 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 | Componente | Repo canónico | Superficie principal | Regla de ownership |
 |---|---|---|---|
 | Stack base | `opencode-stack` | `~/.config/opencode/` | base reusable; no describe por sí solo la composición final cuando hay addons activos |
-| Background | `super-turing-opencode-background` | `~/.opencode/` + plugins async globales | dueño canónico del modelo async/background, del lifecycle y de los patches host/core versionados |
+| Background | `super-turing-opencode-background` | `~/.opencode/` + plugins async globales | dueño canónico del modelo async/background, del lifecycle y de los patches host/core versionados; el stack base no distribuye esos assets |
 | Knowledge | `super-turing-opencode-knowledge` | `~/.config/opencode/` + runtime Engram/Qdrant | dueño de assets de knowledge y de augment aditivo de autonomía |
 | Ticketing | `super-turing-opencode-ticketing` | `~/.config/opencode/` | dueño de workflow de tickets, coupling y augment aditivo de autonomía |
 | Notifier | `super-turing-opencode-notifier` | `~/.config/opencode/plugins/opencode-notify.ts` | dueño del plugin de notificaciones del SO |
@@ -105,7 +105,7 @@ La expectativa operativa es:
 
 > instalar `super-turing-opencode-background` debe alcanzar para instalar todo lo necesario del sistema async/background: plugin, patch host/core requerido y runtime productivo gestionado.
 
-Si el stack base conserva copias de plugins background por compatibilidad o conveniencia, deben tratarse como mirror explícito del repo `super-turing-opencode-background`, no como source of truth paralelo.
+El stack base no debería distribuir assets canónicos de background. La funcionalidad async/background completa debe instalarse desde `super-turing-opencode-background`.
 
 ## Cómo interpretar status en un entorno compuesto
 

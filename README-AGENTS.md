@@ -5,8 +5,6 @@ Este archivo documenta el **esquema efectivo de agentes** disponible en esta ins
 - agentes **base** provistos por OpenCode,
 - agentes y subagentes **custom globales** instalados en `~/.config/opencode/`.
 
-Playbook operativo async: `~/.config/opencode/PLAYBOOK-ASYNC.md`
-
 Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.md`
 
 Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
@@ -51,7 +49,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `analisis-tecnico-evidencia`: separa hechos, inferencias, riesgos e informacion faltante.
 - `cambio-seguro-enterprise`: prioriza cambios minimos, seguros y auditables en sistemas enterprise o legacy.
 - `debugging-sistematico`: obliga a investigar causa raiz antes de proponer fixes.
-- `delegacion-async-opencode`: resume el workflow async de OpenCode para delegaciones read-only e isolated-write con task packet, lifecycle y review segura.
 - `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
@@ -72,7 +69,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/ticket-validate <ticket>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
-- `/bg-tasks` (solo TUI foreground)
 - `/check-local-overlays`
 - `/check-code-patterns [args]`
 - `/find-code-pattern [args]`
@@ -91,7 +87,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - SDD/TDD/BDD se aplican como heurística pragmática: usar criterios de aceptación, escenarios y test-first cuando aclaran o reducen riesgo; no forzarlos en microcambios triviales ni en zonas donde el harness vuelva el ritual más caro que útil.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
-- La UX async se divide entre plugin server y plugin TUI. Para task packet, lifecycle, nested, artifacts y apply/review de delegaciones, referirse a `delegacion-async-opencode` y `PLAYBOOK-ASYNC.md`.
+- Si el addon externo `super-turing-opencode-background` está instalado, puede exponer tools y UX async adicionales sin volverlo parte del stack base.
 - Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.
 - Las herramientas de worktree y scheduler deben usarse solo bajo pedido explícito del usuario.
 - Playwright MCP queda en modo headless/no interactivo por defecto; si una inspección visual headed/manual realmente conviene, debe pedirse confirmación explícita en foreground.
