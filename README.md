@@ -29,6 +29,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `LOCAL-OVERLAY-TEMPLATE.md`: plantilla base para overlays locales aditivos por proyecto
 - `PLAYBOOK-CODE-PATTERNS.md`: guía operativa para integrar Semgrep y ast-grep por proyecto
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
+- `COMPOSITION-MANIFEST.md`: mapa maestro del modelo de composición entre stack base, addons globales, runtime background y overlays locales
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
 - `PLAYBOOK-ASYNC.md`: playbook operativo async
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
@@ -128,6 +129,8 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 ## Addons opcionales fuera del stack base
 
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
+
+Para la composición real entre stack base, addons globales, runtime background y overlays locales, ver también `COMPOSITION-MANIFEST.md`.
 
 ## Tools globales nuevos
 

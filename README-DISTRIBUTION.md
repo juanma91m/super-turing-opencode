@@ -67,6 +67,8 @@ La idea es tratar este directorio como un repo/versionable de stack:
 
 Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
 
+Para el modelo de composición efectivo entre stack base, addons globales, runtime background y overlays locales, ver `COMPOSITION-MANIFEST.md`.
+
 ## Modelo de especialización local por proyecto
 
 Este stack global está pensado para ser la base reusable. Cuando un repo necesite especialización local con `.opencode/`, el patrón recomendado es:

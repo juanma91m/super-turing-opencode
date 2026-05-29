@@ -10,6 +10,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
 - skill global `sdd-tdd-bdd-pragmatico` para conectar especificación, comportamiento esperado y estrategia de validación sin imponer workflow rígido
+- `COMPOSITION-MANIFEST.md` para documentar el modelo de composición entre stack base, addons, runtime background y overlays locales
 
 ### Changed
 
