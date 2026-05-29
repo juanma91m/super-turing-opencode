@@ -16,6 +16,28 @@ TO_UPDATE=()
 UNCHANGED_COUNT=0
 MISSING_SOURCE_COUNT=0
 
+is_managed_by_addon() {
+  local rel_path="$1"
+
+  if [[ -f "$TARGET_DIR/.opencode-ticketing-addon.json" ]]; then
+    case "$rel_path" in
+      LOCAL-OVERLAY-TEMPLATE.md|commands/check-local-overlays.md|commands/init-project-agent-layer.md|commands/ticket-implement.md|commands/ticket-plan.md|commands/ticket-refresh.md|commands/ticket-validate.md|commands/ticket-verdict.md|scripts/check_local_overlays.py|scripts/check_local_overlays.sh|scripts/jira_api_read.py|scripts/jira_helper.sh|skills/overlays-locales-opencode/SKILL.md|skills/workflow-ticket-handoff/SKILL.md|agents/agent-design.md|agents/master-dev.md|agents/planner.md)
+        return 0
+        ;;
+    esac
+  fi
+
+  if [[ -f "$HOME/.opencode/.opencode-background-addon.json" ]]; then
+    case "$rel_path" in
+      plugins/background-agents.ts|plugins/background-agents-tui/index.ts)
+        return 0
+        ;;
+    esac
+  fi
+
+  return 1
+}
+
 usage() {
   cat <<'EOF'
 Usage: sync-opencode-stack.sh [options]
@@ -77,6 +99,10 @@ classify_files() {
   for rel_path in "${MANAGED_FILES[@]}"; do
     src="$SOURCE_DIR/$rel_path"
     dst="$TARGET_DIR/$rel_path"
+
+    if is_managed_by_addon "$rel_path"; then
+      continue
+    fi
 
     if [[ ! -e "$src" ]]; then
       warn "Managed file missing in source: $rel_path"
