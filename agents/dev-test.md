@@ -3,6 +3,9 @@ description: Crea o ajusta tests y ejecuta la validacion tecnica final con evide
 mode: subagent
 model: openai/gpt-5.4
 variant: xhigh
+tools:
+  "playwright_*": false
+  "stitch_*": false
 permission:
   edit: allow
   bash:

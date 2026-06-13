@@ -13,6 +13,15 @@ VALIDATE=1
 MANAGED_FILES=()
 
 WARNINGS=()
+ADDITIVE_RENDER_DIR=""
+
+cleanup_temp_artifacts() {
+  if [[ -n "$ADDITIVE_RENDER_DIR" && -d "$ADDITIVE_RENDER_DIR" ]]; then
+    rm -rf "$ADDITIVE_RENDER_DIR"
+  fi
+}
+
+trap cleanup_temp_artifacts EXIT
 
 usage() {
   cat <<'EOF'
@@ -101,6 +110,33 @@ copy_file() {
   fi
 
   run cp "$src" "$dst"
+}
+
+recompose_additive_agents() {
+  if [[ ! -f "$SOURCE_DIR/scripts/recompose_additive_agents.py" ]]; then
+    warn "No se encontró scripts/recompose_additive_agents.py; se omite recomposición de agentes aditivos"
+    return 0
+  fi
+
+  ADDITIVE_RENDER_DIR="$(mktemp -d)"
+  python3 "$SOURCE_DIR/scripts/recompose_additive_agents.py" render \
+    --source-dir "$SOURCE_DIR" \
+    --target-dir "$TARGET_DIR" \
+    --output-dir "$ADDITIVE_RENDER_DIR"
+
+  local rel_path src dst
+  for rel_path in agents/agent-design.md agents/master-dev.md agents/planner.md; do
+    src="$ADDITIVE_RENDER_DIR/$rel_path"
+    dst="$TARGET_DIR/$rel_path"
+    if [[ ! -f "$src" ]]; then
+      continue
+    fi
+    if [[ -f "$dst" ]] && cmp -s "$src" "$dst"; then
+      continue
+    fi
+    run mkdir -p "$(dirname "$dst")"
+    run cp "$src" "$dst"
+  done
 }
 
 detect_playwright_executable() {
@@ -351,6 +387,7 @@ for rel_path in "${MANAGED_FILES[@]}"; do
   copy_file "$rel_path"
 done
 
+recompose_additive_agents
 install_npm_dependencies
 render_opencode_config
 prune_backups

@@ -7,6 +7,7 @@ tools:
   apply_patch: false
   bash: false
   "playwright_*": true
+  "stitch_*": false
 permission:
   edit: deny
   bash: deny

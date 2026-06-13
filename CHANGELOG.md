@@ -9,11 +9,17 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - plugins globales `plugins/env-guard.ts` y `plugins/agent-identity.ts`
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
+- script `scripts/recompose_additive_agents.py` para recomponer prompts efectivos de `planner`, `master-dev` y `agent-design` en instalaciones compuestas con addons
 - skill global `sdd-tdd-bdd-pragmatico` para conectar especificación, comportamiento esperado y estrategia de validación sin imponer workflow rígido
 - `COMPOSITION-MANIFEST.md` para documentar el modelo de composición entre stack base, addons, runtime background y overlays locales
 
 ### Changed
 
+- `planner`, `master-dev` y `agent-design` se compactan de nuevo para bajar costo fijo de contexto sin recortar sus guardrails principales
+- agentes no orientados a UI ahora recortan tools `stitch_*` y/o `playwright_*` cuando no aportan valor operativo claro, para bajar schemas visibles sin degradar flujos clave
+- `code-inspector` deja de forzar `variant: xhigh` como primer recorte conservador de costo en subagentes read-only acotados
+- `merge-conflict-resolver` deja de forzar `variant: xhigh` como recorte conservador en un agente de scope muy acotado
+- `install-opencode-stack.sh` y `sync-opencode-stack.sh` ahora recomponen automáticamente agentes aditivos cuando knowledge/ticketing están activos, en vez de dejar prompts compuestos stale
 - el stack base deja de distribuir los assets canónicos de background async; esa capacidad pasa a depender del addon externo `super-turing-opencode-background`
 - el notifier del SO deja de formar parte del stack base y pasa al addon externo `super-turing-opencode-notifier`
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier

@@ -3,6 +3,9 @@ description: Implementa cambios de backend Java enterprise con foco en compatibi
 mode: subagent
 model: openai/gpt-5.4
 variant: xhigh
+tools:
+  "playwright_*": false
+  "stitch_*": false
 permission:
   edit: allow
   bash:

@@ -2,7 +2,9 @@
 description: Analiza y resuelve conflictos de merge/rebase preservando la intención funcional de ambas ramas con bajo riesgo.
 mode: subagent
 model: openai/gpt-5.4
-variant: xhigh
+tools:
+  "playwright_*": false
+  "stitch_*": false
 permission:
   edit: allow
   bash:

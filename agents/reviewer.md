@@ -6,6 +6,8 @@ variant: xhigh
 tools:
   apply_patch: false
   bash: true
+  "playwright_*": false
+  "stitch_*": false
 permission:
   edit: deny
   bash:

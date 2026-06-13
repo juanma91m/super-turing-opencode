@@ -2,10 +2,11 @@
 description: Inspecciona el flujo actual del codigo y entrega contexto tecnico util sin editar ni ejecutar cambios riesgosos.
 mode: subagent
 model: openai/gpt-5.4
-variant: xhigh
 tools:
   apply_patch: false
   bash: true
+  "playwright_*": false
+  "stitch_*": false
 permission:
   edit: deny
   bash:

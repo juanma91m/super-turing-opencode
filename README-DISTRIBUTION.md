@@ -37,6 +37,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `scripts/sync-opencode-stack.sh`
 - `scripts/jira_helper.sh`
 - `scripts/jira_api_read.py`
+- `scripts/recompose_additive_agents.py`
 - `scripts/check_local_overlays.sh`
 - `scripts/check_local_overlays.py`
 - `scripts/check_code_patterns.sh`
@@ -154,6 +155,7 @@ Esto:
 
 - detecta diferencias entre el repo y `~/.config/opencode/`,
 - sincroniza solo archivos gestionados que cambiaron,
+- recompone automáticamente los agentes aditivos (`planner`, `master-dev`, `agent-design`) cuando knowledge/ticketing están instalados,
 - hace backup de los archivos reemplazados,
 - poda backups viejos automáticamente (retención base 5) y preserva snapshots marcados con `.pin`,
 - evita reinstalar dependencias pesadas innecesariamente.

@@ -37,6 +37,7 @@
     "scripts/jira_api_read.py",
     "scripts/jira_helper.sh",
     "scripts/prune_stack_backups.py",
+    "scripts/recompose_additive_agents.py",
     "scripts/check_local_overlays.py",
     "scripts/check_local_overlays.sh",
     "scripts/check_code_patterns.sh",

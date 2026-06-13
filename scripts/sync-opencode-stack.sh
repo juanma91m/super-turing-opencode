@@ -15,13 +15,28 @@ TO_CREATE=()
 TO_UPDATE=()
 UNCHANGED_COUNT=0
 MISSING_SOURCE_COUNT=0
+ADDITIVE_RENDER_DIR=""
+
+ADDITIVE_MANAGED_FILES=(
+  "agents/agent-design.md"
+  "agents/master-dev.md"
+  "agents/planner.md"
+)
+
+cleanup_temp_artifacts() {
+  if [[ -n "$ADDITIVE_RENDER_DIR" && -d "$ADDITIVE_RENDER_DIR" ]]; then
+    rm -rf "$ADDITIVE_RENDER_DIR"
+  fi
+}
+
+trap cleanup_temp_artifacts EXIT
 
 is_managed_by_addon() {
   local rel_path="$1"
 
   if [[ -f "$TARGET_DIR/.opencode-ticketing-addon.json" ]]; then
     case "$rel_path" in
-      LOCAL-OVERLAY-TEMPLATE.md|commands/check-local-overlays.md|commands/init-project-agent-layer.md|commands/ticket-implement.md|commands/ticket-plan.md|commands/ticket-refresh.md|commands/ticket-validate.md|commands/ticket-verdict.md|scripts/check_local_overlays.py|scripts/check_local_overlays.sh|scripts/jira_api_read.py|scripts/jira_helper.sh|skills/overlays-locales-opencode/SKILL.md|skills/workflow-ticket-handoff/SKILL.md|agents/agent-design.md|agents/master-dev.md|agents/planner.md)
+      LOCAL-OVERLAY-TEMPLATE.md|commands/check-local-overlays.md|commands/init-project-agent-layer.md|commands/ticket-implement.md|commands/ticket-plan.md|commands/ticket-refresh.md|commands/ticket-validate.md|commands/ticket-verdict.md|scripts/check_local_overlays.py|scripts/check_local_overlays.sh|scripts/jira_api_read.py|scripts/jira_helper.sh|skills/overlays-locales-opencode/SKILL.md|skills/workflow-ticket-handoff/SKILL.md)
         return 0
         ;;
     esac
@@ -60,6 +75,39 @@ run() {
   "$@"
 }
 
+is_additive_managed_file() {
+  local rel_path="$1"
+  local item
+  for item in "${ADDITIVE_MANAGED_FILES[@]}"; do
+    if [[ "$rel_path" == "$item" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+ensure_additive_render_dir() {
+  if [[ -n "$ADDITIVE_RENDER_DIR" ]]; then
+    return 0
+  fi
+
+  ADDITIVE_RENDER_DIR="$(mktemp -d)"
+  python3 "$SOURCE_DIR/scripts/recompose_additive_agents.py" render \
+    --source-dir "$SOURCE_DIR" \
+    --target-dir "$TARGET_DIR" \
+    --output-dir "$ADDITIVE_RENDER_DIR"
+}
+
+source_path_for_rel() {
+  local rel_path="$1"
+  if is_additive_managed_file "$rel_path"; then
+    ensure_additive_render_dir
+    printf '%s/%s\n' "$ADDITIVE_RENDER_DIR" "$rel_path"
+    return 0
+  fi
+  printf '%s/%s\n' "$SOURCE_DIR" "$rel_path"
+}
+
 load_managed_files() {
   if ! command -v python3 >/dev/null 2>&1; then
     printf 'python3 is required to read STACK-MANIFEST.json\n' >&2
@@ -89,7 +137,7 @@ classify_files() {
   local rel_path src dst
 
   for rel_path in "${MANAGED_FILES[@]}"; do
-    src="$SOURCE_DIR/$rel_path"
+    src="$(source_path_for_rel "$rel_path")"
     dst="$TARGET_DIR/$rel_path"
 
     if is_managed_by_addon "$rel_path"; then
@@ -149,14 +197,14 @@ apply_changes() {
   backup_dir="$TARGET_DIR/.stack-sync-backups/$timestamp"
 
   for rel_path in "${TO_CREATE[@]}"; do
-    src="$SOURCE_DIR/$rel_path"
+    src="$(source_path_for_rel "$rel_path")"
     dst="$TARGET_DIR/$rel_path"
     run mkdir -p "$(dirname "$dst")"
     run cp "$src" "$dst"
   done
 
   for rel_path in "${TO_UPDATE[@]}"; do
-    src="$SOURCE_DIR/$rel_path"
+    src="$(source_path_for_rel "$rel_path")"
     dst="$TARGET_DIR/$rel_path"
     run mkdir -p "$(dirname "$backup_dir/$rel_path")"
     run cp "$dst" "$backup_dir/$rel_path"
