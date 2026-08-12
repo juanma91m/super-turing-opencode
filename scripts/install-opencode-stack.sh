@@ -225,9 +225,31 @@ if playwright_exec:
 
 config = {
     "$schema": "https://opencode.ai/config.json",
+    "model": "openai/gpt-5.6-sol",
+    "small_model": "openai/gpt-5.6-sol",
     "agent": {
         "plan": {
             "disable": True,
+        },
+        "general": {
+            "model": "openai/gpt-5.6-sol",
+            "variant": "medium",
+        },
+        "explore": {
+            "model": "openai/gpt-5.6-sol",
+            "variant": "medium",
+        },
+        "title": {
+            "model": "openai/gpt-5.6-sol",
+            "variant": "low",
+        },
+        "summary": {
+            "model": "openai/gpt-5.6-sol",
+            "variant": "medium",
+        },
+        "compaction": {
+            "model": "openai/gpt-5.6-sol",
+            "variant": "medium",
         },
     },
     "permission": {

@@ -1,8 +1,8 @@
 ---
 description: Analiza requerimientos y tickets, aclara ambiguedades y arma un handoff tecnico accionable antes de implementar.
 mode: primary
-model: openai/gpt-5.4
-variant: xhigh
+model: openai/gpt-5.6-sol
+variant: high
 tools:
   "playwright_*": false
   "stitch_*": false

@@ -1,8 +1,8 @@
 ---
 description: Crea o ajusta tests y ejecuta la validacion tecnica final con evidencia clara y reproducible.
 mode: subagent
-model: openai/gpt-5.4
-variant: xhigh
+model: openai/gpt-5.6-sol
+variant: medium
 tools:
   "playwright_*": false
   "stitch_*": false

@@ -1,8 +1,8 @@
 ---
 description: Investiga documentacion web, herramientas, APIs, MCPs e integraciones con evidencia util y verificable.
 mode: primary
-model: openai/gpt-5.4
-variant: xhigh
+model: openai/gpt-5.6-sol
+variant: medium
 tools:
   apply_patch: false
   bash: false

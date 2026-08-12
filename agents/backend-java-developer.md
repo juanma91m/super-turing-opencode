@@ -1,8 +1,8 @@
 ---
 description: Implementa cambios de backend Java enterprise con foco en compatibilidad, bajo riesgo y validacion razonable.
 mode: subagent
-model: openai/gpt-5.4
-variant: xhigh
+model: openai/gpt-5.6-sol
+variant: medium
 tools:
   "playwright_*": false
   "stitch_*": false

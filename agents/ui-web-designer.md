@@ -1,8 +1,8 @@
 ---
 description: Diseña interfaces web y flujos UI usando convenciones web, Material UI, Stitch y Playwright, sin implementar codigo.
 mode: subagent
-model: openai/gpt-5.4
-variant: xhigh
+model: openai/gpt-5.6-sol
+variant: medium
 tools:
   apply_patch: false
   bash: false

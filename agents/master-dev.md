@@ -1,8 +1,8 @@
 ---
 description: Lidera y ejecuta trabajo tecnico en proyectos enterprise con foco en evidencia, cambios minimos y mantenibilidad.
 mode: primary
-model: openai/gpt-5.4
-variant: xhigh
+model: openai/gpt-5.6-sol
+variant: high
 tools:
   "stitch_*": false
 permission:
