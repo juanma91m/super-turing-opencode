@@ -6,6 +6,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- agente global `code-reviewer`, comandos `/code-review` y `/code-review-pr`, skill `code-review-branch-to-branch` y helper incremental para revisiones branch/PR de terceros
 - plugins globales `plugins/env-guard.ts` y `plugins/agent-identity.ts`
 - plugins globales `plugins/opencode-worktree.ts` y `plugins/opencode-scheduler.ts` (MVP: terminal spawn best-effort + scheduler cron supervisado)
 - script `scripts/prune_stack_backups.py` para poda automática de backups del stack con retención y soporte de `.pin`
@@ -15,6 +16,8 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `code-reviewer` ahora detiene PRs de otro repo, detecta discrepancias entre ticket explícito y título/rama, y registra hashes exactos para que cada aprobación sea reproducible
+- `reviewer` conserva su workflow post-solución; el nuevo `code-reviewer` separa la aprobación de desarrollos de terceros sin mezclar ambos procesos
 - `planner`, `master-dev` y `agent-design` se compactan de nuevo para bajar costo fijo de contexto sin recortar sus guardrails principales
 - agentes no orientados a UI ahora recortan tools `stitch_*` y/o `playwright_*` cuando no aportan valor operativo claro, para bajar schemas visibles sin degradar flujos clave
 - `code-inspector` deja de forzar `variant: xhigh` como primer recorte conservador de costo en subagentes read-only acotados

@@ -31,6 +31,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `frontend-web-developer`: implementador de capa de presentacion web en el stack real del proyecto, incluyendo Vaadin, React, Angular u otros.
 - `merge-conflict-resolver`: integra conflictos de merge/rebase preservando la intención funcional de ambas ramas.
 - `reviewer`: revisor tecnico centrado en riesgos, regresiones, compatibilidad, performance y validaciones pendientes.
+- `code-reviewer`: revisión independiente de desarrollos de terceros por ramas o Pull Request; guarda informes incrementales y evita observaciones cosméticas.
 - `ui-web-designer`: diseña interfaces y flujos web con criterio de UX, Material UI, Stitch y Playwright cuando haga falta. No implementa codigo; su foco es diseño y definicion visual.
 
 ## Agentes de soporte/base que pueden aparecer en OpenCode
@@ -48,6 +49,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `diseno-ui-web`: criterios de diseño web claros, accesibles e implementables, con fuerte referencia en Material UI.
 - `analisis-tecnico-evidencia`: separa hechos, inferencias, riesgos e informacion faltante.
 - `cambio-seguro-enterprise`: prioriza cambios minimos, seguros y auditables en sistemas enterprise o legacy.
+- `code-review-branch-to-branch`: criterio común para revisar ramas o Pull Requests con evidencia, severidad y umbral anti-ruido.
 - `debugging-sistematico`: obliga a investigar causa raiz antes de proponer fixes.
 - `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
@@ -72,6 +74,8 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/check-local-overlays`
 - `/check-code-patterns [args]`
 - `/find-code-pattern [args]`
+- `/code-review <rama-origen> <rama-destino>`
+- `/code-review-pr <url|numero|rama> [ticket-o-contexto]`
 - `/stack-doctor`
 - `/init-project-agent-layer <path>`
 
@@ -84,6 +88,8 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - El workflow `tmp/<ticket>/verdict.md` -> implementación -> `result-dev.md` es reusable pero opcional: activarlo solo cuando el proyecto adopta ese patrón.
 - `master-dev` lidera el trabajo técnico general; `ui-web-designer` define UX, `frontend-web-developer` implementa presentación y `backend-java-developer` cubre backend/datos. Delegar solo cuando la especialización aporte foco real.
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
+- `reviewer` conserva el workflow de verificación post-solución durante desarrollo propio; `code-reviewer` se usa para aprobar implementaciones de terceros y ambos comparten solo criterios técnicos reutilizables.
+- Antes de revisar un PR, `code-reviewer` valida repo actual vs URL, consistencia del ticket y snapshot de commits; un cambio posterior del head requiere una nueva revisión incremental.
 - SDD/TDD/BDD se aplican como heurística pragmática: usar criterios de aceptación, escenarios y test-first cuando aclaran o reducen riesgo; no forzarlos en microcambios triviales ni en zonas donde el harness vuelva el ritual más caro que útil.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
