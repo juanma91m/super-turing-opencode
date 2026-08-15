@@ -24,6 +24,7 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 | Stack base | `opencode-stack` | `~/.config/opencode/` | base reusable; no describe por sí solo la composición final cuando hay addons activos |
 | Background | `super-turing-opencode-background` | `~/.opencode/` + plugins async globales | dueño canónico del modelo async/background, del lifecycle y de los patches host/core versionados; el stack base no distribuye esos assets |
 | Knowledge | `super-turing-opencode-knowledge` | `~/.config/opencode/` + runtime Engram/Qdrant | dueño de assets de knowledge y de augment aditivo de autonomía |
+| CodeGraph | `super-turing-opencode-codegraph` | `~/.config/opencode/` + runtime global + `<repo>/.codegraph/` | dueño del runtime/MCP/wrappers de inteligencia estructural; cada índice permanece machine-local en su repository root |
 | Ticketing | `super-turing-opencode-ticketing` | `~/.config/opencode/` | dueño de workflow de tickets, coupling y augment aditivo de autonomía |
 | Notifier | `super-turing-opencode-notifier` | `~/.config/opencode/plugins/opencode-notify.ts` | dueño del plugin de notificaciones del SO |
 | GitHub accounts local | `super-turing-opencode-github-accounts-local` | `~/.config/opencode/skills/github-cuentas-multiples/` | addon privado y machine-local; dueño del mapeo cuenta/owner/alias SSH de esta máquina, sin credenciales |
@@ -35,16 +36,18 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 
 1. `opencode-stack`
 2. `super-turing-opencode-knowledge`
-3. `super-turing-opencode-ticketing`
-4. `super-turing-opencode-notifier`
-5. `super-turing-opencode-background`
-6. addons privados machine-local, cuando existan, como `super-turing-opencode-github-accounts-local`
-7. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
+3. `super-turing-opencode-codegraph`
+4. `super-turing-opencode-ticketing`
+5. `super-turing-opencode-notifier`
+6. `super-turing-opencode-background`
+7. addons privados machine-local, cuando existan, como `super-turing-opencode-github-accounts-local`
+8. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
 
 Racional:
 
 - el stack base instala la capa reusable común,
-- knowledge y ticketing enriquecen esa base,
+- knowledge, CodeGraph y ticketing enriquecen esa base con responsabilidades separadas,
+- CodeGraph centraliza runtime y consulta estructural sin centralizar los índices de cada repo,
 - notifier suma capacidad aislada,
 - background gobierna el runtime productivo y la UX async,
 - los addons machine-local agregan políticas específicas de la máquina sin contaminar la base portable,

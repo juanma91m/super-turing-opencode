@@ -4,10 +4,11 @@ Guía operativa para integrar herramientas de búsqueda y chequeo estructural de
 
 ## 1. Objetivo
 
-Este playbook cubre dos familias de herramientas:
+Este playbook cubre tres familias de herramientas:
 
 - **Semgrep**: reglas de análisis estático y checks repetibles.
 - **ast-grep**: búsqueda estructural y apoyo a refactors/localización de impacto.
+- **CodeGraph** (addon opcional): grafo persistente local para callers, flujos, blast radius y tests afectados.
 
 La idea no es correrlas en todos los tickets, sino activarlas cuando el cambio toca zonas sensibles o cuando su evidencia reduce riesgo real.
 
@@ -50,6 +51,17 @@ Usarla para:
 - mapear impacto antes de implementar,
 - preparar refactors repetitivos,
 - encontrar patrones sintácticos sin depender de regex frágiles.
+
+### CodeGraph
+
+Usarlo cuando el addon `super-turing-opencode-codegraph` esté instalado y el repo ya tenga índice para:
+
+- rastrear flujos entre archivos y capas,
+- mapear callers/callees y blast radius,
+- orientar selección de tests afectados,
+- reducir ciclos amplios de grep/read en repos grandes.
+
+El addon es dueño de runtime, MCP y wrappers. El stack base no genera ni administra `<repo>/.codegraph/`, y los agentes no deben inicializar índices autónomamente.
 
 ## 4. Comandos estándar del stack
 
@@ -142,3 +154,4 @@ Así los hallazgos quedan reutilizables para implementación/review/validación.
 - no volver Semgrep/ast-grep obligatorios para todos los tickets,
 - no tratar los findings como sustituto de criterio técnico,
 - no usar ast-grep para auto-rewrites masivos en la primera fase.
+- no tratar el grafo como prueba única de ausencia de dependencias ni compartir `.codegraph/` entre worktrees.

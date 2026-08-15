@@ -68,6 +68,8 @@ Las capabilities OS-specific o machine-local que no formen parte del control pla
 
 En particular, la capacidad async/background con patch host/core y runtime gestionado vive en `super-turing-opencode-background`, no en el bundle base.
 
+La inteligencia estructural CodeGraph también se distribuye como addon separado (`super-turing-opencode-codegraph`): administra su runtime y MCP global, mientras cada `<repo>/.codegraph/` permanece como estado machine-local regenerable.
+
 Las políticas con cuentas, owners o aliases SSH específicos de una máquina
 también deben vivir fuera del bundle portable. En esta instalación, ese
 ownership corresponde al addon privado `super-turing-opencode-github-accounts-local`,

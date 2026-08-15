@@ -6,6 +6,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- documentación e integración compositiva del addon externo `super-turing-opencode-codegraph`, dueño del runtime/MCP global y del lifecycle de índices estructurales machine-local por repo
 - documentación del addon privado `super-turing-opencode-github-accounts-local` como owner de políticas de identidad GitHub específicas de esta máquina
 - agente global `code-reviewer`, comandos `/code-review` y `/code-review-pr`, skill `code-review-branch-to-branch` y helper incremental para revisiones branch/PR de terceros
 - plugins globales `plugins/env-guard.ts` y `plugins/agent-identity.ts`
@@ -17,7 +18,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
-- `STACK-MANIFEST.json` sube a `0.8.9` y explicita que identidades/aliases machine-local no pertenecen al bundle portable
+- `STACK-MANIFEST.json` sube a `0.9.0` por la incorporación de CodeGraph al modelo formal de composición y mantiene identidades/aliases machine-local fuera del bundle portable
 - `code-reviewer` ahora detiene PRs de otro repo, detecta discrepancias entre ticket explícito y título/rama, y registra hashes exactos para que cada aprobación sea reproducible
 - `reviewer` conserva su workflow post-solución; el nuevo `code-reviewer` separa la aprobación de desarrollos de terceros sin mezclar ambos procesos
 - `planner`, `master-dev` y `agent-design` se compactan de nuevo para bajar costo fijo de contexto sin recortar sus guardrails principales

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.8.9",
+  "version": "0.9.0",
   "components": {
     "playwright": {
       "mode": "headless",
@@ -105,6 +105,7 @@
     "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
     "el stack base ya no distribuye los assets canónicos de background async; esa capacidad vive en el addon externo super-turing-opencode-background",
     "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync",
+    "la inteligencia estructural CodeGraph vive en el addon externo super-turing-opencode-codegraph; el stack base solo documenta su composición",
     "las políticas machine-local con identidades o aliases propios deben vivir en addons privados separados, no en el bundle portable",
     "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base"
   ]

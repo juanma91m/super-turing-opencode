@@ -53,6 +53,16 @@ Ese addon es el dueño canónico de:
 - UX TUI de Background Tasks,
 - managed local install en `~/.opencode`.
 
+Si querés inteligencia estructural sobre repositorios, instalar además `super-turing-opencode-codegraph`:
+
+```bash
+git clone git@github-juanma91m-v2:juanma91m/super-turing-opencode-codegraph.git
+cd super-turing-opencode-codegraph
+bash scripts/install.sh
+```
+
+Ese addon fija la versión de CodeGraph, registra el MCP global read-only y aporta wrappers para generar o adoptar `<repo>/.codegraph/`. Los índices siguen siendo machine-local por repository root y no forman parte del stack base ni de knowledge.
+
 ### 3. Completar secretos opcionales
 
 #### Stitch

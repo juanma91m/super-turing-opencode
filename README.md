@@ -126,6 +126,7 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 ## Addons opcionales fuera del stack base
 
 - `super-turing-opencode-background`: runtime gestionado, patch host/core versionado y UX async/background.
+- `super-turing-opencode-codegraph`: runtime/MCP global de inteligencia estructural, wrappers seguros e índices machine-local por repository root.
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
 - `super-turing-opencode-github-accounts-local`: política privada machine-local para seleccionar cuentas `gh` y aliases SSH sin versionar credenciales.
 
