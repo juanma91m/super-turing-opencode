@@ -68,6 +68,11 @@ Las capabilities OS-specific o machine-local que no formen parte del control pla
 
 En particular, la capacidad async/background con patch host/core y runtime gestionado vive en `super-turing-opencode-background`, no en el bundle base.
 
+Las políticas con cuentas, owners o aliases SSH específicos de una máquina
+también deben vivir fuera del bundle portable. En esta instalación, ese
+ownership corresponde al addon privado `super-turing-opencode-github-accounts-local`,
+que versiona la skill operativa pero nunca credenciales ni claves.
+
 Para el modelo de composición efectivo entre stack base, addons globales, runtime background y overlays locales, ver `COMPOSITION-MANIFEST.md`.
 
 ## Modelo de especialización local por proyecto

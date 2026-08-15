@@ -26,6 +26,7 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 | Knowledge | `super-turing-opencode-knowledge` | `~/.config/opencode/` + runtime Engram/Qdrant | dueño de assets de knowledge y de augment aditivo de autonomía |
 | Ticketing | `super-turing-opencode-ticketing` | `~/.config/opencode/` | dueño de workflow de tickets, coupling y augment aditivo de autonomía |
 | Notifier | `super-turing-opencode-notifier` | `~/.config/opencode/plugins/opencode-notify.ts` | dueño del plugin de notificaciones del SO |
+| GitHub accounts local | `super-turing-opencode-github-accounts-local` | `~/.config/opencode/skills/github-cuentas-multiples/` | addon privado y machine-local; dueño del mapeo cuenta/owner/alias SSH de esta máquina, sin credenciales |
 | Overlay Higyrus | `super-turing-opencode-higyrus` | `higyrus/.opencode/`, `higyrus/AGENTS.md`, `higyrus/opencode.json` | dueño del overlay local del proyecto Higyrus |
 
 ## Orden recomendado de composición
@@ -37,7 +38,8 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 3. `super-turing-opencode-ticketing`
 4. `super-turing-opencode-notifier`
 5. `super-turing-opencode-background`
-6. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
+6. addons privados machine-local, cuando existan, como `super-turing-opencode-github-accounts-local`
+7. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
 
 Racional:
 
@@ -45,6 +47,7 @@ Racional:
 - knowledge y ticketing enriquecen esa base,
 - notifier suma capacidad aislada,
 - background gobierna el runtime productivo y la UX async,
+- los addons machine-local agregan políticas específicas de la máquina sin contaminar la base portable,
 - los overlays locales aterrizan la especialización repo-específica encima de todo lo anterior.
 
 ## Reglas de composición
@@ -106,6 +109,16 @@ La expectativa operativa es:
 > instalar `super-turing-opencode-background` debe alcanzar para instalar todo lo necesario del sistema async/background: plugin, patch host/core requerido y runtime productivo gestionado.
 
 El stack base no debería distribuir assets canónicos de background. La funcionalidad async/background completa debe instalarse desde `super-turing-opencode-background`.
+
+## Nota específica sobre políticas machine-local
+
+Identidades, aliases SSH, rutas o mappings propios de una máquina no deben entrar
+al stack base portable. Cuando necesiten versionado y lifecycle, deben vivir en
+un addon privado separado que:
+
+- no copie tokens, claves ni credential stores,
+- administre solo sus assets declarados,
+- y mantenga `install`, `status` y `uninstall` propios.
 
 ## Cómo interpretar status en un entorno compuesto
 

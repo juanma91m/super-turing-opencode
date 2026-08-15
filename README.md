@@ -127,8 +127,9 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 
 - `super-turing-opencode-background`: runtime gestionado, patch host/core versionado y UX async/background.
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
+- `super-turing-opencode-github-accounts-local`: política privada machine-local para seleccionar cuentas `gh` y aliases SSH sin versionar credenciales.
 
-El stack base puede convivir con esos addons, pero no los distribuye ni los instala por sí mismo.
+El stack base puede convivir con esos addons, pero no los distribuye ni los instala por sí mismo. Los addons machine-local deben permanecer privados o parametrizarse antes de reutilizarlos en otra máquina.
 
 Para la composición real entre stack base, addons globales, runtime background y overlays locales, ver también `COMPOSITION-MANIFEST.md`.
 
