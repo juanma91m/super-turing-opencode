@@ -1,6 +1,6 @@
 import type { Plugin } from "@opencode-ai/plugin"
 
-const ENV_FILE_PATTERN = /(^|\/|\\)\.env($|\.)/i
+const ENV_FILE_PATTERN = /(^|[\s'"/\\])\.env($|[.\s'"/\\])/i
 const ENV_EXAMPLE_PATTERN = /(^|\/|\\)\.env\.example$/i
 
 function normalizePath(input: string): string {
@@ -11,6 +11,10 @@ function isProtectedEnvPath(input: string): boolean {
   const normalized = normalizePath(input)
   if (ENV_EXAMPLE_PATTERN.test(normalized)) return false
   return ENV_FILE_PATTERN.test(normalized)
+}
+
+function containsProtectedEnvReference(input: string): boolean {
+  return ENV_FILE_PATTERN.test(normalizePath(input).replace(/\.env\.example/gi, ""))
 }
 
 function extractCandidatePaths(args: Record<string, unknown> | undefined): string[] {
@@ -45,6 +49,16 @@ const BLOCKED_TOOLS = new Set(["read", "edit", "write", "patch", "multiedit", "a
 
 const EnvGuardPlugin: Plugin = async () => ({
   "tool.execute.before": async (input, output) => {
+    if (input.tool === "bash") {
+      const command = (output.args as Record<string, unknown> | undefined)?.command
+      if (typeof command !== "string" || !containsProtectedEnvReference(command)) return
+      throw new Error(
+        `Accessing sensitive .env* files through Bash is blocked by the global stack guard. ` +
+          `Use explicit secret-safe workflows instead of exposing raw secrets. ` +
+          `Only .env.example is allowed for normal operations.`,
+      )
+    }
+
     if (!BLOCKED_TOOLS.has(input.tool)) return
 
     const paths = extractCandidatePaths(output.args as Record<string, unknown> | undefined)

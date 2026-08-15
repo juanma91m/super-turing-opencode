@@ -6,6 +6,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- plugin `permission-autopilot` para autoaprobar operaciones cotidianas sin eliminar confirmaciones destructivas; `env-guard` ahora bloquea también referencias `.env*` desde Bash
 - documentación e integración compositiva del addon externo `super-turing-opencode-codegraph`, dueño del runtime/MCP global y del lifecycle de índices estructurales machine-local por repo
 - documentación del addon privado `super-turing-opencode-github-accounts-local` como owner de políticas de identidad GitHub específicas de esta máquina
 - agente global `code-reviewer`, comandos `/code-review` y `/code-review-pr`, skill `code-review-branch-to-branch` y helper incremental para revisiones branch/PR de terceros
@@ -18,6 +19,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.10.0` por el nuevo perfil central de permisos de confianza alta controlada
 - `STACK-MANIFEST.json` sube a `0.9.0` por la incorporación de CodeGraph al modelo formal de composición y mantiene identidades/aliases machine-local fuera del bundle portable
 - `code-reviewer` ahora detiene PRs de otro repo, detecta discrepancias entre ticket explícito y título/rama, y registra hashes exactos para que cada aprobación sea reproducible
 - `reviewer` conserva su workflow post-solución; el nuevo `code-reviewer` separa la aprobación de desarrollos de terceros sin mezclar ambos procesos

@@ -28,6 +28,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `LOCAL-OVERLAY-TEMPLATE.md`: plantilla base para overlays locales aditivos por proyecto
 - `PLAYBOOK-CODE-PATTERNS.md`: guía operativa para integrar Semgrep y ast-grep por proyecto
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
+- `PLAYBOOK-PERMISSIONS.md`: política central de autoaprobación cotidiana y confirmación destructiva
 - `COMPOSITION-MANIFEST.md`: mapa maestro del modelo de composición entre stack base, addons globales, runtime background y overlays locales
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
@@ -66,6 +67,7 @@ Ese script:
 - helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
+- autopilot de permisos para autoaprobar operaciones cotidianas y conservar confirmación en comandos destructivos, credenciales, infraestructura y publicación
 - identidad y atribución multiagente para sesiones complejas
 - workflow de worktrees por ticket con herramientas globales para crear/listar/borrar worktrees
 - scheduler global para jobs recurrentes explícitos con logs, locks y timeout opcional
