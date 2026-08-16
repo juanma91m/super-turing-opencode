@@ -21,6 +21,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.11.1`; el installer omite el header `{file:...}` de Stitch cuando no existe `stitch-api-key`, evitando una configuración global inválida aunque el MCP esté deshabilitado
 - `STACK-MANIFEST.json` sube a `0.11.0` por el instalador de distribución completa desacoplado
 - `STACK-MANIFEST.json` sube a `0.10.1`; `permission-autopilot` aplica también
   el perfil Bash seguro durante `config` para builds que no ejecutan el hook

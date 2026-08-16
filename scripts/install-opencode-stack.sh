@@ -223,6 +223,18 @@ playwright_exec = os.environ.get("PLAYWRIGHT_EXECUTABLE", "")
 if playwright_exec:
     playwright_command.extend(["--executable-path", playwright_exec])
 
+stitch_config = {
+    "type": "remote",
+    "url": "https://stitch.googleapis.com/mcp",
+    "enabled": stitch_enabled,
+    "timeout": 300000,
+    "oauth": False,
+}
+if stitch_enabled:
+    stitch_config["headers"] = {
+        "X-Goog-Api-Key": "{file:%s}" % os.environ["STITCH_KEY_FILE"],
+    }
+
 config = {
     "$schema": "https://opencode.ai/config.json",
     "model": "openai/gpt-5.6-sol",
@@ -272,16 +284,7 @@ config = {
             "command": playwright_command,
             "enabled": playwright_enabled,
         },
-        "stitch": {
-            "type": "remote",
-            "url": "https://stitch.googleapis.com/mcp",
-            "enabled": stitch_enabled,
-            "timeout": 300000,
-            "oauth": False,
-            "headers": {
-                "X-Goog-Api-Key": "{file:%s}" % os.environ["STITCH_KEY_FILE"],
-            },
-        },
+        "stitch": stitch_config,
     },
 }
 
