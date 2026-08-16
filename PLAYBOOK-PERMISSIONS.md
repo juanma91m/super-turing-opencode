@@ -7,16 +7,29 @@ Reducir prompts repetitivos de `allow/deny` sin convertir la instalación en un
 
 ## Mecanismo
 
-`plugins/permission-autopilot.ts` interviene únicamente cuando OpenCode ya
-resolvió una operación como `ask`:
+`plugins/permission-autopilot.ts` aplica el perfil en dos capas:
 
-- autoaprueba operaciones cotidianas clasificadas como de bajo riesgo,
-- deja el estado en `ask` cuando detecta una operación sensible,
+- durante `config`, convierte los perfiles Bash con default `ask` en default
+  `allow` y agrega reglas `ask` para comandos sensibles,
+- conserva intactos los perfiles Bash cuyo default es `deny`,
+- y mantiene `permission.ask` como segunda barrera para runtimes que ejecutan
+  ese hook antes de mostrar el diálogo.
+
+La capa de configuración es necesaria porque algunos builds de OpenCode
+publican el evento de permiso sin ejecutar el hook `permission.ask`. Con este
+fallback, las operaciones cotidianas se resuelven antes de crear el diálogo:
+
+- se permiten operaciones cotidianas clasificadas como de bajo riesgo,
+- se mantiene `ask` para operaciones sensibles,
 - no modifica reglas que ya resolvieron en `deny`,
 - y no autoaprueba permisos desconocidos.
 
 Esto permite conservar los perfiles read-only y los overlays existentes sin
 duplicar la misma lista en cada agente.
+
+Las reglas Bash usan el orden de OpenCode: gana la última coincidencia. El
+plugin coloca primero el `allow` general, después los comandos sensibles en
+`ask` y al final cualquier `deny` explícito que ya existiera.
 
 ## Operaciones autoaprobadas
 
@@ -60,5 +73,6 @@ Después de modificar la política:
 1. ejecutar typecheck sobre ambos plugins,
 2. validar casos seguros y riesgosos del clasificador,
 3. sincronizar el stack,
-4. ejecutar `opencode debug config`,
+4. ejecutar `opencode debug config` y comprobar el perfil Bash efectivo de un
+   agente mutable y de uno read-only,
 5. reiniciar OpenCode porque los plugins se cargan al iniciar la sesión.

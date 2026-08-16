@@ -19,6 +19,9 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.10.1`; `permission-autopilot` aplica también
+  el perfil Bash seguro durante `config` para builds que no ejecutan el hook
+  `permission.ask`, preservando los defaults `deny` de agentes read-only
 - `STACK-MANIFEST.json` sube a `0.10.0` por el nuevo perfil central de permisos de confianza alta controlada
 - `STACK-MANIFEST.json` sube a `0.9.0` por la incorporación de CodeGraph al modelo formal de composición y mantiene identidades/aliases machine-local fuera del bundle portable
 - `code-reviewer` ahora detiene PRs de otro repo, detecta discrepancias entre ticket explícito y título/rama, y registra hashes exactos para que cada aprobación sea reproducible

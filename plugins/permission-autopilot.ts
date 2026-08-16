@@ -1,4 +1,95 @@
-import type { Plugin } from "@opencode-ai/plugin"
+import type { Config, Plugin } from "@opencode-ai/plugin"
+
+type PermissionAction = "ask" | "allow" | "deny"
+type BashPermission = PermissionAction | Record<string, PermissionAction>
+
+const RISKY_BASH_PATTERNS = [
+  "sudo *",
+  "doas *",
+  "pkexec *",
+  "rm *",
+  "rmdir *",
+  "shred *",
+  "git reset *",
+  "git clean *",
+  "git rebase *",
+  "git checkout -- *",
+  "git restore *",
+  "git branch -D *",
+  "git branch -d *",
+  "git branch --delete *",
+  "git push *--force*",
+  "git push * -f*",
+  "git commit *--amend*",
+  "git tag -d *",
+  "git tag --delete *",
+  "gh repo delete *",
+  "gh repo rename *",
+  "gh repo archive *",
+  "gh repo transfer *",
+  "gh api * -X DELETE*",
+  "gh api * --method DELETE*",
+  "gh api * -X PATCH*",
+  "gh api * --method PATCH*",
+  "gh api * -X PUT*",
+  "gh api * --method PUT*",
+  "chmod *",
+  "chown *",
+  "chgrp *",
+  "setfacl *",
+  "kill *",
+  "killall *",
+  "pkill *",
+  "shutdown *",
+  "reboot *",
+  "poweroff *",
+  "halt *",
+  "systemctl stop *",
+  "systemctl disable *",
+  "systemctl mask *",
+  "systemctl restart *",
+  "dd *",
+  "fdisk *",
+  "parted *",
+  "mkfs*",
+  "wipefs *",
+  "docker system prune *",
+  "docker system rm *",
+  "docker volume prune *",
+  "docker volume rm *",
+  "docker image prune *",
+  "docker image rm *",
+  "docker container prune *",
+  "docker container rm *",
+  "docker compose down *-v*",
+  "docker compose down *--volumes*",
+  "kubectl delete *",
+  "helm uninstall *",
+  "terraform apply *",
+  "terraform destroy *",
+  "tofu apply *",
+  "tofu destroy *",
+  "dropdb *",
+  "mysqladmin drop *",
+  "psql *",
+  "mysql *",
+  "mongosh *",
+  "redis-cli *",
+  "alembic upgrade *",
+  "liquibase update *",
+  "flyway migrate *",
+  "prisma migrate deploy *",
+  "npm publish *",
+  "pnpm publish *",
+  "yarn npm publish *",
+  "mvn deploy *",
+  "gradle publish *",
+  "docker push *",
+  "bash -c *",
+  "sh -c *",
+  "zsh -c *",
+  "eval *",
+] as const
 
 const AUTO_ALLOW_PERMISSIONS = new Set([
   "bash",
@@ -82,7 +173,32 @@ export function permissionNeedsApproval(permission: string, patterns: readonly s
   return patterns.some((command) => RISKY_BASH.some((pattern) => pattern.test(command)))
 }
 
+export function controlledBashPermission(current?: BashPermission): BashPermission {
+  if (current === "deny") return current
+  if (typeof current === "object" && current["*"] === "deny") return current
+
+  const existing = typeof current === "object" ? Object.entries(current).filter(([pattern]) => pattern !== "*") : []
+  return Object.fromEntries([
+    ["*", "allow"],
+    ...existing.filter(([, action]) => action !== "deny"),
+    ...RISKY_BASH_PATTERNS.map((pattern) => [pattern, "ask"] as const),
+    ...existing.filter(([, action]) => action === "deny"),
+  ])
+}
+
+function applyControlledBashProfile(config: Config): void {
+  config.permission ??= {}
+  config.permission.bash = controlledBashPermission(config.permission.bash)
+
+  for (const agent of Object.values(config.agent ?? {})) {
+    if (!agent?.permission || typeof agent.permission !== "object") continue
+    if (agent.permission.bash === undefined) continue
+    agent.permission.bash = controlledBashPermission(agent.permission.bash)
+  }
+}
+
 const PermissionAutopilotPlugin: Plugin = async () => ({
+  config: async (config) => applyControlledBashProfile(config),
   "permission.ask": async (input, output) => {
     const normalized = normalizePermissionInput(input as PermissionAskInput)
     if (permissionNeedsApproval(normalized.permission, normalized.patterns)) return
