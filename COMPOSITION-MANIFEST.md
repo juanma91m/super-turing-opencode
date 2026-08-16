@@ -43,6 +43,28 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 7. addons privados machine-local, cuando existan, como `super-turing-opencode-github-accounts-local`
 8. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
 
+## Instalación orquestada
+
+El repo base expone un único entrypoint para bootstrap:
+
+```bash
+bash scripts/install.sh --main
+bash scripts/install.sh --complete
+```
+
+- `--main` instala únicamente la base reusable.
+- `--complete` instala base, Knowledge, CodeGraph, Ticketing, Notifier y
+  Background en el orden anterior.
+- el orquestador lee `distribution/addons.json`, clona o actualiza cada repo y
+  ejecuta su contrato estable `scripts/install.sh`;
+- la lógica interna, dependencias y lifecycle siguen siendo propiedad de cada
+  addon;
+- `github-accounts-local` y los overlays específicos quedan fuera del pack.
+
+Por diseño, el catálogo general solo debería cambiar cuando se agrega o quita
+un componente, o cuando cambia el orden de composición. Los cambios internos de
+un addon se resuelven dentro de su propio instalador.
+
 Racional:
 
 - el stack base instala la capa reusable común,

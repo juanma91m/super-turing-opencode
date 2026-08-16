@@ -4,12 +4,17 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 
 ## Qué instala
 
+El modo principal instala:
+
 - agentes y subagentes globales,
 - commands globales,
 - skills globales,
 - helpers Jira/session cleanup,
 - configuración MCP para Context7, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
+
+El modo completo agrega los cinco addons globales portables definidos en
+`distribution/addons.json`.
 
 ## Prerrequisitos mínimos
 
@@ -27,11 +32,33 @@ git clone <URL-DEL-REPO> opencode-stack
 cd opencode-stack
 ```
 
-### 2. Ejecutar el installer
+### 2. Elegir el modo de instalación
+
+#### Solo stack principal
 
 ```bash
-bash scripts/install-opencode-stack.sh
+bash scripts/install.sh --main
 ```
+
+#### Pack completo
+
+```bash
+bash scripts/install.sh --complete
+```
+
+Sin flags, en una terminal interactiva, el installer pregunta qué modo usar.
+
+El pack completo instala en este orden:
+
+1. stack base;
+2. Knowledge;
+3. CodeGraph;
+4. Ticketing;
+5. Notifier;
+6. Background.
+
+No incluye `super-turing-opencode-github-accounts-local` ni repos/overlays
+específicos de proyectos.
 
 Ese comando:
 
@@ -42,9 +69,12 @@ Ese comando:
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 
-El stack base no incluye addons externos opcionales.
+El stack base no absorbe addons externos. El modo completo solo los orquesta:
+clona o actualiza cada repo y ejecuta el `scripts/install.sh` mantenido por ese
+addon. La lista y el orden viven en `distribution/addons.json`.
 
-Si querés la capacidad async/background completa, instalar además `super-turing-opencode-background`.
+Si elegiste `--main` y después querés sumar async/background, podés instalar
+`super-turing-opencode-background` por separado.
 
 Ese addon es el dueño canónico de:
 
@@ -53,7 +83,8 @@ Ese addon es el dueño canónico de:
 - UX TUI de Background Tasks,
 - managed local install en `~/.opencode`.
 
-Si querés inteligencia estructural sobre repositorios, instalar además `super-turing-opencode-codegraph`:
+Si elegiste `--main` y después querés inteligencia estructural, podés instalar
+`super-turing-opencode-codegraph` por separado:
 
 ```bash
 git clone git@github-juanma91m-v2:juanma91m/super-turing-opencode-codegraph.git
@@ -63,7 +94,23 @@ bash scripts/install.sh
 
 Ese addon fija la versión de CodeGraph, registra el MCP global read-only y aporta wrappers para generar o adoptar `<repo>/.codegraph/`. Los índices siguen siendo machine-local por repository root y no forman parte del stack base ni de knowledge.
 
-### 3. Completar secretos opcionales
+### 3. Prerrequisitos adicionales del modo completo
+
+- acceso HTTPS a GitHub;
+- `bun` para compilar el runtime administrado de Background;
+- instalación local de OpenCode compatible con el modo managed-local-install;
+- Linux x64 para el lifecycle completo de Background actualmente soportado.
+
+Background prepara por sí mismo el checkout fuente OpenCode fijado por su
+manifest. Si alguno de estos requisitos falta, su instalador corta con un error
+explícito y se puede repetir el modo completo después de corregirlo.
+
+El lifecycle completo de Background opera sobre la instalación activa, por lo
+que `--complete` debe usar el target estándar `~/.config/opencode`. Un
+`--target-dir` alternativo sigue siendo válido para `--main`, pero no para el
+takeover administrado de Background.
+
+### 4. Completar secretos opcionales
 
 #### Stitch
 
@@ -130,7 +177,11 @@ Si querés ver qué haría el installer:
 
 ```bash
 bash scripts/install-opencode-stack.sh --dry-run --skip-npm-install --skip-playwright-install --no-validate
+bash scripts/install.sh --complete --dry-run --skip-addon-update --skip-npm-install --skip-playwright-install --no-validate
 ```
+
+`--workspace-dir` permite elegir dónde clonar addons; por defecto se usa el
+directorio padre del checkout del stack base.
 
 ## Mantenimiento normal después de instalar
 
@@ -147,6 +198,10 @@ bash scripts/sync-opencode-stack.sh
 
 - `~/.cache/ms-playwright/`
 - secretos fuera del repo (`stitch-api-key`, `.env` de proyectos, etc.)
+- tokens, claves SSH o sesiones de `gh`
+- Engram/Qdrant existentes: se migran con su backup/restore y configuración Cloud
+- índices `.codegraph/` de cada proyecto, porque son machine-local y regenerables
+- `github-accounts-local` y overlays específicos de proyectos
 
 
 ## Problemas frecuentes

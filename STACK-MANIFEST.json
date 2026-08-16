@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "components": {
     "playwright": {
       "mode": "headless",
@@ -12,6 +12,7 @@
     ".gitignore",
     "CHANGELOG.md",
     "COMPOSITION-MANIFEST.md",
+    "distribution/addons.json",
     "CONTEXT7-TECH-CATALOG.md",
     "INSTALLATION.md",
     "LOCAL-OVERLAY-TEMPLATE.md",
@@ -48,6 +49,8 @@
     "scripts/check_code_patterns.sh",
     "scripts/find_code_pattern.sh",
     "scripts/install-opencode-stack.sh",
+    "scripts/install-opencode-distribution.sh",
+    "scripts/install.sh",
     "scripts/session_cleanup.py",
     "scripts/session_cleanup.sh",
     "scripts/sync-opencode-stack.sh",
@@ -106,7 +109,9 @@
     "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales",
     "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
     "el stack base ya no distribuye los assets canónicos de background async; esa capacidad vive en el addon externo super-turing-opencode-background",
-    "addons externos opcionales no forman parte del bundle base ni del lifecycle de install/sync",
+    "install.sh ofrece modo main y complete; complete orquesta addons externos sin absorber su lifecycle",
+    "distribution/addons.json define únicamente altas, bajas y orden; cada addon conserva scripts/install.sh como contrato estable",
+    "github-accounts-local y los overlays específicos de proyecto están excluidos de la instalación completa",
     "la inteligencia estructural CodeGraph vive en el addon externo super-turing-opencode-codegraph; el stack base solo documenta su composición",
     "las políticas machine-local con identidades o aliases propios deben vivir en addons privados separados, no en el bundle portable",
     "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base"

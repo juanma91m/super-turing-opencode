@@ -40,8 +40,18 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 Guía completa paso a paso: `INSTALLATION.md`
 
 ```bash
-bash scripts/install-opencode-stack.sh
+bash scripts/install.sh --main
+bash scripts/install.sh --complete
 ```
+
+- `--main`: instala solo el stack base reusable.
+- `--complete`: instala el pack portable completo en orden canónico llamando al
+  instalador propio de cada addon.
+- sin flags, en una terminal interactiva, el script permite elegir el modo.
+
+La instalación completa incluye Knowledge, CodeGraph, Ticketing, Notifier y
+Background. No instala `github-accounts-local` ni overlays específicos de
+proyectos.
 
 Ese script:
 
@@ -51,6 +61,9 @@ Ese script:
 - regenera `opencode.json` según capacidades locales,
 - valida la config final cuando corresponde,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
+
+El entrypoint histórico `scripts/install-opencode-stack.sh` se conserva como
+lifecycle exclusivo de la base y como implementación del modo `--main`.
 
 ## Capacidades globales nuevas del workflow
 
@@ -96,15 +109,16 @@ Notas:
 - los backups viejos del stack se podan automáticamente con retención base de 5 snapshots por bucket, preservando cualquier snapshot marcado con `.pin`,
 - no reinstala Playwright ni addons externos,
 - no regenera `opencode.json`,
-- asegura `tui.json` para activar el plugin TUI async global sin pisar otros campos del archivo,
-- este repo también trae un `opencode.json` local con allowlists para `sync-opencode-stack.sh`, `install-opencode-stack.sh`, `opencode debug config` y git de mantenimiento habitual, para evitar prompts innecesarios al trabajar sobre el source-of-truth,
+- este repo también trae un `opencode.json` local con allowlists para sync/install, `opencode debug config` y git de mantenimiento habitual, para evitar prompts innecesarios al trabajar sobre el source-of-truth,
 - no instala ni sincroniza addons externos opcionales,
 - no debería usarse para secretos ni para migrar memoria.
 
 ## Regla de trabajo
 
 No editar `~/.config/opencode/` como fuente principal.
-Los cambios del stack deben hacerse en este repo y luego desplegarse con `sync-opencode-stack.sh` o, si hace falta bootstrap completo, con `install-opencode-stack.sh`.
+Los cambios del stack deben hacerse en este repo y luego desplegarse con
+`sync-opencode-stack.sh`; para bootstrap usar `install.sh --main` o
+`install.sh --complete` según el alcance deseado.
 
 Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overlay aditivo**:
 
@@ -132,7 +146,9 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
 - `super-turing-opencode-github-accounts-local`: política privada machine-local para seleccionar cuentas `gh` y aliases SSH sin versionar credenciales.
 
-El stack base puede convivir con esos addons, pero no los distribuye ni los instala por sí mismo. Los addons machine-local deben permanecer privados o parametrizarse antes de reutilizarlos en otra máquina.
+El stack base no absorbe el lifecycle de esos addons. El modo `--complete`
+orquesta los addons globales portables; los addons machine-local permanecen
+privados y fuera de esa instalación.
 
 Para la composición real entre stack base, addons globales, runtime background y overlays locales, ver también `COMPOSITION-MANIFEST.md`.
 
@@ -152,7 +168,7 @@ Para la composición real entre stack base, addons globales, runtime background 
 2. actualizar `STACK-MANIFEST.json` y `CHANGELOG.md` cuando corresponda,
 3. revisar drift con `scripts/sync-opencode-stack.sh --status`,
 4. sincronizar con `scripts/sync-opencode-stack.sh`,
-5. usar `scripts/install-opencode-stack.sh` solo para bootstrap o cambios de base más pesados,
+5. usar `scripts/install.sh --main` o `--complete` solo para bootstrap o cambios de base más pesados,
 6. validar con `opencode debug config`.
 
 Importante:

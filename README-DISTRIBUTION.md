@@ -34,6 +34,9 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `package.json`
 - `package-lock.json`
 - `scripts/install-opencode-stack.sh`
+- `scripts/install-opencode-distribution.sh`
+- `scripts/install.sh`
+- `distribution/addons.json`
 - `scripts/sync-opencode-stack.sh`
 - `scripts/jira_helper.sh`
 - `scripts/jira_api_read.py`
@@ -110,6 +113,7 @@ Para instrucciones al pie desde `git clone`, ver también `INSTALLATION.md`.
 
 - `opencode` instalado
 - `node`, `npm` y `npx`
+- para `--complete`: Linux x64, `bun` y una instalación local de OpenCode compatible con Background
 - opcional: `stitch-api-key` en `~/.config/opencode/stitch-api-key`
 
 ### Paso 1
@@ -118,13 +122,28 @@ Clonar, copiar o sincronizar este stack en cualquier directorio fuente.
 
 ### Paso 2
 
-Ejecutar:
+Elegir una instalación:
 
 ```bash
-bash scripts/install-opencode-stack.sh
+bash scripts/install.sh --main
+bash scripts/install.sh --complete
 ```
 
-Los addons externos opcionales se instalan después del bootstrap del stack base y no forman parte de `install-opencode-stack.sh` ni `sync-opencode-stack.sh`.
+- `--main` ejecuta únicamente el lifecycle base.
+- `--complete` clona/actualiza e instala Knowledge, CodeGraph, Ticketing,
+  Notifier y Background según `distribution/addons.json`.
+- sin modo explícito, una terminal interactiva muestra un selector.
+
+Cada addon expone `scripts/install.sh` como contrato estable. El orquestador no
+conoce su implementación interna, de modo que solo necesita cambiar el catálogo
+si se agrega/quita un repo o cambia el orden.
+
+La distribución completa **no instala** `github-accounts-local` ni ningún
+overlay específico de proyecto.
+
+“Completa” describe el software global portable; no copia secretos, memorias,
+Qdrant ni índices CodeGraph de proyectos. Esos estados conservan sus propios
+procedimientos de backup, restore o regeneración.
 
 Opciones útiles:
 
@@ -133,6 +152,8 @@ bash scripts/install-opencode-stack.sh --target-dir "$HOME/.config/opencode"
 bash scripts/install-opencode-stack.sh --dry-run
 bash scripts/install-opencode-stack.sh --skip-playwright-install
 bash scripts/install-opencode-stack.sh --skip-npm-install
+bash scripts/install.sh --complete --workspace-dir "$HOME/.local/src"
+bash scripts/install.sh --complete --dry-run --skip-addon-update
 ```
 
 ### Paso 3
@@ -184,9 +205,23 @@ Esto:
   - Stitch: habilitado si existe `stitch-api-key`
   - Playwright: habilitado si se pudo detectar/instalar Chromium
 
+En modo completo, además:
+
+- rechaza checkouts de addons con cambios locales antes de ejecutar código;
+- actualiza cada addon por fast-forward sobre `main`;
+- registra en salida el commit exacto que instala;
+- ejecuta cada `scripts/install.sh` sin duplicar su lifecycle;
+- valida al final la configuración compuesta.
+
+Este modelo sigue `main` para que una máquina nueva reciba los cambios actuales
+de cada addon. El tradeoff es menor reproducibilidad histórica que un lockfile;
+los SHA impresos por la instalación permiten auditar exactamente qué se usó.
+
 ## Cuándo usar install vs sync
 
 - `install-opencode-stack.sh`: bootstrap completo, máquina nueva, cambios de base o setup inicial de Playwright.
+- `install.sh --main`: interfaz recomendada para ese mismo bootstrap base.
+- `install.sh --complete`: bootstrap de toda la distribución portable global.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
 
 ## Helpers opcionales de Jira

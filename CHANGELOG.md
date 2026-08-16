@@ -6,6 +6,8 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- entrypoint `scripts/install.sh` con modos `--main` y `--complete`, más un orquestador declarativo que instala los addons portables en orden llamando el `scripts/install.sh` propio de cada repo
+- catálogo `distribution/addons.json` como única lista de altas, bajas y orden del pack completo; excluye explícitamente `github-accounts-local` y overlays específicos
 - plugin `permission-autopilot` para autoaprobar operaciones cotidianas sin eliminar confirmaciones destructivas; `env-guard` ahora bloquea también referencias `.env*` desde Bash
 - documentación e integración compositiva del addon externo `super-turing-opencode-codegraph`, dueño del runtime/MCP global y del lifecycle de índices estructurales machine-local por repo
 - documentación del addon privado `super-turing-opencode-github-accounts-local` como owner de políticas de identidad GitHub específicas de esta máquina
@@ -19,6 +21,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.11.0` por el instalador de distribución completa desacoplado
 - `STACK-MANIFEST.json` sube a `0.10.1`; `permission-autopilot` aplica también
   el perfil Bash seguro durante `config` para builds que no ejecutan el hook
   `permission.ask`, preservando los defaults `deny` de agentes read-only

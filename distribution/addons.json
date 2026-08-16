@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "installerContract": "scripts/install.sh",
+  "branch": "main",
+  "addons": [
+    {
+      "id": "knowledge",
+      "repository": "https://github.com/juanma91m/super-turing-opencode-knowledge.git"
+    },
+    {
+      "id": "codegraph",
+      "repository": "https://github.com/juanma91m/super-turing-opencode-codegraph.git"
+    },
+    {
+      "id": "ticketing",
+      "repository": "https://github.com/juanma91m/super-turing-opencode-ticketing.git"
+    },
+    {
+      "id": "notifier",
+      "repository": "https://github.com/juanma91m/super-turing-opencode-notifier.git"
+    },
+    {
+      "id": "background",
+      "repository": "https://github.com/juanma91m/super-turing-opencode-background.git"
+    }
+  ],
+  "excluded": [
+    "super-turing-opencode-github-accounts-local",
+    "project-specific overlays"
+  ]
+}
