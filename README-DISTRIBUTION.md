@@ -35,7 +35,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `package-lock.json`
 - `scripts/install-opencode-stack.sh`
 - `scripts/install-opencode-distribution.sh`
-- `scripts/install.sh`
+- `install.sh`
 - `distribution/addons.json`
 - `scripts/sync-opencode-stack.sh`
 - `scripts/jira_helper.sh`
@@ -125,8 +125,8 @@ Clonar, copiar o sincronizar este stack en cualquier directorio fuente.
 Elegir una instalación:
 
 ```bash
-bash scripts/install.sh --main
-bash scripts/install.sh --complete
+bash install.sh --main
+bash install.sh --complete
 ```
 
 - `--main` ejecuta únicamente el lifecycle base.
@@ -152,8 +152,8 @@ bash scripts/install-opencode-stack.sh --target-dir "$HOME/.config/opencode"
 bash scripts/install-opencode-stack.sh --dry-run
 bash scripts/install-opencode-stack.sh --skip-playwright-install
 bash scripts/install-opencode-stack.sh --skip-npm-install
-bash scripts/install.sh --complete --workspace-dir "$HOME/.local/src"
-bash scripts/install.sh --complete --dry-run --skip-addon-update
+bash install.sh --complete --workspace-dir "$HOME/.local/src"
+bash install.sh --complete --dry-run --skip-addon-update
 ```
 
 ### Paso 3

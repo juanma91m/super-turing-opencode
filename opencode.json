@@ -16,8 +16,8 @@
       "bash \"scripts/install-opencode-stack.sh\"*": "allow",
       "bash scripts/install-opencode-distribution.sh*": "allow",
       "bash \"scripts/install-opencode-distribution.sh\"*": "allow",
-      "bash scripts/install.sh*": "allow",
-      "bash \"scripts/install.sh\"*": "allow"
+      "bash install.sh*": "allow",
+      "bash \"install.sh\"*": "allow"
     }
   }
 }

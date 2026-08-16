@@ -37,13 +37,13 @@ cd opencode-stack
 #### Solo stack principal
 
 ```bash
-bash scripts/install.sh --main
+bash install.sh --main
 ```
 
 #### Pack completo
 
 ```bash
-bash scripts/install.sh --complete
+bash install.sh --complete
 ```
 
 Sin flags, en una terminal interactiva, el installer pregunta qué modo usar.
@@ -177,7 +177,7 @@ Si querés ver qué haría el installer:
 
 ```bash
 bash scripts/install-opencode-stack.sh --dry-run --skip-npm-install --skip-playwright-install --no-validate
-bash scripts/install.sh --complete --dry-run --skip-addon-update --skip-npm-install --skip-playwright-install --no-validate
+bash install.sh --complete --dry-run --skip-addon-update --skip-npm-install --skip-playwright-install --no-validate
 ```
 
 `--workspace-dir` permite elegir dónde clonar addons; por defecto se usa el

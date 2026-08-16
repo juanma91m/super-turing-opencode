@@ -40,8 +40,8 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 Guía completa paso a paso: `INSTALLATION.md`
 
 ```bash
-bash scripts/install.sh --main
-bash scripts/install.sh --complete
+bash install.sh --main
+bash install.sh --complete
 ```
 
 - `--main`: instala solo el stack base reusable.
@@ -117,8 +117,8 @@ Notas:
 
 No editar `~/.config/opencode/` como fuente principal.
 Los cambios del stack deben hacerse en este repo y luego desplegarse con
-`sync-opencode-stack.sh`; para bootstrap usar `install.sh --main` o
-`install.sh --complete` según el alcance deseado.
+`sync-opencode-stack.sh`; para bootstrap usar el `install.sh` raíz con `--main`
+o `--complete` según el alcance deseado.
 
 Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overlay aditivo**:
 
@@ -168,7 +168,7 @@ Para la composición real entre stack base, addons globales, runtime background 
 2. actualizar `STACK-MANIFEST.json` y `CHANGELOG.md` cuando corresponda,
 3. revisar drift con `scripts/sync-opencode-stack.sh --status`,
 4. sincronizar con `scripts/sync-opencode-stack.sh`,
-5. usar `scripts/install.sh --main` o `--complete` solo para bootstrap o cambios de base más pesados,
+5. usar `install.sh --main` o `--complete` solo para bootstrap o cambios de base más pesados,
 6. validar con `opencode debug config`.
 
 Importante:

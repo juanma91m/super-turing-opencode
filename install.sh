@@ -2,13 +2,13 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MODE=""
 FORWARDED_ARGS=()
 
 usage() {
   cat <<'EOF'
-Usage: bash scripts/install.sh [--main|--complete] [installer options]
+Usage: bash install.sh [--main|--complete] [installer options]
 
 Modes:
   --main       Install only the reusable base stack
@@ -85,9 +85,9 @@ fi
 
 case "$MODE" in
   main)
-    exec bash "$SCRIPT_DIR/install-opencode-stack.sh" "${FORWARDED_ARGS[@]}"
+    exec bash "$REPO_DIR/scripts/install-opencode-stack.sh" "${FORWARDED_ARGS[@]}"
     ;;
   complete)
-    exec bash "$SCRIPT_DIR/install-opencode-distribution.sh" "${FORWARDED_ARGS[@]}"
+    exec bash "$REPO_DIR/scripts/install-opencode-distribution.sh" "${FORWARDED_ARGS[@]}"
     ;;
 esac

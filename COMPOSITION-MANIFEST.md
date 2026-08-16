@@ -48,8 +48,8 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 El repo base expone un único entrypoint para bootstrap:
 
 ```bash
-bash scripts/install.sh --main
-bash scripts/install.sh --complete
+bash install.sh --main
+bash install.sh --complete
 ```
 
 - `--main` instala únicamente la base reusable.
