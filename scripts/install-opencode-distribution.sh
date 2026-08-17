@@ -16,6 +16,7 @@ INSTALLER_CONTRACT=""
 ADDON_BRANCH=""
 ADDONS=()
 ADDON_REPO_DIR=""
+PREPARED_ADDONS=()
 
 usage() {
   cat <<'EOF'
@@ -43,6 +44,39 @@ EOF
 }
 
 log() { printf '[opencode-distribution] %s\n' "$*"; }
+
+preflight_base() {
+  local failed=0 dependency node_version
+  for dependency in git python3 node npm npx; do
+    if ! command -v "$dependency" >/dev/null 2>&1; then
+      printf '[opencode-distribution][preflight] missing required command: %s\n' "$dependency" >&2
+      failed=1
+    fi
+  done
+  if command -v node >/dev/null 2>&1; then
+    node_version="$(node -p 'process.versions.node')"
+    if ! python3 - "$node_version" <<'PY'
+import sys
+
+try:
+    version = tuple(int(part) for part in sys.argv[1].split("."))
+except ValueError:
+    raise SystemExit(1)
+major, minor, patch = (version + (0, 0, 0))[:3]
+supported = (
+    (major == 22 and (minor, patch) >= (22, 2))
+    or (major == 24 and (minor, patch) >= (15, 0))
+    or major >= 26
+)
+raise SystemExit(0 if supported else 1)
+PY
+    then
+      printf '[opencode-distribution][preflight] unsupported Node.js %s; required: ^22.22.2, ^24.15.0 or >=26\n' "$node_version" >&2
+      failed=1
+    fi
+  fi
+  return "$failed"
+}
 
 load_manifest() {
   local manifest_output
@@ -158,19 +192,43 @@ install_base() {
   bash "$SOURCE_DIR/scripts/install-opencode-stack.sh" "${args[@]}"
 }
 
-install_addons() {
-  local line kind id repository repo_dir result args
+prepare_addons() {
+  local line kind id repository result
+  PREPARED_ADDONS=()
   for line in "${ADDONS[@]}"; do
     IFS=$'\t' read -r kind id repository <<< "$line"
     [[ "$kind" == "addon" ]] || { printf 'Invalid addon manifest row\n' >&2; exit 1; }
     result=0
     ensure_addon_repo "$id" "$repository" || result=$?
     if [[ "$result" -eq 10 ]]; then
-      log "Dry-run: installer for $id is not executed because its repo is not present"
+      log "Dry-run: preflight/installer for $id cannot run because its repo is not present"
       continue
     fi
     [[ "$result" -eq 0 ]] || exit "$result"
-    repo_dir="$ADDON_REPO_DIR"
+    PREPARED_ADDONS+=("$id"$'\t'"$ADDON_REPO_DIR")
+  done
+}
+
+run_addon_preflights() {
+  local line id repo_dir failed=0
+  for line in "${PREPARED_ADDONS[@]}"; do
+    IFS=$'\t' read -r id repo_dir <<< "$line"
+    if [[ ! -f "$repo_dir/scripts/preflight.sh" ]]; then
+      continue
+    fi
+    log "Running $id preflight"
+    if ! bash "$repo_dir/scripts/preflight.sh" --target-dir "$TARGET_DIR"; then
+      printf '[opencode-distribution][preflight] %s failed\n' "$id" >&2
+      failed=1
+    fi
+  done
+  return "$failed"
+}
+
+install_addons() {
+  local line id repo_dir args
+  for line in "${PREPARED_ADDONS[@]}"; do
+    IFS=$'\t' read -r id repo_dir <<< "$line"
     args=(--target-dir "$TARGET_DIR")
     [[ "$DRY_RUN" -eq 1 ]] && args+=(--dry-run)
     log "Installing $id from commit $(git -C "$repo_dir" rev-parse --short HEAD)"
@@ -213,6 +271,14 @@ load_manifest
 log "Workspace: $WORKSPACE_DIR"
 log "Target: $TARGET_DIR"
 log 'Excluded: github-accounts-local and project-specific overlays'
+preflight_failed=0
+preflight_base || preflight_failed=1
+prepare_addons
+run_addon_preflights || preflight_failed=1
+if [[ "$preflight_failed" -ne 0 ]]; then
+  printf '[opencode-distribution] Preflight failed; no files were installed into %s\n' "$TARGET_DIR" >&2
+  exit 2
+fi
 install_base
 install_addons
 validate_distribution

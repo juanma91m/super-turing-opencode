@@ -6,6 +6,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- preflight de distribución antes de tocar el target: valida requisitos base y ejecuta `scripts/preflight.sh` addon-owned cuando existe
 - entrypoint raíz `install.sh` con modos `--main` y `--complete`, más un orquestador declarativo que instala los addons portables en orden llamando el `scripts/install.sh` propio de cada repo sin colisionar con scripts instalados por addons
 - catálogo `distribution/addons.json` como única lista de altas, bajas y orden del pack completo; excluye explícitamente `github-accounts-local` y overlays específicos
 - plugin `permission-autopilot` para autoaprobar operaciones cotidianas sin eliminar confirmaciones destructivas; `env-guard` ahora bloquea también referencias `.env*` desde Bash
@@ -21,6 +22,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.11.2`; la instalación completa exige una versión de Node compatible con las dependencias bloqueadas y aborta antes de instalar si falla cualquier preflight
 - `STACK-MANIFEST.json` sube a `0.11.1`; el installer omite el header `{file:...}` de Stitch cuando no existe `stitch-api-key`, evitando una configuración global inválida aunque el MCP esté deshabilitado
 - `STACK-MANIFEST.json` sube a `0.11.0` por el instalador de distribución completa desacoplado
 - `STACK-MANIFEST.json` sube a `0.10.1`; `permission-autopilot` aplica también

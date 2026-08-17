@@ -112,7 +112,7 @@ Para instrucciones al pie desde `git clone`, ver también `INSTALLATION.md`.
 ### Prerrequisitos mínimos
 
 - `opencode` instalado
-- `node`, `npm` y `npx`
+- `node`, `npm` y `npx` con Node `^22.22.2`, `^24.15.0` o `>=26`
 - para `--complete`: Linux x64, `bun` y una instalación local de OpenCode compatible con Background
 - opcional: `stitch-api-key` en `~/.config/opencode/stitch-api-key`
 
@@ -207,6 +207,7 @@ Esto:
 
 En modo completo, además:
 
+- prepara los checkouts y ejecuta preflights addon-owned antes de modificar el target;
 - rechaza checkouts de addons con cambios locales antes de ejecutar código;
 - actualiza cada addon por fast-forward sobre `main`;
 - registra en salida el commit exacto que instala;

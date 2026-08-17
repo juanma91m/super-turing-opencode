@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "components": {
     "playwright": {
       "mode": "headless",

@@ -20,7 +20,7 @@ El modo completo agrega los cinco addons globales portables definidos en
 
 - `opencode` ya instalado
 - `git`
-- `node`, `npm`, `npx`
+- `node`, `npm`, `npx` con Node `^22.22.2`, `^24.15.0` o `>=26`
 - `python3`
 
 ## Instalación paso a paso
@@ -104,6 +104,11 @@ Ese addon fija la versión de CodeGraph, registra el MCP global read-only y apor
 Background prepara por sí mismo el checkout fuente OpenCode fijado por su
 manifest. Si alguno de estos requisitos falta, su instalador corta con un error
 explícito y se puede repetir el modo completo después de corregirlo.
+
+Antes de copiar archivos al target, el modo completo clona/actualiza los repos
+de addons y ejecuta el preflight base más cualquier `scripts/preflight.sh`
+publicado por esos addons. Un fallo de Node/Bun aborta antes de modificar
+`~/.config/opencode/`.
 
 El lifecycle completo de Background opera sobre la instalación activa, por lo
 que `--complete` debe usar el target estándar `~/.config/opencode`. Un
