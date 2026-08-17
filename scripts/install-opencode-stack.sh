@@ -239,7 +239,11 @@ config = {
     "$schema": "https://opencode.ai/config.json",
     "model": "openai/gpt-5.6-sol",
     "small_model": "openai/gpt-5.6-sol",
+    "default_agent": "master-dev",
     "agent": {
+        "build": {
+            "hidden": True,
+        },
         "plan": {
             "disable": True,
         },

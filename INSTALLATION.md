@@ -66,6 +66,7 @@ Ese comando:
 - instala Playwright Chromium user-space si falta,
 - copia assets a `~/.config/opencode/`,
 - genera `~/.config/opencode/opencode.json` con Context7 global y el resto de MCPs base según disponibilidad local,
+- selecciona `master-dev` como agente por defecto y oculta el built-in `build` de la selección manual sin deshabilitarlo,
 - valida con `opencode debug config`,
 - e intenta correr `stack-doctor` al final para reportar warnings/errores del entorno.
 

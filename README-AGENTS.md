@@ -14,14 +14,14 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
 - `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.
-- `build`: agente primario orientado a ejecutar cambios y resolver tareas de implementación general.
+- `build`: agente primario base orientado a implementación general; queda oculto de la selección manual, pero disponible para compatibilidad y flujos internos.
 
 ## Agentes globales custom
 
 - `planner`: planner tecnico/funcional generico para tickets y analisis previo a implementacion.
 - `explorer`: investiga documentacion, APIs, herramientas y MCPs. Prioriza Context7 para docs de librerias/APIs, fetch directo para el resto y usa Playwright solo como segunda opcion.
 - `agent-design`: diseña y mantiene agentes, skills, comandos, prompts y permisos para OpenCode.
-- `master-dev`: lider tecnico generico para proyectos enterprise; analiza, decide y puede implementar con foco en evidencia, bajo riesgo y mantenibilidad.
+- `master-dev`: agente global por defecto y líder técnico genérico para proyectos enterprise; analiza, decide y puede implementar con foco en evidencia, bajo riesgo y mantenibilidad.
 
 ## Subagentes custom
 

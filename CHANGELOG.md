@@ -22,6 +22,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.11.3`; `master-dev` pasa a ser el agente global por defecto y el built-in `build` queda oculto sin deshabilitarlo para flujos internos
 - `STACK-MANIFEST.json` sube a `0.11.2`; la instalación completa exige una versión de Node compatible con las dependencias bloqueadas y aborta antes de instalar si falla cualquier preflight
 - `STACK-MANIFEST.json` sube a `0.11.1`; el installer omite el header `{file:...}` de Stitch cuando no existe `stitch-api-key`, evitando una configuración global inválida aunque el MCP esté deshabilitado
 - `STACK-MANIFEST.json` sube a `0.11.0` por el instalador de distribución completa desacoplado
