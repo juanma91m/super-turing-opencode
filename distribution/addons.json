@@ -20,6 +20,10 @@
       "repository": "https://github.com/juanma91m/super-turing-opencode-notifier.git"
     },
     {
+      "id": "documents",
+      "repository": "https://github.com/juanma91m/super-turing-opencode-documents.git"
+    },
+    {
       "id": "background",
       "repository": "https://github.com/juanma91m/super-turing-opencode-background.git"
     }

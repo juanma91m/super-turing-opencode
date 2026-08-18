@@ -13,7 +13,7 @@ El modo principal instala:
 - configuración MCP para Context7, Playwright y Stitch,
 - documentación operativa en `~/.config/opencode/`.
 
-El modo completo agrega los cinco addons globales portables definidos en
+El modo completo agrega los seis addons globales portables definidos en
 `distribution/addons.json`.
 
 ## Prerrequisitos mínimos
@@ -55,7 +55,8 @@ El pack completo instala en este orden:
 3. CodeGraph;
 4. Ticketing;
 5. Notifier;
-6. Background.
+6. Documents;
+7. Background.
 
 No incluye `super-turing-opencode-github-accounts-local` ni repos/overlays
 específicos de proyectos.
@@ -98,13 +99,15 @@ Ese addon fija la versión de CodeGraph, registra el MCP global read-only y apor
 ### 3. Prerrequisitos adicionales del modo completo
 
 - acceso HTTPS a GitHub;
-- `bun` para compilar el runtime administrado de Background;
+- `curl`, `tar` y `sha256sum` para instalar Quarto user-space desde Documents;
+- `curl`, `unzip` y `sha256sum` si Background necesita bootstrappear Bun;
 - instalación local de OpenCode compatible con el modo managed-local-install;
 - Linux x64 para el lifecycle completo de Background actualmente soportado.
 
 Background prepara por sí mismo el checkout fuente OpenCode fijado por su
-manifest. Si alguno de estos requisitos falta, su instalador corta con un error
-explícito y se puede repetir el modo completo después de corregirlo.
+manifest y, cuando falta, instala la versión de Bun fijada en un runtime
+user-space propio. Si alguno de los requisitos no bootstrappeables falta, su
+preflight corta con un error explícito antes de modificar el target.
 
 Antes de copiar archivos al target, el modo completo clona/actualiza los repos
 de addons y ejecuta el preflight base más cualquier `scripts/preflight.sh`

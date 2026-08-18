@@ -23,6 +23,7 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `plugins/`
 - `README-AGENTS.md`
 - `CONTEXT7-TECH-CATALOG.md`
+- `DEPENDENCY-POLICY.md`
 - `LOCAL-OVERLAY-TEMPLATE.md`
 - `PLAYBOOK-CODE-PATTERNS.md`
 - `PLAYBOOK-LOCAL-OVERLAYS.md`
@@ -69,9 +70,17 @@ La idea es tratar este directorio como un repo/versionable de stack:
 
 Las capabilities OS-specific o machine-local que no formen parte del control plane base deben distribuirse como addons separados.
 
+Cada addon conserva además ownership sobre sus aplicaciones y runtimes externos.
+El contrato de bootstrap, preflight y uso de privilegios se define en
+`DEPENDENCY-POLICY.md`.
+
 En particular, la capacidad async/background con patch host/core y runtime gestionado vive en `super-turing-opencode-background`, no en el bundle base.
 
 La inteligencia estructural CodeGraph también se distribuye como addon separado (`super-turing-opencode-codegraph`): administra su runtime y MCP global, mientras cada `<repo>/.codegraph/` permanece como estado machine-local regenerable.
+
+La publicación editorial vive en `super-turing-opencode-documents`: administra
+Quarto/Pandoc/Typst user-space, plantillas, comando, skill y QA visual sin
+convertir esas dependencias en responsabilidad del stack base.
 
 Las políticas con cuentas, owners o aliases SSH específicos de una máquina
 también deben vivir fuera del bundle portable. En esta instalación, ese
@@ -113,7 +122,7 @@ Para instrucciones al pie desde `git clone`, ver también `INSTALLATION.md`.
 
 - `opencode` instalado
 - `node`, `npm` y `npx` con Node `^22.22.2`, `^24.15.0` o `>=26`
-- para `--complete`: Linux x64, `bun` y una instalación local de OpenCode compatible con Background
+- para `--complete`: Linux x64, una instalación local de OpenCode compatible con Background y herramientas de descarga/descompresión para runtimes user-space
 - opcional: `stitch-api-key` en `~/.config/opencode/stitch-api-key`
 
 ### Paso 1
@@ -131,7 +140,7 @@ bash install.sh --complete
 
 - `--main` ejecuta únicamente el lifecycle base.
 - `--complete` clona/actualiza e instala Knowledge, CodeGraph, Ticketing,
-  Notifier y Background según `distribution/addons.json`.
+  Notifier, Documents y Background según `distribution/addons.json`.
 - sin modo explícito, una terminal interactiva muestra un selector.
 
 Cada addon expone `scripts/install.sh` como contrato estable. El orquestador no

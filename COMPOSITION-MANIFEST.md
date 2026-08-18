@@ -27,6 +27,7 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 | CodeGraph | `super-turing-opencode-codegraph` | `~/.config/opencode/` + runtime global + `<repo>/.codegraph/` | dueño del runtime/MCP/wrappers de inteligencia estructural; cada índice permanece machine-local en su repository root |
 | Ticketing | `super-turing-opencode-ticketing` | `~/.config/opencode/` | dueño de workflow de tickets, coupling y augment aditivo de autonomía |
 | Notifier | `super-turing-opencode-notifier` | `~/.config/opencode/plugins/opencode-notify.ts` | dueño del plugin de notificaciones del SO |
+| Documents | `super-turing-opencode-documents` | `~/.config/opencode/` + runtime Quarto user-space | dueño de publicación PDF/DOCX/ODT, plantillas, QA visual y lifecycle del runtime documental |
 | GitHub accounts local | `super-turing-opencode-github-accounts-local` | `~/.config/opencode/skills/github-cuentas-multiples/` | addon privado y machine-local; dueño del mapeo cuenta/owner/alias SSH de esta máquina, sin credenciales |
 | Overlay Higyrus | `super-turing-opencode-higyrus` | `higyrus/.opencode/`, `higyrus/AGENTS.md`, `higyrus/opencode.json` | dueño del overlay local del proyecto Higyrus |
 
@@ -39,9 +40,10 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 3. `super-turing-opencode-codegraph`
 4. `super-turing-opencode-ticketing`
 5. `super-turing-opencode-notifier`
-6. `super-turing-opencode-background`
-7. addons privados machine-local, cuando existan, como `super-turing-opencode-github-accounts-local`
-8. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
+6. `super-turing-opencode-documents`
+7. `super-turing-opencode-background`
+8. addons privados machine-local, cuando existan, como `super-turing-opencode-github-accounts-local`
+9. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
 
 ## Instalación orquestada
 
@@ -53,8 +55,8 @@ bash install.sh --complete
 ```
 
 - `--main` instala únicamente la base reusable.
-- `--complete` instala base, Knowledge, CodeGraph, Ticketing, Notifier y
-  Background en el orden anterior.
+- `--complete` instala base, Knowledge, CodeGraph, Ticketing, Notifier,
+  Documents y Background en el orden anterior.
 - el orquestador lee `distribution/addons.json`, clona o actualiza cada repo y
   ejecuta su contrato estable `scripts/install.sh`;
 - la lógica interna, dependencias y lifecycle siguen siendo propiedad de cada
@@ -71,6 +73,7 @@ Racional:
 - knowledge, CodeGraph y ticketing enriquecen esa base con responsabilidades separadas,
 - CodeGraph centraliza runtime y consulta estructural sin centralizar los índices de cada repo,
 - notifier suma capacidad aislada,
+- documents agrega publicación editorial reproducible sin cargar el lifecycle en la base,
 - background gobierna el runtime productivo y la UX async,
 - los addons machine-local agregan políticas específicas de la máquina sin contaminar la base portable,
 - los overlays locales aterrizan la especialización repo-específica encima de todo lo anterior.

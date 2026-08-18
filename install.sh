@@ -23,7 +23,8 @@ Complete mode installs, in order:
   3. CodeGraph
   4. Ticketing
   5. Notifier
-  6. Background
+  6. Documents
+  7. Background
 
 It never installs github-accounts-local or project-specific overlays.
 

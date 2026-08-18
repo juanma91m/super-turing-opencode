@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.11.3",
+  "version": "0.12.0",
   "components": {
     "playwright": {
       "mode": "headless",
@@ -13,6 +13,7 @@
     "CHANGELOG.md",
     "COMPOSITION-MANIFEST.md",
     "CONTEXT7-TECH-CATALOG.md",
+    "DEPENDENCY-POLICY.md",
     "INSTALLATION.md",
     "LOCAL-OVERLAY-TEMPLATE.md",
     "PLAYBOOK-CODE-PATTERNS.md",
@@ -111,6 +112,7 @@
     "github-accounts-local y los overlays específicos de proyecto están excluidos de la instalación completa",
     "la inteligencia estructural CodeGraph vive en el addon externo super-turing-opencode-codegraph; el stack base solo documenta su composición",
     "las políticas machine-local con identidades o aliases propios deben vivir en addons privados separados, no en el bundle portable",
+    "la publicación documental y su runtime Quarto/Pandoc/Typst viven en super-turing-opencode-documents; el stack base solo orquesta su lifecycle",
     "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base"
   ]
 }

@@ -30,6 +30,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `PLAYBOOK-LOCAL-OVERLAYS.md`: guía operativa para crear, auditar y mantener capas locales `.opencode/`
 - `PLAYBOOK-PERMISSIONS.md`: política central de autoaprobación cotidiana y confirmación destructiva
 - `COMPOSITION-MANIFEST.md`: mapa maestro del modelo de composición entre stack base, addons globales, runtime background y overlays locales
+- `DEPENDENCY-POLICY.md`: ownership, bootstrap y guardrails para aplicaciones y runtimes externos
 - `INSTALLATION.md`: guía concreta de instalación desde `git clone`
 - `README-DISTRIBUTION.md`: criterios de distribución y migración
 - `STACK-MANIFEST.json`: versión y assets administrados
@@ -49,9 +50,9 @@ bash install.sh --complete
   instalador propio de cada addon.
 - sin flags, en una terminal interactiva, el script permite elegir el modo.
 
-La instalación completa incluye Knowledge, CodeGraph, Ticketing, Notifier y
-Background. No instala `github-accounts-local` ni overlays específicos de
-proyectos.
+La instalación completa incluye Knowledge, CodeGraph, Ticketing, Notifier,
+Documents y Background. No instala `github-accounts-local` ni overlays
+específicos de proyectos.
 
 Ese script:
 
@@ -144,6 +145,7 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 - `super-turing-opencode-background`: runtime gestionado, patch host/core versionado y UX async/background.
 - `super-turing-opencode-codegraph`: runtime/MCP global de inteligencia estructural, wrappers seguros e índices machine-local por repository root.
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
+- `super-turing-opencode-documents`: publicación PDF/DOCX/ODT con Quarto/Typst, plantillas y QA visual.
 - `super-turing-opencode-github-accounts-local`: política privada machine-local para seleccionar cuentas `gh` y aliases SSH sin versionar credenciales.
 
 El stack base no absorbe el lifecycle de esos addons. El modo `--complete`

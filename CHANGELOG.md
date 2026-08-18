@@ -6,6 +6,8 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- addon portable `super-turing-opencode-documents` en la composición completa, dueño de Quarto/Pandoc/Typst user-space, plantillas, publicación PDF/DOCX/ODT y QA visual
+- `DEPENDENCY-POLICY.md` como contrato común para runtimes user-space, aplicaciones de sistema, preflights y secretos
 - preflight de distribución antes de tocar el target: valida requisitos base y ejecuta `scripts/preflight.sh` addon-owned cuando existe
 - entrypoint raíz `install.sh` con modos `--main` y `--complete`, más un orquestador declarativo que instala los addons portables en orden llamando el `scripts/install.sh` propio de cada repo sin colisionar con scripts instalados por addons
 - catálogo `distribution/addons.json` como única lista de altas, bajas y orden del pack completo; excluye explícitamente `github-accounts-local` y overlays específicos
@@ -22,6 +24,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.12.0`; Documents se incorpora a `distribution/addons.json` antes de Background sin trasladar su runtime al stack base
 - `STACK-MANIFEST.json` sube a `0.11.3`; `master-dev` pasa a ser el agente global por defecto y el built-in `build` queda oculto sin deshabilitarlo para flujos internos
 - `STACK-MANIFEST.json` sube a `0.11.2`; la instalación completa exige una versión de Node compatible con las dependencias bloqueadas y aborta antes de instalar si falla cualquier preflight
 - `STACK-MANIFEST.json` sube a `0.11.1`; el installer omite el header `{file:...}` de Stitch cuando no existe `stitch-api-key`, evitando una configuración global inválida aunque el MCP esté deshabilitado
