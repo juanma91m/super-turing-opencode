@@ -38,7 +38,7 @@ Antes de consultar ticket, leer el diff o reservar un informe de PR:
 2. obtener el remote actual con `git remote get-url origin`,
 3. normalizar ambos a `owner/repo`, aceptando URLs HTTPS y remotes SSH como `git@host:owner/repo.git`,
 4. comparar sin distinguir mayúsculas/minúsculas,
-5. si no coinciden, detenerse y pedir abrir OpenCode en el repo correcto; no leer el diff ni escribir un informe.
+5. si no coinciden, detenerse y pedir abrir el repo correcto antes de seguir; no leer el diff ni escribir un informe.
 
 Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplicar la misma comparación.
 
@@ -65,6 +65,21 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 3. Revisar primero zonas de mayor riesgo: seguridad, datos/migraciones, contratos, concurrencia/performance, integraciones y tests críticos.
 4. Abrir contexto adyacente solo para confirmar una hipótesis concreta.
 5. Cerrar cuando cada hallazgo tenga evidencia, impacto y acción; más búsquedas sin pregunta nueva son sobreexploración.
+
+## Presupuesto operativo
+
+- Separar planning de review: planning investiga y especifica; review evalúa un diff concreto (no reabrir análisis ya cerrado).
+- Objetivo normal: hasta 20 tool calls; a las 25, cerrar hallazgos y redactar. Máximo 30 sin pedir confirmación al usuario.
+- Leer inicialmente hasta 8 archivos principales y solo los rangos necesarios; para archivos largos, usar diff/hunks o rangos de hasta 250 líneas, no leerlos completos por comodidad.
+- No leer `node_modules`, vendorizados, generados, locks ni repos hermanos salvo que el diff los toque o una compatibilidad crítica no pueda probarse de otra forma.
+- No repetir `git diff`/`git show`/búsquedas o status equivalentes si la evidencia ya está disponible.
+- Cargar como máximo 3 skills: esta skill, la skill Jira/local si existe y una skill de dominio elegida por el diff.
+- No consultar memoria, Rovo, web o documentación externa por defecto. Escalar solo cuando falta un dato crítico imposible de obtener del ticket y del código.
+
+## Jira y CodeGraph acotados durante review
+
+- Jira: si el repo lo habilita, una única llamada `context` (`jira_helper.sh context <ticket> --parent-depth 1 --siblings 0 --comments 5 --links 5` o equivalente); nunca `issue` raw por defecto (vuelca ADF, metadata, comentarios y adjuntos innecesarios). No recorrer épica, hermanos, adjuntos ni Rovo por defecto.
+- CodeGraph/`codegraph_explore`/`mcp__codegraph__explore`: usarlo solo si reemplaza exploración manual, con una consulta compacta y acotada a los símbolos del diff — nunca arquitectura global, trazas masivas ni reindexación durante un review. Si una consulta devuelve salida masiva o no reduce lecturas, dejar de usarlo para esa revisión y volver a diff/lectura directa.
 
 ## Qué buscar
 
@@ -103,7 +118,8 @@ No reportar por defecto:
 
 ## Diffs grandes
 
-- Si supera 30 archivos o 1500 líneas modificadas, revisar por zonas de riesgo y declararlo.
+- Si supera 30 archivos o 1500 líneas modificadas, revisar por zonas de riesgo y declararlo en limitaciones.
+- Prioridad de revisión: seguridad, datos/migraciones, contratos, concurrencia/performance, integraciones y tests críticos.
 - No prometer exhaustividad falsa; proponer una segunda pasada focalizada si queda una zona material.
 
 ## Formato del informe

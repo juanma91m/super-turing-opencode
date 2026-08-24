@@ -69,6 +69,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/ticket-verdict <ticket>`
 - `/ticket-implement <ticket>`
 - `/ticket-validate <ticket>`
+- `/ticket-code-review <ticket> <rama-origen> <rama-destino>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
 - `/check-local-overlays`

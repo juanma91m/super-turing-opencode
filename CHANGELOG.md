@@ -6,6 +6,9 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Added
 
+- comando `commands/ticket-code-review.md`: code review de una rama por ticket Jira, con informe incremental en `tmp/<ticket>/code-review/` (antes vivía duplicado sin versionar en 9 overlays de `higyrus-workspace`; resultó ser genérico, sin nada específico de AUNE)
+- `skills/code-review-branch-to-branch/SKILL.md` ahora incluye presupuesto operativo de review (tool calls, orden de lectura, límites de archivos) y uso acotado de Jira/CodeGraph durante un review — contenido migrado desde una skill `aune-code-review-eficiente` que vivía duplicada y sin versionar en cada overlay de `higyrus-workspace`; se fusionó porque no tenía nada específico de AUNE y siempre se cargaba junto con esta skill
+
 - addon portable `super-turing-opencode-documents` en la composición completa, dueño de Quarto/Pandoc/Typst user-space, plantillas, publicación PDF/DOCX/ODT y QA visual
 - `DEPENDENCY-POLICY.md` como contrato común para runtimes user-space, aplicaciones de sistema, preflights y secretos
 - preflight de distribución antes de tocar el target: valida requisitos base y ejecuta `scripts/preflight.sh` addon-owned cuando existe
