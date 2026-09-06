@@ -19,7 +19,6 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 ## Agentes globales custom
 
 - `planner`: planner tecnico/funcional generico para tickets y analisis previo a implementacion.
-- `explorer`: investiga documentacion, APIs, herramientas y MCPs. Prioriza Context7 para docs de librerias/APIs, fetch directo para el resto y usa Playwright solo como segunda opcion.
 - `agent-design`: diseña y mantiene agentes, skills, comandos, prompts y permisos para OpenCode.
 - `master-dev`: agente global por defecto y líder técnico genérico para proyectos enterprise; analiza, decide y puede implementar con foco en evidencia, bajo riesgo y mantenibilidad.
 
@@ -53,23 +52,16 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `debugging-sistematico`: obliga a investigar causa raiz antes de proponer fixes.
 - `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
-- `implementacion-frontend-web`: baja cambios de UI al stack real del proyecto sin duplicar criterios de diseño.
 - `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
 - `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
 - `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI con foco en headless, polling y evitar regeneraciones ciegas.
 - `sdd-tdd-bdd-pragmatico`: conecta especificación, comportamiento esperado y estrategia de pruebas sin imponer ceremonias rígidas.
 - `verificacion-antes-de-cerrar`: evita declarar cierre o éxito sin evidencia fresca.
-- `workflow-ticket-handoff`: define el patron reusable `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md` para trabajo guiado por tickets.
+- `workflow-ticket-handoff` puede estar disponible cuando se instala el addon Ticketing; no pertenece al core.
 - `revision-por-etapas`: separa revisión de cumplimiento funcional vs revisión de calidad/riesgo técnico.
 
-## Comandos globales reutilizables
+## Comandos globales reutilizables del core
 
-- `/ticket-plan <ticket>`
-- `/ticket-refresh <ticket>`
-- `/ticket-verdict <ticket>`
-- `/ticket-implement <ticket>`
-- `/ticket-validate <ticket>`
-- `/ticket-code-review <ticket> <rama-origen> <rama-destino>`
 - `/sessions-list [args]`
 - `/sessions-clean [args]`
 - `/check-local-overlays`
@@ -80,13 +72,16 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `/stack-doctor`
 - `/init-project-agent-layer <path>`
 
+Cuando se instala `super-turing-opencode-ticketing`, el addon agrega los
+comandos `/ticket-*` y el workflow de handoff asociado.
+
 ## Criterios globales resumidos
 
 - Mantener agentes globales genéricos, reutilizables y sin dominio de proyecto; lo específico debe vivir en el `AGENTS.md` local o en overlays del repo.
 - Distinguir siempre entre agentes base de OpenCode y agentes custom del stack; `agent-design` debe proteger esa separación.
 - Para docs externas de librerías o APIs, Context7 es la fuente preferida cuando esté disponible; IDs canónicos, versiones objetivo o fuentes privadas deben quedar en la capa local del proyecto.
 - Si un agente, skill o comando local sombrea uno global, el override debe ser aditivo y reinyectar explícitamente comportamiento, permisos seguros y guardrails útiles; para checklist, drift y `__replace__`, referirse a `overlays-locales-opencode`, `PLAYBOOK-LOCAL-OVERLAYS.md` y `LOCAL-OVERLAY-TEMPLATE.md`.
-- El workflow `tmp/<ticket>/verdict.md` -> implementación -> `result-dev.md` es reusable pero opcional: activarlo solo cuando el proyecto adopta ese patrón.
+- Si está instalado Ticketing, el workflow `tmp/<ticket>/verdict.md` -> implementación -> `result-dev.md` sigue siendo reusable pero opcional: activarlo solo cuando el proyecto adopta ese patrón.
 - `master-dev` lidera el trabajo técnico general; `ui-web-designer` define UX, `frontend-web-developer` implementa presentación y `backend-java-developer` cubre backend/datos. Delegar solo cuando la especialización aporte foco real.
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
 - `reviewer` conserva el workflow de verificación post-solución durante desarrollo propio; `code-reviewer` se usa para aprobar implementaciones de terceros y ambos comparten solo criterios técnicos reutilizables.

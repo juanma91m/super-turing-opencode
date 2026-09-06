@@ -59,7 +59,6 @@ Skills sugeridas:
 - `contratos-api-y-datos`
 - `verificacion-antes-de-cerrar`
 - `revision-por-etapas`
-- `workflow-ticket-handoff`
 
 
 Entrega esperada:

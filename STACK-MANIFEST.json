@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.12.0",
+  "version": "0.13.2",
   "components": {
     "playwright": {
       "mode": "headless",
@@ -28,7 +28,6 @@
     "agents/code-inspector.md",
     "agents/code-reviewer.md",
     "agents/dev-test.md",
-    "agents/explorer.md",
     "agents/frontend-web-developer.md",
     "agents/master-dev.md",
     "agents/merge-conflict-resolver.md",
@@ -44,12 +43,6 @@
     "commands/sessions-clean.md",
     "commands/sessions-list.md",
     "commands/stack-doctor.md",
-    "commands/ticket-code-review.md",
-    "commands/ticket-implement.md",
-    "commands/ticket-plan.md",
-    "commands/ticket-refresh.md",
-    "commands/ticket-validate.md",
-    "commands/ticket-verdict.md",
     "package-lock.json",
     "package.json",
     "plugins/agent-identity.ts",
@@ -62,8 +55,6 @@
     "scripts/check_local_overlays.sh",
     "scripts/find_code_pattern.sh",
     "scripts/install-opencode-stack.sh",
-    "scripts/jira_api_read.py",
-    "scripts/jira_helper.sh",
     "scripts/next_code_review_path.sh",
     "scripts/prune_stack_backups.py",
     "scripts/recompose_additive_agents.py",
@@ -77,7 +68,6 @@
     "skills/debugging-sistematico/SKILL.md",
     "skills/diseno-agentes-opencode/SKILL.md",
     "skills/diseno-ui-web/SKILL.md",
-    "skills/implementacion-frontend-web/SKILL.md",
     "skills/investigacion-web/SKILL.md",
     "skills/mentoria-tecnica-opencode/SKILL.md",
     "skills/overlays-locales-opencode/SKILL.md",
@@ -85,8 +75,11 @@
     "skills/revision-por-etapas/SKILL.md",
     "skills/sdd-tdd-bdd-pragmatico/SKILL.md",
     "skills/stitch-playwright-ui-opencode/SKILL.md",
-    "skills/verificacion-antes-de-cerrar/SKILL.md",
-    "skills/workflow-ticket-handoff/SKILL.md"
+    "skills/verificacion-antes-de-cerrar/SKILL.md"
+  ],
+  "obsoleteTargets": [
+    "agents/explorer.md",
+    "skills/implementacion-frontend-web"
   ],
   "generatedFiles": [
     "opencode.json",
@@ -105,7 +98,7 @@
     "el installer genera opencode.json por máquina destino y no copia secretos",
     "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial",
     "plan queda deshabilitado en favor del agente custom planner",
-    "los helpers Jira y el workflow tmp/<ticket>/ son reutilizables pero opcionales",
+    "los helpers Jira, comandos /ticket-* y workflow tmp/<ticket>/ pertenecen al addon super-turing-opencode-ticketing",
     "debugging-sistematico, verificacion-antes-de-cerrar y revision-por-etapas refuerzan depuracion, cierre y review sin crear agentes nuevos",
     "el stack base ya no distribuye los assets canónicos de background async; esa capacidad vive en el addon externo super-turing-opencode-background",
     "el install.sh raíz ofrece modo main y complete; complete orquesta addons externos sin absorber su lifecycle",
@@ -114,6 +107,7 @@
     "la inteligencia estructural CodeGraph vive en el addon externo super-turing-opencode-codegraph; el stack base solo documenta su composición",
     "las políticas machine-local con identidades o aliases propios deben vivir en addons privados separados, no en el bundle portable",
     "la publicación documental y su runtime Quarto/Pandoc/Typst viven en super-turing-opencode-documents; el stack base solo orquesta su lifecycle",
-    "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base"
+    "las integraciones persistentes o de conocimiento permanente deben vivir en addons separados y no en el stack base",
+    "el stack base es dueño del scaffolding y auditoría de overlays locales; Ticketing solo agrega Jira y workflows guiados por tickets"
   ]
 }

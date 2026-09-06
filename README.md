@@ -7,7 +7,7 @@ Stack portable y versionable de OpenCode con:
 - skills globales,
 - skills de debugging, verificacion y review por etapas,
 - skill global para SDD/TDD/BDD pragmático y trazabilidad spec -> cambio -> validación,
-- helpers opcionales para Jira/tickets y cleanup de sesiones,
+- cleanup de sesiones y composición con addons opcionales,
 - integración con Playwright headless,
 - integración opcional con Stitch,
 - installer reproducible para desplegar el stack en otra máquina.
@@ -19,7 +19,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 ## Layout
 
 - `agents/`: agentes y subagentes custom
-- `commands/`: comandos reutilizables para tickets y mantenimiento
+- `commands/`: comandos reutilizables de ingeniería y mantenimiento del stack
 - `skills/`: skills globales
 - `plugins/`: plugins globales base del stack
 - `patches/`: reservado para patches versionados sobre dependencias externas cuando el stack base realmente los necesite
@@ -70,14 +70,12 @@ lifecycle exclusivo de la base y como implementación del modo `--main`.
 
 - `planner`: planner tecnico/funcional generico para trabajo previo a implementacion
 - `dev-test`: validador tecnico reutilizable
-- `workflow-ticket-handoff`: skill para el patron `tmp/<ticket>/verdict.md` -> implementacion -> `result-dev.md`
 - `debugging-sistematico`: skill para depurar con causa raiz antes de fixear
 - `verificacion-antes-de-cerrar`: skill para exigir evidencia fresca antes de declarar cierre
 - `revision-por-etapas`: skill para review en dos etapas (cumplimiento y luego calidad/riesgo)
 - `sdd-tdd-bdd-pragmatico`: skill para incorporar criterios de aceptación, escenarios y pruebas pragmáticas sin volver rígido el workflow
-- comandos globales `/ticket-*` y `/sessions-*`
+- comandos globales `/sessions-*`; los comandos `/ticket-*` pertenecen al addon Ticketing
 - comandos operativos `/stack-doctor`, `/check-local-overlays` y `/init-project-agent-layer`
-- helper Jira reusable en `scripts/jira_helper.sh` + `jira_api_read.py`
 - helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
@@ -85,6 +83,9 @@ lifecycle exclusivo de la base y como implementación del modo `--main`.
 - identidad y atribución multiagente para sesiones complejas
 - workflow de worktrees por ticket con herramientas globales para crear/listar/borrar worktrees
 - scheduler global para jobs recurrentes explícitos con logs, locks y timeout opcional
+
+Jira, los comandos `/ticket-*` y el workflow `tmp/<ticket>/` se instalan desde
+`super-turing-opencode-ticketing`; no forman parte del core reusable.
 
 ## Sync diario recomendado
 
@@ -142,6 +143,8 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 
 ## Addons opcionales fuera del stack base
 
+- `super-turing-opencode-knowledge`: memoria durable Engram y corpus recuperable Qdrant.
+- `super-turing-opencode-ticketing`: Jira, Atlassian Rovo read-only, comandos `/ticket-*` y handoffs por ticket.
 - `super-turing-opencode-background`: runtime gestionado, patch host/core versionado y UX async/background.
 - `super-turing-opencode-codegraph`: runtime/MCP global de inteligencia estructural, wrappers seguros e índices machine-local por repository root.
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.

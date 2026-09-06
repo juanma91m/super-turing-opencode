@@ -4,6 +4,12 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+### Ownership
+
+- `STACK-MANIFEST.json` sube a `0.13.0` por la primera normalización de ownership entre core y addons.
+- Jira, los comandos `/ticket-*`, `workflow-ticket-handoff` y sus helpers salen del core y pasan a tener un único dueño canónico: `super-turing-opencode-ticketing`.
+- El scaffolding y la auditoría de overlays (`init-project-agent-layer`, `check-local-overlays`, templates, playbook y catálogo Context7) quedan explícitamente en el core, porque son capacidades generales y no dependen de Jira.
+
 ### Added
 
 - comando `commands/ticket-code-review.md`: code review de una rama por ticket Jira, con informe incremental en `tmp/<ticket>/code-review/` (antes vivía duplicado sin versionar en 9 overlays de `higyrus-workspace`; resultó ser genérico, sin nada específico de AUNE)
@@ -27,6 +33,9 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Changed
 
+- `STACK-MANIFEST.json` sube a `0.13.1`; se retira `implementacion-frontend-web` porque duplicaba literalmente la responsabilidad del agente `frontend-web-developer`. El agente conserva el workflow técnico y `diseno-ui-web` sigue siendo el criterio visual reusable.
+- `STACK-MANIFEST.json` sube a `0.13.2`; se retira `explorer` después de migrar Background y los nueve overlays AUNE. Context7/fetch directo quedan en el agente coordinador, mientras Background conserva solo targets read-only especializados en inspección, review y diseño.
+- install/sync incorporan `obsoleteTargets` para retirar assets que dejaron de pertenecer al stack sin dejar configuración global stale.
 - `STACK-MANIFEST.json` sube a `0.12.0`; Documents se incorpora a `distribution/addons.json` antes de Background sin trasladar su runtime al stack base
 - `STACK-MANIFEST.json` sube a `0.11.3`; `master-dev` pasa a ser el agente global por defecto y el built-in `build` queda oculto sin deshabilitarlo para flujos internos
 - `STACK-MANIFEST.json` sube a `0.11.2`; la instalación completa exige una versión de Node compatible con las dependencias bloqueadas y aborta antes de instalar si falla cualquier preflight

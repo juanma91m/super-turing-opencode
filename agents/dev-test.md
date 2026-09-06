@@ -58,4 +58,3 @@ Skills sugeridas:
 - `debugging-sistematico`
 - `sdd-tdd-bdd-pragmatico`
 - `verificacion-antes-de-cerrar`
-- `workflow-ticket-handoff`

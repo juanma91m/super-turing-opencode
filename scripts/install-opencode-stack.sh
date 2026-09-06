@@ -11,6 +11,7 @@ SKIP_PLAYWRIGHT_INSTALL=0
 VALIDATE=1
 
 MANAGED_FILES=()
+OBSOLETE_TARGETS=()
 
 WARNINGS=()
 ADDITIVE_RENDER_DIR=""
@@ -60,6 +61,20 @@ PY
     printf 'No managed files found in %s\n' "$SOURCE_DIR/STACK-MANIFEST.json" >&2
     exit 1
   fi
+}
+
+load_obsolete_targets() {
+  mapfile -t OBSOLETE_TARGETS < <(
+    python3 - "$SOURCE_DIR/STACK-MANIFEST.json" <<'PY'
+import json
+import pathlib
+import sys
+
+data = json.loads(pathlib.Path(sys.argv[1]).read_text())
+for item in data.get("obsoleteTargets", []):
+    print(item)
+PY
+  )
 }
 
 log() {
@@ -401,6 +416,7 @@ TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_DIR="$TARGET_DIR/.stack-backups/$TIMESTAMP"
 
 load_managed_files
+load_obsolete_targets
 
 log "Source dir: $SOURCE_DIR"
 log "Target dir: $TARGET_DIR"
@@ -410,7 +426,16 @@ run mkdir -p "$TARGET_DIR"
 for rel_path in "${MANAGED_FILES[@]}"; do
   backup_path "$rel_path" "$BACKUP_DIR"
 done
+for rel_path in "${OBSOLETE_TARGETS[@]}"; do
+  backup_path "$rel_path" "$BACKUP_DIR"
+done
 backup_path "opencode.json" "$BACKUP_DIR"
+
+for rel_path in "${OBSOLETE_TARGETS[@]}"; do
+  if [[ -e "$TARGET_DIR/$rel_path" || -L "$TARGET_DIR/$rel_path" ]]; then
+    run rm -rf "$TARGET_DIR/$rel_path"
+  fi
+done
 
 for rel_path in "${MANAGED_FILES[@]}"; do
   copy_file "$rel_path"

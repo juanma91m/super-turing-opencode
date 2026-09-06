@@ -39,8 +39,6 @@ Estos archivos/directorios deben tratarse como **source of truth versionable**:
 - `install.sh`
 - `distribution/addons.json`
 - `scripts/sync-opencode-stack.sh`
-- `scripts/jira_helper.sh`
-- `scripts/jira_api_read.py`
 - `scripts/recompose_additive_agents.py`
 - `scripts/check_local_overlays.sh`
 - `scripts/check_local_overlays.py`
@@ -206,8 +204,8 @@ Esto:
 - detecta Playwright Chromium en user-space,
 - si no lo encuentra, intenta instalarlo con `npx playwright install chromium`,
 - genera `opencode.json` con rutas locales de la máquina,
-- deja disponible un set global de comandos `/ticket-*` y `/sessions-*`,
-- instala helpers reutilizables para Jira/tickets y limpieza de sesiones,
+- deja disponibles los comandos core, incluidos `/sessions-*`,
+- instala helpers de limpieza de sesiones; Jira y `/ticket-*` llegan únicamente con el addon Ticketing,
 - intenta correr `stack-doctor` al final cuando el target es `~/.config/opencode/`,
 - deja Context7 configurado globalmente vía `npx -y @upstash/context7-mcp@latest` para docs de librerias/APIs,
 - habilita o deshabilita otros MCPs según disponibilidad local:
@@ -234,9 +232,9 @@ los SHA impresos por la instalación permiten auditar exactamente qué se usó.
 - `install.sh --complete`: bootstrap de toda la distribución portable global.
 - `sync-opencode-stack.sh`: cambios normales del día a día en agentes, skills, plugins, scripts o documentación versionada.
 
-## Helpers opcionales de Jira
+## Helpers opcionales de Jira (addon Ticketing)
 
-El stack ahora incluye helpers genéricos para Jira/tickets:
+`super-turing-opencode-ticketing` incluye helpers genéricos para Jira/tickets:
 
 - `scripts/jira_helper.sh`
 - `scripts/jira_api_read.py`

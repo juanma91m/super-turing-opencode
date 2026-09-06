@@ -24,7 +24,7 @@ Cuando `/init-project-agent-layer` o un humano detecte una tecnología en el rep
 2. buscar la tecnología en este catálogo,
 3. si el match es confiable, proponerla en `AGENTS.md`,
 4. si hay drift de versión o ambigüedad, dejar nota explícita,
-5. si no hay match confiable, no inventar ID: dejar follow-up para `explorer` o resolución manual.
+5. si no hay match confiable, no inventar ID: usar docs oficiales/fetch puntual o dejar resolución manual.
 
 ## Modelo de confianza
 
@@ -49,7 +49,7 @@ Cuando el proyecto use librerías o APIs externas relevantes, preferir este esqu
 - **Usar con cautela por drift de versión en Context7**
   - <tecnología>: <id> _(motivo)_
 - **Cuando no haya match confiable en Context7**
-  - <tecnología>: preferir código del repo, docs oficiales o investigación puntual con `explorer`
+  - <tecnología>: preferir código del repo, Context7, docs oficiales o fetch puntual
 ```
 
 ## Señales de detección sugeridas
@@ -100,7 +100,7 @@ Si hay varias majors posibles, mencionar siempre en `AGENTS.md` la **versión re
 | Tecnología | Señales típicas | Estado | Recomendación |
 | --- | --- | --- | --- |
 | Apache Axis 1.4 | `org.apache.axis:*` | none | no asumir un ID de Context7; preferir código del repo y docs oficiales |
-| JAX-WS legacy / RI antigua | `javax.xml.ws`, dependencias legacy SOAP | none | tratarlo como caso de investigación puntual con `explorer` |
+| JAX-WS legacy / RI antigua | `javax.xml.ws`, dependencias legacy SOAP | none | tratarlo como investigación puntual sobre documentación oficial |
 | forks internos / SDK privados | nombres no públicos o propios del repo | none | dejar la fuente local/privada en `AGENTS.md`, no en este catálogo global |
 
 ## Criterios de crecimiento del catálogo

@@ -19,7 +19,6 @@ permission:
     code-inspector: allow
     ui-web-designer: allow
     reviewer: allow
-    explorer: allow
     dev-test: allow
     merge-conflict-resolver: allow
 ---
@@ -93,7 +92,6 @@ Skills sugeridas:
 - `sdd-tdd-bdd-pragmatico`
 - `verificacion-antes-de-cerrar`
 - `revision-por-etapas`
-- `workflow-ticket-handoff`
 
 Estilo de respuesta:
 - directo, técnico y breve,

@@ -10,9 +10,11 @@ STATUS_ONLY=0
 VALIDATE=1
 
 MANAGED_FILES=()
+OBSOLETE_TARGETS=()
 WARNINGS=()
 TO_CREATE=()
 TO_UPDATE=()
+TO_REMOVE=()
 UNCHANGED_COUNT=0
 MISSING_SOURCE_COUNT=0
 ADDITIVE_RENDER_DIR=""
@@ -30,20 +32,6 @@ cleanup_temp_artifacts() {
 }
 
 trap cleanup_temp_artifacts EXIT
-
-is_managed_by_addon() {
-  local rel_path="$1"
-
-  if [[ -f "$TARGET_DIR/.opencode-ticketing-addon.json" ]]; then
-    case "$rel_path" in
-      LOCAL-OVERLAY-TEMPLATE.md|commands/check-local-overlays.md|commands/init-project-agent-layer.md|commands/ticket-implement.md|commands/ticket-plan.md|commands/ticket-refresh.md|commands/ticket-validate.md|commands/ticket-verdict.md|scripts/check_local_overlays.py|scripts/check_local_overlays.sh|scripts/jira_api_read.py|scripts/jira_helper.sh|skills/overlays-locales-opencode/SKILL.md|skills/workflow-ticket-handoff/SKILL.md)
-        return 0
-        ;;
-    esac
-  fi
-
-  return 1
-}
 
 usage() {
   cat <<'EOF'
@@ -133,16 +121,26 @@ PY
   fi
 }
 
+load_obsolete_targets() {
+  mapfile -t OBSOLETE_TARGETS < <(
+    python3 - "$SOURCE_DIR/STACK-MANIFEST.json" <<'PY'
+import json
+import pathlib
+import sys
+
+data = json.loads(pathlib.Path(sys.argv[1]).read_text())
+for item in data.get("obsoleteTargets", []):
+    print(item)
+PY
+  )
+}
+
 classify_files() {
   local rel_path src dst
 
   for rel_path in "${MANAGED_FILES[@]}"; do
     src="$(source_path_for_rel "$rel_path")"
     dst="$TARGET_DIR/$rel_path"
-
-    if is_managed_by_addon "$rel_path"; then
-      continue
-    fi
 
     if [[ ! -e "$src" ]]; then
       warn "Managed file missing in source: $rel_path"
@@ -161,12 +159,18 @@ classify_files() {
       TO_UPDATE+=("$rel_path")
     fi
   done
+
+  for rel_path in "${OBSOLETE_TARGETS[@]}"; do
+    if [[ -e "$TARGET_DIR/$rel_path" || -L "$TARGET_DIR/$rel_path" ]]; then
+      TO_REMOVE+=("$rel_path")
+    fi
+  done
 }
 
 print_plan() {
   local rel_path
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
     log "No managed file differences detected"
     return 0
   fi
@@ -184,12 +188,19 @@ print_plan() {
       printf '  ~ %s\n' "$rel_path"
     done
   fi
+
+  if [[ "${#TO_REMOVE[@]}" -gt 0 ]]; then
+    printf 'Remove obsolete:\n'
+    for rel_path in "${TO_REMOVE[@]}"; do
+      printf '  - %s\n' "$rel_path"
+    done
+  fi
 }
 
 apply_changes() {
   local rel_path src dst timestamp backup_dir
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
     return 0
   fi
 
@@ -211,6 +222,14 @@ apply_changes() {
     run mkdir -p "$(dirname "$dst")"
     run cp "$src" "$dst"
   done
+
+
+  for rel_path in "${TO_REMOVE[@]}"; do
+    dst="$TARGET_DIR/$rel_path"
+    run mkdir -p "$(dirname "$backup_dir/$rel_path")"
+    run cp -R "$dst" "$backup_dir/$rel_path"
+    run rm -rf "$dst"
+  done
 }
 
 validate_config() {
@@ -222,7 +241,7 @@ validate_config() {
     return 0
   fi
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
     return 0
   fi
 
@@ -245,7 +264,7 @@ prune_backups() {
     return 0
   fi
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
     return 0
   fi
 
@@ -294,6 +313,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 load_managed_files
+load_obsolete_targets
 
 log "Source dir: $SOURCE_DIR"
 log "Target dir: $TARGET_DIR"
@@ -312,8 +332,8 @@ if [[ "$STATUS_ONLY" -eq 0 ]]; then
   fi
 fi
 
-printf 'Summary: create=%d update=%d unchanged=%d missing_source=%d\n' \
-  "${#TO_CREATE[@]}" "${#TO_UPDATE[@]}" "$UNCHANGED_COUNT" "$MISSING_SOURCE_COUNT"
+printf 'Summary: create=%d update=%d remove=%d unchanged=%d missing_source=%d\n' \
+  "${#TO_CREATE[@]}" "${#TO_UPDATE[@]}" "${#TO_REMOVE[@]}" "$UNCHANGED_COUNT" "$MISSING_SOURCE_COUNT"
 
 if [[ "${#WARNINGS[@]}" -gt 0 ]]; then
   printf '\nWarnings:\n' >&2

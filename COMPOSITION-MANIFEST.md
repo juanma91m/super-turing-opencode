@@ -21,11 +21,11 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 
 | Componente | Repo canónico | Superficie principal | Regla de ownership |
 |---|---|---|---|
-| Stack base | `opencode-stack` | `~/.config/opencode/` | base reusable; no describe por sí solo la composición final cuando hay addons activos |
+| Stack base | `opencode-stack` | `~/.config/opencode/` | base reusable y dueño del scaffolding/auditoría de overlays locales; no describe por sí solo la composición final cuando hay addons activos |
 | Background | `super-turing-opencode-background` | `~/.opencode/` + plugins async globales | dueño canónico del modelo async/background, del lifecycle y de los patches host/core versionados; el stack base no distribuye esos assets |
 | Knowledge | `super-turing-opencode-knowledge` | `~/.config/opencode/` + runtime Engram/Qdrant | dueño de assets de knowledge y de augment aditivo de autonomía |
 | CodeGraph | `super-turing-opencode-codegraph` | `~/.config/opencode/` + runtime global + `<repo>/.codegraph/` | dueño del runtime/MCP/wrappers de inteligencia estructural; cada índice permanece machine-local en su repository root |
-| Ticketing | `super-turing-opencode-ticketing` | `~/.config/opencode/` | dueño de workflow de tickets, coupling y augment aditivo de autonomía |
+| Ticketing | `super-turing-opencode-ticketing` | `~/.config/opencode/` | dueño de Jira, Atlassian Rovo, comandos `/ticket-*`, workflow de tickets y augment aditivo de autonomía |
 | Notifier | `super-turing-opencode-notifier` | `~/.config/opencode/plugins/opencode-notify.ts` | dueño del plugin de notificaciones del SO |
 | Documents | `super-turing-opencode-documents` | `~/.config/opencode/` + runtime Quarto user-space | dueño de publicación PDF/DOCX/ODT, plantillas, QA visual y lifecycle del runtime documental |
 | GitHub accounts local | `super-turing-opencode-github-accounts-local` | `~/.config/opencode/skills/github-cuentas-multiples/` | addon privado y machine-local; dueño del mapeo cuenta/owner/alias SSH de esta máquina, sin credenciales |
@@ -79,6 +79,30 @@ Racional:
 - los overlays locales aterrizan la especialización repo-específica encima de todo lo anterior.
 
 ## Reglas de composición
+
+### Regla de ubicación por responsabilidad
+
+| Si una capacidad trata de... | Dueño esperado |
+|---|---|
+| roles generales, permisos base, seguridad, Context7, auditoría o scaffolding de overlays | `opencode-stack` |
+| memoria durable, retrieval, Engram, Qdrant, backup o sync de conocimiento | `super-turing-opencode-knowledge` |
+| delegación async, foreground/background, estado o UX de tareas en segundo plano | `super-turing-opencode-background` |
+| Jira, Confluence vía Rovo, comandos `/ticket-*` o handoffs `tmp/<ticket>/` | `super-turing-opencode-ticketing` |
+| generación PDF/PPTX/DOCX/ODT, diagramas, render, templates o QA visual | `super-turing-opencode-documents` |
+| índices estructurales, MCP CodeGraph o wrappers de init/sync/reindex | `super-turing-opencode-codegraph` |
+| notificaciones nativas del sistema operativo | `super-turing-opencode-notifier` |
+| identidades, aliases o rutas propias de una máquina | addon privado machine-local |
+| dominio, stack, comandos o restricciones de un producto concreto | overlay local del proyecto |
+
+Una regla descubierta en un proyecto debe subir a global solo cuando:
+
+1. no contiene nombres, paths, dominio ni contratos propios del repo,
+2. aplica a más de un proyecto o agente,
+3. tiene un dueño global inequívoco según la tabla,
+4. y al promoverla se elimina o reduce la copia local equivalente.
+
+Promover no significa duplicar: el proyecto conserva únicamente el lente de
+dominio que especializa la regla global.
 
 ### 1. Aditivo cuando el archivo expresa comportamiento compuesto
 

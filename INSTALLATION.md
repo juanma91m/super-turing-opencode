@@ -133,7 +133,9 @@ chmod 600 ~/.config/opencode/stitch-api-key
 
 #### Jira helpers (solo si un proyecto los usa)
 
-Los helpers globales de Jira **no** necesitan configuración global fija, pero los proyectos que adopten workflow Jira deben tener un `.env` compatible con:
+Los helpers de Jira se instalan con `super-turing-opencode-ticketing`, no con
+el modo `--main`. No necesitan configuración global fija, pero los proyectos
+que adopten workflow Jira deben tener un `.env` compatible con:
 
 - `JIRA_BASE_URL`
 - `JIRA_EMAIL`
