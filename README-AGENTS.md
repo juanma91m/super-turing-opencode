@@ -93,7 +93,8 @@ comandos `/ticket-*` y el workflow de handoff asociado.
 - Si el addon externo `super-turing-opencode-background` está instalado, puede exponer tools y UX async adicionales sin volverlo parte del stack base.
 - Si `super-turing-opencode-codegraph` está instalado, `code-inspector`, `planner`, `reviewer`, `code-reviewer` y `master-dev` pueden usar `codegraph_explore` para análisis estructural en repos ya indexados; inicialización y reindex siguen wrappers explícitos del addon.
 - Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.
-- Las herramientas de worktree y scheduler deben usarse solo bajo pedido explícito del usuario.
+- Stitch pertenece operativamente a `ui-web-designer`; otros agentes deben derivar allí el trabajo de generación o variación visual.
+- Playwright se expone solo a roles que planifican, implementan, diseñan o validan superficies web; los overlays pueden especializar ese acceso según el stack real.
 - Playwright MCP queda en modo headless/no interactivo por defecto; si una inspección visual headed/manual realmente conviene, debe pedirse confirmación explícita en foreground.
 - Para distribuir este stack a otra máquina, versionar `agents/`, `skills/`, `plugins/`, docs y manifest; no versionar secretos ni estado local (`stitch-api-key`, `node_modules/`, etc.).
 - Los backups del stack se podan automáticamente con retención base de 5 snapshots por bucket y soporte de `.pin`.

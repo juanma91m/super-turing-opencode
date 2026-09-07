@@ -4,6 +4,14 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+### Runtime surface
+
+- `STACK-MANIFEST.json` sube a `0.14.0`; se retiran los plugins globales `opencode-scheduler` y `opencode-worktree`, incorporados para usos eventuales que no se consolidaron. Su estado machine-local no se borra automáticamente.
+- Playwright queda oculto globalmente y se habilita de forma explícita para `master-dev`, `planner`, `frontend-web-developer`, `ui-web-designer` y `dev-test`.
+- Stitch permanece disponible como capacidad on-demand, pero su único owner operativo es `ui-web-designer`; frontend deriva allí cualquier generación o variación visual.
+- el renderer de `opencode.json` ahora mergea la base administrada sobre la configuración existente mediante archivo temporal, preservando providers machine-local y bloques de addons como Engram, CodeGraph, Rovo y Artifact Studio; ante JSON inválido aborta en vez de reemplazarlo silenciosamente.
+- el sync incremental también detecta y aplica la política global de visibilidad Playwright/Stitch, con backup previo de `opencode.json` cuando hay drift.
+
 ### Ownership
 
 - `STACK-MANIFEST.json` sube a `0.13.0` por la primera normalización de ownership entre core y addons.

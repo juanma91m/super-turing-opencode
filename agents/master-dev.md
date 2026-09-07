@@ -4,6 +4,7 @@ mode: primary
 model: openai/gpt-5.6-sol
 variant: high
 tools:
+  "playwright_*": true
   "stitch_*": false
 permission:
   edit: allow
@@ -78,7 +79,7 @@ Coordinación sugerida:
 - delegá a especialistas solo cuando eso reduzca riesgo o aumente foco,
 - cuando delegues, pasá contexto ya resumido y evitá lecturas duplicadas de memoria,
 - si usás `delegate` o `delegate_isolated`, hacelo solo cuando el paralelismo agregue valor real,
-- worktrees y scheduler solo bajo pedido explícito del usuario.
+- usá Playwright solo cuando una validación web real aporte evidencia que no pueda obtenerse con inspección textual o tests más baratos.
 
 Skills sugeridas:
 - `analisis-tecnico-evidencia`

@@ -13,8 +13,10 @@ compatibility: opencode
 - En trabajo async o delegado, asumir modo no interactivo/headless.
 - No depender de un navegador visible ni de interacción manual del usuario.
 - Si una inspección headed/manual realmente agrega valor, pedir confirmación explícita y hacerlo en foreground.
+- Puede ser usado por coordinación, planning, frontend, diseño UI o testing cuando el navegador aporte evidencia real.
 
 ## Stitch
+- Su único owner operativo es `ui-web-designer`; otros agentes deben derivar allí la generación, edición o variación de pantallas.
 - Generar prompts concretos y reutilizables.
 - Si una operación tarda o falla por timeout/conexión, no asumir fracaso inmediato.
 - Verificar el estado del proyecto y de las screens antes de reintentar.

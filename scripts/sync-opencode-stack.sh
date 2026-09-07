@@ -17,6 +17,7 @@ TO_UPDATE=()
 TO_REMOVE=()
 UNCHANGED_COUNT=0
 MISSING_SOURCE_COUNT=0
+CONFIG_POLICY_UPDATE=0
 ADDITIVE_RENDER_DIR=""
 
 ADDITIVE_MANAGED_FILES=(
@@ -167,10 +168,25 @@ classify_files() {
   done
 }
 
+classify_config_policy() {
+  local status
+  if python3 "$SOURCE_DIR/scripts/apply_opencode_tool_policy.py" check --config "$TARGET_DIR/opencode.json"; then
+    CONFIG_POLICY_UPDATE=0
+    return 0
+  else
+    status=$?
+  fi
+  if [[ "$status" -eq 1 ]]; then
+    CONFIG_POLICY_UPDATE=1
+    return 0
+  fi
+  return "$status"
+}
+
 print_plan() {
   local rel_path
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 && "$CONFIG_POLICY_UPDATE" -eq 0 ]]; then
     log "No managed file differences detected"
     return 0
   fi
@@ -195,12 +211,17 @@ print_plan() {
       printf '  - %s\n' "$rel_path"
     done
   fi
+
+  if [[ "$CONFIG_POLICY_UPDATE" -eq 1 ]]; then
+    printf 'Update generated config policy:\n'
+    printf '  ~ opencode.json (Playwright/Stitch global visibility)\n'
+  fi
 }
 
 apply_changes() {
   local rel_path src dst timestamp backup_dir
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 && "$CONFIG_POLICY_UPDATE" -eq 0 ]]; then
     return 0
   fi
 
@@ -230,6 +251,19 @@ apply_changes() {
     run cp -R "$dst" "$backup_dir/$rel_path"
     run rm -rf "$dst"
   done
+
+  if [[ "$CONFIG_POLICY_UPDATE" -eq 1 ]]; then
+    dst="$TARGET_DIR/opencode.json"
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      printf '[dry-run] apply generated config policy to %s\n' "$dst"
+    else
+      if [[ -f "$dst" ]]; then
+        mkdir -p "$backup_dir"
+        cp "$dst" "$backup_dir/opencode.json"
+      fi
+      python3 "$SOURCE_DIR/scripts/apply_opencode_tool_policy.py" apply --config "$dst"
+    fi
+  fi
 }
 
 validate_config() {
@@ -241,7 +275,7 @@ validate_config() {
     return 0
   fi
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 && "$CONFIG_POLICY_UPDATE" -eq 0 ]]; then
     return 0
   fi
 
@@ -264,7 +298,7 @@ prune_backups() {
     return 0
   fi
 
-  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 ]]; then
+  if [[ "${#TO_CREATE[@]}" -eq 0 && "${#TO_UPDATE[@]}" -eq 0 && "${#TO_REMOVE[@]}" -eq 0 && "$CONFIG_POLICY_UPDATE" -eq 0 ]]; then
     return 0
   fi
 
@@ -319,6 +353,7 @@ log "Source dir: $SOURCE_DIR"
 log "Target dir: $TARGET_DIR"
 
 classify_files
+classify_config_policy
 print_plan
 
 if [[ "$STATUS_ONLY" -eq 0 ]]; then
@@ -332,8 +367,8 @@ if [[ "$STATUS_ONLY" -eq 0 ]]; then
   fi
 fi
 
-printf 'Summary: create=%d update=%d remove=%d unchanged=%d missing_source=%d\n' \
-  "${#TO_CREATE[@]}" "${#TO_UPDATE[@]}" "${#TO_REMOVE[@]}" "$UNCHANGED_COUNT" "$MISSING_SOURCE_COUNT"
+printf 'Summary: create=%d update=%d remove=%d config_policy_update=%d unchanged=%d missing_source=%d\n' \
+  "${#TO_CREATE[@]}" "${#TO_UPDATE[@]}" "${#TO_REMOVE[@]}" "$CONFIG_POLICY_UPDATE" "$UNCHANGED_COUNT" "$MISSING_SOURCE_COUNT"
 
 if [[ "${#WARNINGS[@]}" -gt 0 ]]; then
   printf '\nWarnings:\n' >&2

@@ -4,7 +4,7 @@ mode: primary
 model: openai/gpt-5.6-sol
 variant: high
 tools:
-  "playwright_*": false
+  "playwright_*": true
   "stitch_*": false
 permission:
   edit: deny
@@ -37,9 +37,10 @@ Modo de trabajo:
 5. si ves un atajo conceptual flojo, explicá primero el porqué técnico,
 6. si existen helpers aprobados para el workflow del proyecto, usarlos; si no, pedir confirmación antes de escribir,
 7. para dudas sobre librerías, SDKs o APIs externas, priorizar Context7 y usar fetch directo solo cuando haga falta,
-8. delegar solo cuando la especialización agregue valor real,
-9. terminar con preguntas concretas si el requerimiento sigue ambiguo,
-10. si el usuario pasa de análisis a implementación, explicitar que ese paso corresponde a `master-dev` y no empezar a implementar desde `planner`.
+8. usar Playwright solo para entender flujos o estados UI dinámicos cuando fetch, documentación y evidencia textual no alcancen,
+9. delegar solo cuando la especialización agregue valor real,
+10. terminar con preguntas concretas si el requerimiento sigue ambiguo,
+11. si el usuario pasa de análisis a implementación, explicitar que ese paso corresponde a `master-dev` y no empezar a implementar desde `planner`.
 
 Reglas:
 - no implementes código,

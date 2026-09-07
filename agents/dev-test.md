@@ -4,7 +4,7 @@ mode: subagent
 model: openai/gpt-5.6-sol
 variant: medium
 tools:
-  "playwright_*": false
+  "playwright_*": true
   "stitch_*": false
 permission:
   edit: allow
@@ -25,6 +25,7 @@ Responsabilidad:
 - dejar evidencia clara de compilacion, checks y pruebas,
 - detectar fallos reproducibles antes del cierre.
 - persistir solo hallazgos durables de validacion, no cada rerun intermedio.
+- usar Playwright cuando el comportamiento web requiera validación E2E o evidencia visual real.
 
 Secuencia de trabajo:
 1. identificar la validacion minima correcta para este repo,

@@ -81,8 +81,8 @@ lifecycle exclusivo de la base y como implementación del modo `--main`.
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - autopilot de permisos para autoaprobar operaciones cotidianas y conservar confirmación en comandos destructivos, credenciales, infraestructura y publicación
 - identidad y atribución multiagente para sesiones complejas
-- workflow de worktrees por ticket con herramientas globales para crear/listar/borrar worktrees
-- scheduler global para jobs recurrentes explícitos con logs, locks y timeout opcional
+- Playwright headless con exposición acotada a coordinación, planning, frontend, diseño UI y testing
+- Stitch aislado como capacidad on-demand de `ui-web-designer`
 
 Jira, los comandos `/ticket-*` y el workflow `tmp/<ticket>/` se instalan desde
 `super-turing-opencode-ticketing`; no forman parte del core reusable.
@@ -156,11 +156,6 @@ orquesta los addons globales portables; los addons machine-local permanecen
 privados y fuera de esa instalación.
 
 Para la composición real entre stack base, addons globales, runtime background y overlays locales, ver también `COMPOSITION-MANIFEST.md`.
-
-## Tools globales nuevos
-
-- `worktree_create` / `worktree_list` / `worktree_delete`: flujo global para trabajo paralelo por ticket usando git worktrees con config repo-local `.opencode/worktree.jsonc`, sync configurable y apertura best-effort de terminal nueva.
-- `schedule_job` / `list_jobs` / `get_job` / `run_job` / `job_logs` / `delete_job`: automatización recurrente explícita por scope de workdir, con logs, locks, timeout opcional y ejecución no interactiva. Backend inicial: cron supervisado.
 
 ## Supuestos actuales
 

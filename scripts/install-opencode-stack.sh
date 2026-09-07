@@ -199,6 +199,8 @@ render_opencode_config() {
   local stitch_enabled="false"
   local playwright_enabled="false"
   local playwright_exec=""
+  local target_config="$TARGET_DIR/opencode.json"
+  local temporary_config="$TARGET_DIR/opencode.json.tmp"
 
   if [[ -f "$stitch_key" ]]; then
     stitch_enabled="true"
@@ -226,9 +228,29 @@ render_opencode_config() {
   PLAYWRIGHT_EXECUTABLE="$playwright_exec" \
   STITCH_ENABLED="$stitch_enabled" \
   STITCH_KEY_FILE="$stitch_key" \
-  python3 <<'PY' > "$TARGET_DIR/opencode.json"
+  TARGET_CONFIG="$target_config" \
+  python3 <<'PY' > "$temporary_config"
 import json
 import os
+from pathlib import Path
+
+target_config = Path(os.environ["TARGET_CONFIG"])
+try:
+    existing_config = json.loads(target_config.read_text(encoding="utf-8"))
+except FileNotFoundError:
+    existing_config = {}
+except json.JSONDecodeError as exc:
+    raise SystemExit(f"Invalid JSON in existing OpenCode config {target_config}: {exc}") from exc
+
+
+def deep_merge(existing, managed):
+    result = dict(existing) if isinstance(existing, dict) else {}
+    for key, value in managed.items():
+        if isinstance(value, dict) and isinstance(result.get(key), dict):
+            result[key] = deep_merge(result[key], value)
+        else:
+            result[key] = value
+    return result
 
 playwright_enabled = os.environ["PLAYWRIGHT_ENABLED"] == "true"
 stitch_enabled = os.environ["STITCH_ENABLED"] == "true"
@@ -250,7 +272,7 @@ if stitch_enabled:
         "X-Goog-Api-Key": "{file:%s}" % os.environ["STITCH_KEY_FILE"],
     }
 
-config = {
+managed_config = {
     "$schema": "https://opencode.ai/config.json",
     "model": "openai/gpt-5.6-sol",
     "small_model": "openai/gpt-5.6-sol",
@@ -288,6 +310,10 @@ config = {
             "~/.config/opencode/scripts/**": "allow",
         },
     },
+    "tools": {
+        "playwright_*": False,
+        "stitch_*": False,
+    },
     "mcp": {
         "context7": {
             "type": "local",
@@ -307,8 +333,10 @@ config = {
     },
 }
 
+config = deep_merge(existing_config, managed_config)
 print(json.dumps(config, indent=2))
 PY
+  mv "$temporary_config" "$target_config"
 }
 
 install_npm_dependencies() {
