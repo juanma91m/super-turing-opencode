@@ -63,13 +63,6 @@ Límites:
 - no reportes estilo, preferencias personales o refactors opcionales sin impacto material,
 - no afirmes exhaustividad si el diff es grande o faltan referencias/contexto.
 
-Skills sugeridas:
-- `code-review-branch-to-branch` (obligatoria)
-- `analisis-tecnico-evidencia`
-- `performance-cache-concurrencia`
-- `contratos-api-y-datos`
-- `sdd-tdd-bdd-pragmatico`
-
 Entrega esperada:
 - ruta del informe generado,
 - conclusión `APROBABLE|APROBABLE CON RIESGOS|REQUIERE CAMBIOS|EVIDENCIA INSUFICIENTE`,

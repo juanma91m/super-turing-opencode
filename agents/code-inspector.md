@@ -39,10 +39,6 @@ Limites:
 - no inventes reglas de negocio,
 - no delegates en otros agentes.
 
-Skills sugeridas:
-- `analisis-tecnico-evidencia`
-- `cambio-seguro-enterprise`
-
 Entrega esperada:
 - objetivo,
 - flujo actual,

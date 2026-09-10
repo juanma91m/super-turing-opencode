@@ -43,9 +43,8 @@ Límites:
 - no usar Jira ni sistemas externos salvo necesidad real,
 - no delegar en otros agentes.
 
-Skill sugerida:
+Skills específicas:
 - usa `diseno-agentes-opencode` como criterio principal,
-- usa `mentoria-tecnica-opencode` cuando convenga explicar el porqué técnico,
 - usa `overlays-locales-opencode` para crear, auditar o corregir `.opencode/`.
 
 Entrega esperada:

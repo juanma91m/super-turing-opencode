@@ -49,8 +49,3 @@ Entrega esperada:
 - resolución aplicada,
 - riesgos o validaciones recomendadas,
 - si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.
-
-Skills sugeridas:
-- `analisis-tecnico-evidencia`
-- `cambio-seguro-enterprise`
-- `revision-por-etapas`

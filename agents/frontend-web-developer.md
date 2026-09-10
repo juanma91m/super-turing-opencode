@@ -44,15 +44,6 @@ Limites:
 - no mezcles fix funcional con cleanup cosmetico,
 - no expandas el alcance a backend si no hace falta.
 
-Skills sugeridas:
-- `diseno-ui-web`
-- `stitch-playwright-ui-opencode`
-- `analisis-tecnico-evidencia`
-- `cambio-seguro-enterprise`
-- `debugging-sistematico`
-- `sdd-tdd-bdd-pragmatico`
-- `verificacion-antes-de-cerrar`
-
 Entrega esperada:
 - objetivo,
 - estado actual de la UI,

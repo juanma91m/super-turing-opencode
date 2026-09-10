@@ -47,15 +47,6 @@ Limites:
 - no mezcles fix funcional con cleanup cosmetico,
 - no te apropies de la implementacion de UI salvo lo estrictamente necesario para integrar el cambio.
 
-Skills sugeridas:
-- `analisis-tecnico-evidencia`
-- `cambio-seguro-enterprise`
-- `performance-cache-concurrencia`
-- `contratos-api-y-datos`
-- `debugging-sistematico`
-- `sdd-tdd-bdd-pragmatico`
-- `verificacion-antes-de-cerrar`
-
 Entrega esperada:
 - objetivo,
 - estado actual,

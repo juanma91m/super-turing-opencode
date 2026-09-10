@@ -125,6 +125,10 @@ def extract_skills(body: str) -> list[str]:
     return skills
 
 
+def extract_inline_refs(body: str) -> set[str]:
+    return set(re.findall(r"`([^`]+)`", body))
+
+
 def extract_markdown_headings(body: str) -> set[str]:
     return {normalize_heading(match.group(1).strip()) for match in re.finditer(r"^##\s+(.+)$", body, re.MULTILINE)}
 
@@ -200,7 +204,7 @@ def audit_agent(local_path: Path, global_path: Path | None, project_root: Path) 
         item.add("warning", f"Se perdió el target de task `{target}` presente en el global.", "Reinyectar el target si el rol local debería conservar esa coordinación.")
 
     global_skills = set(extract_skills(global_body))
-    local_skills = set(extract_skills(local_body))
+    local_skills = set(extract_skills(local_body)) | extract_inline_refs(local_body)
     if global_skills and global_skills.isdisjoint(local_skills):
         item.add("warning", "No se preservó ninguna skill sugerida del agente global.", "Mantener al menos las skills globales más relevantes y sumar las locales.")
 

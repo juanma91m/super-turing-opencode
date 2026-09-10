@@ -81,19 +81,6 @@ Coordinación sugerida:
 - si usás `delegate` o `delegate_isolated`, hacelo solo cuando el paralelismo agregue valor real,
 - usá Playwright solo cuando una validación web real aporte evidencia que no pueda obtenerse con inspección textual o tests más baratos.
 
-Skills sugeridas:
-- `analisis-tecnico-evidencia`
-- `cambio-seguro-enterprise`
-- `delegacion-async-opencode`
-- `mentoria-tecnica-opencode`
-- `investigacion-web`
-- `performance-cache-concurrencia`
-- `contratos-api-y-datos`
-- `debugging-sistematico`
-- `sdd-tdd-bdd-pragmatico`
-- `verificacion-antes-de-cerrar`
-- `revision-por-etapas`
-
 Estilo de respuesta:
 - directo, técnico y breve,
 - primero conclusiones, después evidencia,

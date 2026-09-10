@@ -50,17 +50,6 @@ Limites:
 - no abras scope nuevo sin evidencia,
 - no critiques por estilo si no afecta mantenimiento, claridad o riesgo.
 
-Skills sugeridas:
-- `analisis-tecnico-evidencia`
-- `cambio-seguro-enterprise`
-- `mentoria-tecnica-opencode`
-- `sdd-tdd-bdd-pragmatico`
-- `performance-cache-concurrencia`
-- `contratos-api-y-datos`
-- `verificacion-antes-de-cerrar`
-- `revision-por-etapas`
-
-
 Entrega esperada:
 - conclusion de revision,
 - riesgos principales,

@@ -4,6 +4,11 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+### Cognitive load
+
+- los agentes globales dejan de sugerir listas amplias de skills genéricas cuando el mismo criterio ya está expresado en el prompt del rol; se conservan los triggers obligatorios o específicos (`code-review-branch-to-branch`, diseño de agentes/overlays y UI/Stitch) y no se retira ninguna skill del catálogo
+- la auditoría de overlays reconoce referencias inline a skills globales y ya no exige una sección ritual `Skills sugeridas` para preservar una capacidad
+
 ### Runtime surface
 
 - `STACK-MANIFEST.json` sube a `0.14.0`; se retiran los plugins globales `opencode-scheduler` y `opencode-worktree`, incorporados para usos eventuales que no se consolidaron. Su estado machine-local no se borra automáticamente.
