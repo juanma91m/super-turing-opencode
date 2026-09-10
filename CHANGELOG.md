@@ -9,6 +9,11 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - los agentes globales dejan de sugerir listas amplias de skills genéricas cuando el mismo criterio ya está expresado en el prompt del rol; se conservan los triggers obligatorios o específicos (`code-review-branch-to-branch`, diseño de agentes/overlays y UI/Stitch) y no se retira ninguna skill del catálogo
 - la auditoría de overlays reconoce referencias inline a skills globales y ya no exige una sección ritual `Skills sugeridas` para preservar una capacidad
 
+### Overlay hygiene
+
+- `STACK-MANIFEST.json` sube a `0.14.1`; `check_local_overlays.py` distingue recortes explícitos/seguros de drift real y evita exigir allowlists de Gradle cuando el wrapper no existe en el proyecto
+- se agregan `check_overlay_sync.py` y su wrapper para validar en modo read-only la paridad entre un overlay canónico, su `sync_manifest.txt`, sus obsoletos declarados y el target desplegado
+
 ### Runtime surface
 
 - `STACK-MANIFEST.json` sube a `0.14.0`; se retiran los plugins globales `opencode-scheduler` y `opencode-worktree`, incorporados para usos eventuales que no se consolidaron. Su estado machine-local no se borra automáticamente.

@@ -25,6 +25,8 @@ class Finding:
     severity: str
     message: str
     suggestion: str | None = None
+    code: str = "generic"
+    subject: str | None = None
 
 
 @dataclass
@@ -36,8 +38,18 @@ class AuditItem:
     status: str = "OK"
     findings: list[Finding] = field(default_factory=list)
 
-    def add(self, severity: str, message: str, suggestion: str | None = None) -> None:
-        self.findings.append(Finding(severity=severity, message=message, suggestion=suggestion))
+    def add(
+        self,
+        severity: str,
+        message: str,
+        suggestion: str | None = None,
+        *,
+        code: str = "generic",
+        subject: str | None = None,
+    ) -> None:
+        self.findings.append(
+            Finding(severity=severity, message=message, suggestion=suggestion, code=code, subject=subject)
+        )
         if severity == "error":
             self.status = "error"
         elif severity == "warning" and self.status != "error":
@@ -151,6 +163,31 @@ def has_any_token(text: str, tokens: list[str]) -> bool:
     return any(token.lower() in lower for token in tokens)
 
 
+def has_specific_allow(node: Any) -> bool:
+    return isinstance(node, dict) and any(key != "*" and value == "allow" for key, value in node.items())
+
+
+def bash_allow_applies(command: str, project_root: Path) -> bool:
+    if command.startswith("./gradlew"):
+        return (project_root / "gradlew").is_file()
+    return True
+
+
+def guardrail_applies(group_name: str, local_meta: dict[str, Any], project_root: Path) -> bool:
+    local_tools = local_meta.get("tools", {}) if isinstance(local_meta.get("tools"), dict) else {}
+    local_perm = local_meta.get("permission", {}) if isinstance(local_meta.get("permission"), dict) else {}
+    if group_name == "async_delegate":
+        return has_specific_allow(local_perm.get("task"))
+    if group_name == "ticket_handoff":
+        agents_path = project_root / "AGENTS.md"
+        return agents_path.is_file() and has_any_token(read_text(agents_path), TOKEN_GROUPS[group_name])
+    if group_name == "playwright_headless" and local_tools.get("playwright_*") is False:
+        return False
+    if group_name == "stitch_timeout" and local_tools.get("stitch_*") is False:
+        return False
+    return True
+
+
 def audit_agents_local_policy(project_root: Path) -> AuditItem | None:
     agents_md = project_root / "AGENTS.md"
     if not agents_md.exists():
@@ -178,39 +215,49 @@ def audit_agent(local_path: Path, global_path: Path | None, project_root: Path) 
     global_meta, global_body = split_front_matter(read_text(global_path))
 
     if global_meta.get("mode") and local_meta.get("mode") != global_meta.get("mode"):
-        item.add("error", f"`mode` difiere del global (`{global_meta.get('mode')}` -> `{local_meta.get('mode')}`).", "Preservar `mode` salvo cambio intencional explícitamente documentado.")
+        item.add("error", f"`mode` difiere del global (`{global_meta.get('mode')}` -> `{local_meta.get('mode')}`).", "Preservar `mode` salvo cambio intencional explícitamente documentado.", code="agent.mode.changed")
 
     global_tools = global_meta.get("tools", {}) if isinstance(global_meta.get("tools"), dict) else {}
     local_tools = local_meta.get("tools", {}) if isinstance(local_meta.get("tools"), dict) else {}
     for tool_name, global_value in global_tools.items():
         if tool_name not in local_tools:
-            item.add("warning", f"Falta reinyectar la declaración de tool `{tool_name}` presente en el global.", "Copiar la declaración de `tools:` si la capacidad sigue aplicando en el proyecto.")
+            item.add("warning", f"Falta reinyectar la declaración de tool `{tool_name}` presente en el global.", "Copiar la declaración de `tools:` si la capacidad sigue aplicando en el proyecto.", code="agent.tool.missing", subject=tool_name)
         elif global_value is True and local_tools.get(tool_name) is not True:
-            item.add("warning", f"La tool `{tool_name}` quedó más restringida que en el global.", "Confirmar que el recorte es intencional o restaurar la capacidad global.")
+            item.add("accepted", f"La tool `{tool_name}` quedó explícitamente más restringida que en el global.", "El valor local explícito documenta el recorte.", code="agent.tool.explicit_restriction", subject=tool_name)
 
     global_perm = global_meta.get("permission", {}) if isinstance(global_meta.get("permission"), dict) else {}
     local_perm = local_meta.get("permission", {}) if isinstance(local_meta.get("permission"), dict) else {}
     if global_perm.get("edit") == "allow" and local_perm.get("edit") != "allow":
-        item.add("warning", "El permiso `edit` quedó más restrictivo que en el global.", "Documentar el recorte o restaurar `edit: allow` si el rol sigue siendo implementador.")
+        item.add("warning", "El permiso `edit` quedó más restrictivo que en el global.", "Documentar el recorte o restaurar `edit: allow` si el rol sigue siendo implementador.", code="agent.permission.edit_restricted", subject="edit")
 
     global_bash_allow = flatten_allow_map(global_perm.get("bash"))
     local_bash_allow = flatten_allow_map(local_perm.get("bash"))
     for command in sorted(global_bash_allow - local_bash_allow):
-        item.add("warning", f"Se perdió la allowlist segura de bash `{command}` presente en el global.", "Reinyectar la allowlist si sigue siendo válida para el proyecto.")
+        local_action = local_perm.get("bash", {}).get(command) if isinstance(local_perm.get("bash"), dict) else None
+        if local_action in {"ask", "deny"}:
+            item.add("accepted", f"La allowlist global de bash `{command}` tiene recorte local explícito a `{local_action}`.", "El valor local explícito documenta el recorte.", code="agent.permission.bash_explicit_restriction", subject=command)
+        elif not bash_allow_applies(command, project_root):
+            item.add("accepted", f"La allowlist global de bash `{command}` no aplica porque el ejecutable relativo no existe en la raíz del proyecto.", "No reinyectar comandos de otro stack.", code="agent.permission.bash_not_applicable", subject=command)
+        else:
+            item.add("warning", f"Se perdió la allowlist segura de bash `{command}` presente en el global.", "Reinyectar la allowlist si sigue siendo válida para el proyecto.", code="agent.permission.bash_allow_missing", subject=command)
 
     global_task_allow = flatten_allow_map(global_perm.get("task"))
     local_task_allow = flatten_allow_map(local_perm.get("task"))
     for target in sorted(global_task_allow - local_task_allow):
-        item.add("warning", f"Se perdió el target de task `{target}` presente en el global.", "Reinyectar el target si el rol local debería conservar esa coordinación.")
+        local_action = local_perm.get("task", {}).get(target) if isinstance(local_perm.get("task"), dict) else None
+        if local_action in {"ask", "deny"}:
+            item.add("accepted", f"El target global de task `{target}` tiene recorte local explícito a `{local_action}`.", "El valor local explícito documenta el recorte.", code="agent.permission.task_explicit_restriction", subject=target)
+        else:
+            item.add("warning", f"Se perdió el target de task `{target}` presente en el global.", "Reinyectar el target si el rol local debería conservar esa coordinación.", code="agent.permission.task_allow_missing", subject=target)
 
     global_skills = set(extract_skills(global_body))
     local_skills = set(extract_skills(local_body)) | extract_inline_refs(local_body)
     if global_skills and global_skills.isdisjoint(local_skills):
-        item.add("warning", "No se preservó ninguna skill sugerida del agente global.", "Mantener al menos las skills globales más relevantes y sumar las locales.")
+        item.add("warning", "No se preservó ninguna skill sugerida del agente global.", "Mantener al menos las skills globales más relevantes y sumar las locales.", code="agent.skill.global_missing")
 
     for group_name, tokens in TOKEN_GROUPS.items():
-        if has_any_token(global_body, tokens) and not has_any_token(local_body, tokens):
-            item.add("warning", f"No aparece el guardrail global del grupo `{group_name}` en el override local.", "Revisar si conviene reinyectar ese guardrail operativo en el prompt local.")
+        if guardrail_applies(group_name, local_meta, project_root) and has_any_token(global_body, tokens) and not has_any_token(local_body, tokens):
+            item.add("warning", f"No aparece el guardrail global del grupo `{group_name}` en el override local.", "Revisar si conviene reinyectar ese guardrail operativo en el prompt local.", code="agent.guardrail.missing", subject=group_name)
 
     return item
 
@@ -224,18 +271,18 @@ def audit_command(local_path: Path, global_path: Path | None, project_root: Path
     global_meta, global_body = split_front_matter(read_text(global_path))
 
     if global_meta.get("agent") and local_meta.get("agent") != global_meta.get("agent"):
-        item.add("warning", f"El comando cambió de agente (`{global_meta.get('agent')}` -> `{local_meta.get('agent')}`).", "Confirmar que el cambio de ownership es intencional y quedó documentado.")
+        item.add("warning", f"El comando cambió de agente (`{global_meta.get('agent')}` -> `{local_meta.get('agent')}`).", "Confirmar que el cambio de ownership es intencional y quedó documentado.", code="command.agent.changed")
     if global_meta.get("subtask") is not None and local_meta.get("subtask") != global_meta.get("subtask"):
-        item.add("warning", "El flag `subtask` difiere del global.", "Preservar `subtask` salvo necesidad explícita del workflow local.")
+        item.add("warning", "El flag `subtask` difiere del global.", "Preservar `subtask` salvo necesidad explícita del workflow local.", code="command.subtask.changed")
 
     if "Objetivo:" in global_body and "Objetivo:" not in local_body:
-        item.add("warning", "El override no preserva la sección `Objetivo:` del comando global.", "Mantener el contrato básico del comando y luego especializarlo.")
+        item.add("warning", "El override no preserva la sección `Objetivo:` del comando global.", "Mantener el contrato básico del comando y luego especializarlo.", code="command.section.missing", subject="Objetivo")
     if "Reglas:" in global_body and "Reglas:" not in local_body:
-        item.add("warning", "El override no preserva la sección `Reglas:` del comando global.", "Mantener guardrails básicos del comando global.")
+        item.add("warning", "El override no preserva la sección `Reglas:` del comando global.", "Mantener guardrails básicos del comando global.", code="command.section.missing", subject="Reglas")
 
     for group_name, tokens in TOKEN_GROUPS.items():
         if has_any_token(global_body, tokens) and not has_any_token(local_body, tokens):
-            item.add("warning", f"No aparece el grupo de guardrails `{group_name}` presente en el comando global.", "Revisar si conviene reinyectar ese guardrail en el comando local.")
+            item.add("warning", f"No aparece el grupo de guardrails `{group_name}` presente en el comando global.", "Revisar si conviene reinyectar ese guardrail en el comando local.", code="command.guardrail.missing", subject=group_name)
     return item
 
 
@@ -250,11 +297,11 @@ def audit_skill(local_path: Path, global_path: Path | None, project_root: Path) 
     global_headings = extract_markdown_headings(global_body)
     local_headings = extract_markdown_headings(local_body)
     for heading in sorted(global_headings - local_headings):
-        item.add("warning", f"Falta la sección `## {heading}` presente en la skill global.", "Reinyectar la sección o documentar por qué deja de aplicar localmente.")
+        item.add("warning", f"Falta la sección `## {heading}` presente en la skill global.", "Reinyectar la sección o documentar por qué deja de aplicar localmente.", code="skill.section.missing", subject=heading)
 
     for group_name, tokens in TOKEN_GROUPS.items():
         if has_any_token(global_body, tokens) and not has_any_token(local_body, tokens):
-            item.add("warning", f"No aparece el grupo de guardrails `{group_name}` presente en la skill global.", "Revisar si conviene reinyectar ese criterio reusable en la skill local.")
+            item.add("warning", f"No aparece el grupo de guardrails `{group_name}` presente en la skill global.", "Revisar si conviene reinyectar ese criterio reusable en la skill local.", code="skill.guardrail.missing", subject=group_name)
     return item
 
 
@@ -291,9 +338,10 @@ def collect_items(project_root: Path) -> list[AuditItem]:
 
 
 def summarize(items: list[AuditItem]) -> dict[str, int]:
-    summary = {"OK": 0, "warning": 0, "error": 0}
+    summary = {"OK": 0, "warning": 0, "error": 0, "accepted": 0}
     for item in items:
         summary[item.status] = summary.get(item.status, 0) + 1
+        summary["accepted"] += sum(finding.severity == "accepted" for finding in item.findings)
     return summary
 
 
@@ -307,7 +355,7 @@ def render_markdown(project_root: Path, items: list[AuditItem]) -> str:
         return "\n".join(lines)
 
     summary = summarize(items)
-    lines.append(f"- Resumen: OK={summary['OK']} warning={summary['warning']} error={summary['error']}")
+    lines.append(f"- Resumen: OK={summary['OK']} warning={summary['warning']} error={summary['error']} accepted={summary['accepted']}")
     lines.append("")
     for item in items:
         badge = item.status.upper()

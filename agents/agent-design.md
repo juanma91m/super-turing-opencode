@@ -14,6 +14,7 @@ permission:
     git diff --name-only*: allow
     ./gradlew spotlessApply*: allow
     bash ~/.config/opencode/scripts/check_local_overlays.sh*: allow
+    bash ~/.config/opencode/scripts/check_overlay_sync.sh*: allow
   task:
     "*": deny
 ---

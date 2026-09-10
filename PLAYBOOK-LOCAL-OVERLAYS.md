@@ -30,7 +30,19 @@ Ayuda a evitar que un proyecto:
 - `scripts/check_local_overlays.sh`
 - `scripts/check_local_overlays.py`
 
-Sirven para comparar `.opencode/` local contra la base global y emitir `OK` / `warning` / `error`.
+Sirven para comparar `.opencode/` local contra la base global y emitir `OK` / `warning` / `error`. Los recortes explícitos de tools o allowlists (`false`, `deny`, `ask`) se muestran como `accepted`: siguen auditables, pero no contaminan el conteo de drift pendiente.
+
+### Paridad del despliegue
+
+`scripts/check_overlay_sync.sh` compara en modo read-only un repo canónico con su target, usando `sync_manifest.txt` y `obsolete_targets.txt`:
+
+```bash
+bash ~/.config/opencode/scripts/check_overlay_sync.sh \
+  --source-root /ruta/al/overlay-canonico \
+  --target-root /ruta/al/proyecto
+```
+
+Reporta archivos faltantes, distintos o extra dentro de entradas gestionadas y falla si un target declarado obsoleto sigue presente. No modifica archivos.
 
 ### Comando focalizado
 
@@ -161,6 +173,12 @@ Se detectó algo que **podría** ser drift, por ejemplo:
 - guardrails globales ausentes,
 - headings/estructura relevante perdida en una skill,
 - cambio de ownership no documentado en un comando.
+
+### `accepted`
+
+- recorte local explícito de una tool o allowlist a `false`, `deny` o `ask`,
+- allowlist de un ejecutable relativo que no existe en la raíz del proyecto,
+- diferencia más restrictiva que sigue visible para revisión pero no requiere acción.
 
 ### `error`
 

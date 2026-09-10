@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "components": {
     "playwright": {
       "mode": "headless",
@@ -51,6 +51,8 @@
     "scripts/check_code_patterns.sh",
     "scripts/check_local_overlays.py",
     "scripts/check_local_overlays.sh",
+    "scripts/check_overlay_sync.py",
+    "scripts/check_overlay_sync.sh",
     "scripts/find_code_pattern.sh",
     "scripts/apply_opencode_tool_policy.py",
     "scripts/install-opencode-stack.sh",

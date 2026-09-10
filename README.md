@@ -76,7 +76,7 @@ lifecycle exclusivo de la base y como implementación del modo `--main`.
 - `sdd-tdd-bdd-pragmatico`: skill para incorporar criterios de aceptación, escenarios y pruebas pragmáticas sin volver rígido el workflow
 - comandos globales `/sessions-*`; los comandos `/ticket-*` pertenecen al addon Ticketing
 - comandos operativos `/stack-doctor`, `/check-local-overlays` y `/init-project-agent-layer`
-- helper reusable `scripts/check_local_overlays.sh` + `check_local_overlays.py` para auditar capas locales `.opencode/`
+- helpers reusables `scripts/check_local_overlays.sh` para auditar capas locales y `scripts/check_overlay_sync.sh` para verificar paridad read-only entre un overlay canónico y su target
 - wrappers globales `scripts/check_code_patterns.sh` y `find_code_pattern.sh` para delegar pattern checks/búsqueda estructural al proyecto cuando exista integración local
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - autopilot de permisos para autoaprobar operaciones cotidianas y conservar confirmación en comandos destructivos, credenciales, infraestructura y publicación
