@@ -4,6 +4,14 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+### Playwright selectable
+
+- `STACK-MANIFEST.json` sube a `0.15.0`; `playwright_mode_router.py` expone un único MCP `playwright_*` y agrega `browser_set_mode` para elegir headless o visible antes de cada workflow.
+- cambiar el modo reinicia el browser y su sesión aislada; la skill conserva headless como default y documenta continuidad visible para login/takeover manual.
+- el modo único sacrifica concurrencia entre workflows Playwright: foreground y background no deben cambiar el browser simultáneamente.
+- los artefactos runtime de Playwright se redirigen a `~/.cache/opencode/playwright-mcp/` para no crear `.playwright-mcp/` dentro de los repos inspeccionados.
+- la selección no agrega agentes, comandos ni exposición de Playwright a roles nuevos.
+
 ### Cognitive load
 
 - los agentes globales dejan de sugerir listas amplias de skills genéricas cuando el mismo criterio ya está expresado en el prompt del rol; se conservan los triggers obligatorios o específicos (`code-review-branch-to-branch`, diseño de agentes/overlays y UI/Stitch) y no se retira ninguna skill del catálogo
@@ -24,6 +32,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Ownership
 
+- `COMPOSITION-MANIFEST.md` registra `super-turing-opencode-aune` como dueño privado de integraciones específicas de AUNE; queda deliberadamente fuera de `distribution/addons.json`.
 - `STACK-MANIFEST.json` sube a `0.13.0` por la primera normalización de ownership entre core y addons.
 - Jira, los comandos `/ticket-*`, `workflow-ticket-handoff` y sus helpers salen del core y pasan a tener un único dueño canónico: `super-turing-opencode-ticketing`.
 - El scaffolding y la auditoría de overlays (`init-project-agent-layer`, `check-local-overlays`, templates, playbook y catálogo Context7) quedan explícitamente en el core, porque son capacidades generales y no dependen de Jira.

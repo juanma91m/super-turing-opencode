@@ -29,6 +29,7 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 | Notifier | `super-turing-opencode-notifier` | `~/.config/opencode/plugins/opencode-notify.ts` | dueño del plugin de notificaciones del SO |
 | Documents | `super-turing-opencode-documents` | `~/.config/opencode/` + runtime Quarto user-space | dueño de publicación PDF/DOCX/ODT, plantillas, QA visual y lifecycle del runtime documental |
 | GitHub accounts local | `super-turing-opencode-github-accounts-local` | `~/.config/opencode/skills/github-cuentas-multiples/` | addon privado y machine-local; dueño del mapeo cuenta/owner/alias SSH de esta máquina, sin credenciales |
+| AUNE private | `super-turing-opencode-aune` | `~/.config/opencode/` | repo privado fuera del pack portable; dueño de MCPs, helpers y políticas específicas de AUNE, empezando por Grafana AUNESA read-only |
 | Overlay Higyrus | `super-turing-opencode-higyrus` | `higyrus/.opencode/`, `higyrus/AGENTS.md`, `higyrus/opencode.json` | dueño del overlay local del proyecto Higyrus |
 
 ## Orden recomendado de composición
@@ -42,7 +43,7 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 5. `super-turing-opencode-notifier`
 6. `super-turing-opencode-documents`
 7. `super-turing-opencode-background`
-8. addons privados machine-local, cuando existan, como `super-turing-opencode-github-accounts-local`
+8. addons privados, cuando existan, como `super-turing-opencode-github-accounts-local` y `super-turing-opencode-aune`
 9. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
 
 ## Instalación orquestada
@@ -61,7 +62,7 @@ bash install.sh --complete
   ejecuta su contrato estable `scripts/install.sh`;
 - la lógica interna, dependencias y lifecycle siguen siendo propiedad de cada
   addon;
-- `github-accounts-local` y los overlays específicos quedan fuera del pack.
+- `github-accounts-local`, `super-turing-opencode-aune` y los overlays específicos quedan fuera del pack.
 
 Por diseño, el catálogo general solo debería cambiar cuando se agrega o quita
 un componente, o cuando cambia el orden de composición. Los cambios internos de
@@ -92,6 +93,7 @@ Racional:
 | índices estructurales, MCP CodeGraph o wrappers de init/sync/reindex | `super-turing-opencode-codegraph` |
 | notificaciones nativas del sistema operativo | `super-turing-opencode-notifier` |
 | identidades, aliases o rutas propias de una máquina | addon privado machine-local |
+| servicios compartidos, endpoints o políticas exclusivas de AUNE | `super-turing-opencode-aune` |
 | dominio, stack, comandos o restricciones de un producto concreto | overlay local del proyecto |
 
 Una regla descubierta en un proyecto debe subir a global solo cuando:

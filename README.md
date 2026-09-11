@@ -8,7 +8,7 @@ Stack portable y versionable de OpenCode con:
 - skills de debugging, verificacion y review por etapas,
 - skill global para SDD/TDD/BDD pragmático y trazabilidad spec -> cambio -> validación,
 - cleanup de sesiones y composición con addons opcionales,
-- integración con Playwright headless,
+- integración con un único Playwright MCP de modo seleccionable: headless por defecto o navegador visible bajo pedido,
 - integración opcional con Stitch,
 - installer reproducible para desplegar el stack en otra máquina.
 
@@ -81,7 +81,7 @@ lifecycle exclusivo de la base y como implementación del modo `--main`.
 - guardrail global para bloquear acceso general a `.env*` (salvo `.env.example`)
 - autopilot de permisos para autoaprobar operaciones cotidianas y conservar confirmación en comandos destructivos, credenciales, infraestructura y publicación
 - identidad y atribución multiagente para sesiones complejas
-- Playwright headless con exposición acotada a coordinación, planning, frontend, diseño UI y testing
+- un único Playwright MCP con modo headless/visible seleccionable por pedido y exposición acotada a coordinación, planning, frontend, diseño UI y testing
 - Stitch aislado como capacidad on-demand de `ui-web-designer`
 
 Jira, los comandos `/ticket-*` y el workflow `tmp/<ticket>/` se instalan desde

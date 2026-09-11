@@ -255,10 +255,11 @@ def deep_merge(existing, managed):
 playwright_enabled = os.environ["PLAYWRIGHT_ENABLED"] == "true"
 stitch_enabled = os.environ["STITCH_ENABLED"] == "true"
 
-playwright_command = ["npx", "-y", "@playwright/mcp@latest", "--headless"]
 playwright_exec = os.environ.get("PLAYWRIGHT_EXECUTABLE", "")
-if playwright_exec:
-    playwright_command.extend(["--executable-path", playwright_exec])
+playwright_router = str(target_config.parent / "scripts" / "playwright_mode_router.py")
+playwright_environment = {
+    "PLAYWRIGHT_MCP_EXECUTABLE_PATH": playwright_exec,
+}
 
 stitch_config = {
     "type": "remote",
@@ -326,8 +327,9 @@ managed_config = {
         },
         "playwright": {
             "type": "local",
-            "command": playwright_command,
+            "command": ["python3", playwright_router],
             "enabled": playwright_enabled,
+            "environment": playwright_environment,
         },
         "stitch": stitch_config,
     },

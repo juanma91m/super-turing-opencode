@@ -10,7 +10,7 @@ Tener un bundle reproducible que instale:
 - skills globales,
 - documentación operativa,
 - integración MCP con Context7, Stitch y Playwright,
-- política headless para Playwright,
+- un único MCP Playwright con modo headless por defecto y selección visible bajo pedido explícito,
 - sin copiar secretos ni estado local innecesario.
 
 ## Qué se versiona
@@ -210,7 +210,7 @@ Esto:
 - deja Context7 configurado globalmente vía `npx -y @upstash/context7-mcp@latest` para docs de librerias/APIs,
 - habilita o deshabilita otros MCPs según disponibilidad local:
   - Stitch: habilitado si existe `stitch-api-key`
-  - Playwright: habilitado si se pudo detectar/instalar Chromium
+  - Playwright: habilita un único MCP `playwright` con router de modo headless/visible si se pudo detectar/instalar Chromium
 
 En modo completo, además:
 

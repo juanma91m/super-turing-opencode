@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "components": {
     "playwright": {
-      "mode": "headless",
+      "mode": "runtime-selectable, headless-default",
       "browser": "chromium user-space"
     }
   },
@@ -58,6 +58,7 @@
     "scripts/install-opencode-stack.sh",
     "scripts/next_code_review_path.sh",
     "scripts/prune_stack_backups.py",
+    "scripts/playwright_mode_router.py",
     "scripts/recompose_additive_agents.py",
     "scripts/session_cleanup.py",
     "scripts/session_cleanup.sh",
@@ -94,7 +95,8 @@
     ".stack-backups/"
   ],
   "machineLocalState": [
-    "~/.cache/ms-playwright/"
+    "~/.cache/ms-playwright/",
+    "~/.cache/opencode/playwright-mcp/"
   ],
   "notes": [
     "plan y build forman parte del esquema efectivo de agentes pero no viven como archivos custom en agents/",

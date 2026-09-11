@@ -54,7 +54,7 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 - `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
 - `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
 - `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
-- `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI con foco en headless, polling y evitar regeneraciones ciegas.
+- `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI, incluida la selección dinámica entre navegador headless y visible.
 - `sdd-tdd-bdd-pragmatico`: conecta especificación, comportamiento esperado y estrategia de pruebas sin imponer ceremonias rígidas.
 - `verificacion-antes-de-cerrar`: evita declarar cierre o éxito sin evidencia fresca.
 - `workflow-ticket-handoff` puede estar disponible cuando se instala el addon Ticketing; no pertenece al core.
@@ -95,7 +95,7 @@ comandos `/ticket-*` y el workflow de handoff asociado.
 - Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.
 - Stitch pertenece operativamente a `ui-web-designer`; otros agentes deben derivar allí el trabajo de generación o variación visual.
 - Playwright se expone solo a roles que planifican, implementan, diseñan o validan superficies web; los overlays pueden especializar ese acceso según el stack real.
-- Playwright MCP queda en modo headless/no interactivo por defecto; si una inspección visual headed/manual realmente conviene, debe pedirse confirmación explícita en foreground.
+- Playwright se expone como un único MCP `playwright_*`; `playwright_browser_set_mode` selecciona `headless` o `visible` antes de cada workflow. Cambiar el modo reinicia el único browser activo y pierde su sesión aislada, por lo que no se deben superponer workflows foreground/background.
 - Para distribuir este stack a otra máquina, versionar `agents/`, `skills/`, `plugins/`, docs y manifest; no versionar secretos ni estado local (`stitch-api-key`, `node_modules/`, etc.).
 - Los backups del stack se podan automáticamente con retención base de 5 snapshots por bucket y soporte de `.pin`.
 - Cuando uses `opencode debug config`, no compartas la salida cruda si contiene secretos resueltos; resumila y redactá valores sensibles.

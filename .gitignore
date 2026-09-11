@@ -1,6 +1,7 @@
 node_modules/
 .stack-backups/
 .stack-sync-backups/
+.playwright-mcp/
 stitch-api-key
 *.bak.*
 *.orig
