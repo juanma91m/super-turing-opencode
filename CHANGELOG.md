@@ -6,6 +6,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Playwright selectable
 
+- `STACK-MANIFEST.json` sube a `0.15.1`; el router ahora releva requests JSON-RPC iniciados por Playwright (como `roots/list`) y evita el deadlock de 60 segundos al navegar desde OpenCode.
 - `STACK-MANIFEST.json` sube a `0.15.0`; `playwright_mode_router.py` expone un único MCP `playwright_*` y agrega `browser_set_mode` para elegir headless o visible antes de cada workflow.
 - cambiar el modo reinicia el browser y su sesión aislada; la skill conserva headless como default y documenta continuidad visible para login/takeover manual.
 - el modo único sacrifica concurrencia entre workflows Playwright: foreground y background no deben cambiar el browser simultáneamente.

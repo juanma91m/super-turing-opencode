@@ -1,4 +1,5 @@
 import importlib.util
+import io
 import os
 import pathlib
 import unittest
@@ -43,6 +44,56 @@ class PlaywrightModeRouterTest(unittest.TestCase):
             definition["inputSchema"]["properties"]["mode"]["enum"],
             ["headless", "visible"],
         )
+
+    def test_request_relays_upstream_request_and_client_response(self):
+        upstream = ROUTER.PlaywrightUpstream()
+        browser_request = {
+            "jsonrpc": "2.0",
+            "id": 0,
+            "method": "roots/list",
+        }
+        browser_response = {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "result": {"content": []},
+        }
+        client_response = {
+            "jsonrpc": "2.0",
+            "id": 0,
+            "result": {"roots": []},
+        }
+        client_request = {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+                "name": "browser_navigate",
+                "arguments": {"url": "https://example.test"},
+            },
+        }
+
+        with (
+            mock.patch.object(upstream, "send") as send,
+            mock.patch.object(
+                upstream,
+                "receive",
+                side_effect=[browser_request, browser_response],
+            ),
+            mock.patch.object(ROUTER, "emit") as emit,
+            mock.patch.object(
+                ROUTER.sys,
+                "stdin",
+                io.StringIO(f"{ROUTER.json.dumps(client_response)}\n"),
+            ),
+        ):
+            result = upstream.request(client_request)
+
+        self.assertEqual(result, browser_response)
+        self.assertEqual(
+            send.call_args_list,
+            [mock.call(client_request), mock.call(client_response)],
+        )
+        emit.assert_called_once_with(browser_request)
 
 
 if __name__ == "__main__":

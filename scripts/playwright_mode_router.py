@@ -106,6 +106,19 @@ class PlaywrightUpstream:
             raise RuntimeError(f"@playwright/mcp cerró la conexión (exit={code})")
         return json.loads(line)
 
+    def relay_client_response(self, request_id: Any) -> None:
+        """Relay client messages until it answers an upstream server request."""
+        for line in sys.stdin:
+            if not line.strip():
+                continue
+            message = json.loads(line)
+            self.send(message)
+            if message.get("id") == request_id and "method" not in message:
+                return
+        raise RuntimeError(
+            "OpenCode cerró la conexión antes de responder una solicitud de Playwright"
+        )
+
     def request(self, message: dict[str, Any]) -> dict[str, Any]:
         self.send(message)
         request_id = message.get("id")
@@ -114,6 +127,8 @@ class PlaywrightUpstream:
             if response.get("id") == request_id:
                 return response
             emit(response)
+            if "id" in response and "method" in response:
+                self.relay_client_response(response["id"])
 
     def initialize(self, params: dict[str, Any]) -> dict[str, Any]:
         self.initialize_params = params
