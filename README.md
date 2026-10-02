@@ -144,7 +144,7 @@ Si un proyecto crea una capa local `.opencode/`, el patrón esperado es **overla
 ## Addons opcionales fuera del stack base
 
 - `super-turing-opencode-knowledge`: memoria durable Engram y corpus recuperable Qdrant.
-- `super-turing-opencode-ticketing`: Jira, Atlassian Rovo read-only, comandos `/ticket-*` y handoffs por ticket.
+- `super-turing-opencode-ticketing`: Jira, Atlassian MCP v2 con lectura acotada y escritura Confluence opt-in por agente, comandos `/ticket-*` y handoffs por ticket.
 - `super-turing-opencode-background`: runtime gestionado, patch host/core versionado y UX async/background.
 - `super-turing-opencode-codegraph`: runtime/MCP global de inteligencia estructural, wrappers seguros e índices machine-local por repository root.
 - `super-turing-opencode-notifier`: notificaciones nativas del SO.
