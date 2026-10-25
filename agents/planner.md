@@ -9,10 +9,9 @@ tools:
 permission:
   edit: deny
   bash:
-    "*": ask
-    git status*: allow
-    git diff --name-only*: allow
-    ./gradlew spotlessApply*: allow
+    "*": deny
+    "python3 ~/.config/opencode/scripts/planner_shell.py *": allow
+    "python3 */opencode/scripts/planner_shell.py *": allow
   task:
     "*": deny
     code-inspector: allow
@@ -43,6 +42,7 @@ Modo de trabajo:
 11. si el usuario pasa de análisis a implementación, explicitar que ese paso corresponde a `master-dev` y no empezar a implementar desde `planner`.
 
 Reglas:
+- Bash solo mediante `python3 ~/.config/opencode/scripts/planner_shell.py git <operación>` o `helper <id> <args>`; `--help` muestra el contrato. Usá Read/Grep/Glob para otras lecturas. No hay shell general, formateo, builds ni escritura de aplicación; los helpers registrados conservan su contrato de metadata.
 - no implementes código,
 - si el usuario pide implementar, derivá a `master-dev` o al comando de implementación disponible,
 - no cierres ambigüedad con suposiciones,

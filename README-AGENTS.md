@@ -29,6 +29,34 @@ Tras cambiar las guías, reiniciar los clientes para comprobarlas en sesiones
 nuevas. `opencode debug config` valida configuración, pero no prueba por sí solo
 el conjunto completo de instrucciones recibido por el modelo.
 
+## Shell del planner
+
+`planner` no dispone de shell general. Para Git de lectura usa
+`python3 ~/.config/opencode/scripts/planner_shell.py git status --short` (u otra
+operación admitida); para helpers usa `... helper <id> <args>`. `--help` enumera
+los IDs instalados. Read/Grep/Glob siguen siendo la vía ordinaria de lectura.
+
+El plugin `planner-shell-guard.ts` valida llamadas Bash del turno ejecutor y falla
+cerrado si no puede resolver el rol. Bash nativo deniega por defecto y permite
+solo el ejecutor, mientras la guarda rechaza composición, expansiones, redirección,
+intérpretes arbitrarios y operaciones mutadoras. La política de Git desactiva
+pager, fsmonitor, diff externo, textconv y locks opcionales; no hay commits/pushes.
+
+Los addons son dueños de `planner-helpers/*.json`: Core no codifica Jira o corpus.
+Solo se ejecutan scripts registrados bajo la configuración global confiable,
+con argumentos declarados; los de metadata conservan su sandbox `tmp/`. El alias
+`tmp` no puede redirigir a código de aplicación. No se ejecutan wrappers locales
+arbitrarios ni se autoaprueban permisos de otros controles.
+
+Claude llama la misma implementación mediante un PreToolUse scoped al planner;
+no se duplica lógica ni se modifica `settings.json`. Es una frontera de comandos,
+no aislamiento OS frente a programas confiables comprometidos o un operador que
+modifique la configuración global. No cubre permisos de otros roles autorizados.
+
+Quitar la guarda, usar `--pure` o ejecutar un intérprete por otra vía no es un
+fallback permitido. Una operación fuera de la política se entrega al implementador,
+no se ensancha la allowlist durante el análisis. Reiniciar clientes tras instalar.
+
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
 - `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.

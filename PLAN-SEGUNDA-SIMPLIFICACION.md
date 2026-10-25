@@ -4,7 +4,9 @@ Fecha de apertura: 2026-10-25.
 
 Estado: puntos 1 y 2 implementados, validados y sincronizados. El punto 2 incluye
 reconciliación de las divergencias previas autorizada por el usuario. Reiniciar
-clientes y usar sesiones nuevas. Los puntos 3–10 siguen pendientes.
+clientes y usar sesiones nuevas. Segundo repaso y addendum del punto 2 cerrados:
+activación determinista, shell restringido y estilo local prioritario (2.h–2.i).
+Los puntos 3–10 siguen pendientes.
 
 ## Objetivo
 
@@ -59,6 +61,10 @@ Alternativas: `bloqueado`, `diferido` o `descartado`, con motivo registrado.
   plan de despliegue completo, sin syncs amplios ni escrituras en productos.
 - No hacer commits ni pushes sin pedido explícito. No instalar ni sincronizar
   componentes por el solo hecho de estar mencionados en este plan.
+- Nunca hacer commits ni pushes en los repos producto AUNE en esta iniciativa:
+  solo en los canónicos. Los productos son destinos de despliegue; sus cambios
+  locales de capas de agentes se conservan sin publicar. No pedir ticket/rama
+  para publicarlos ni forzar assets ignorados a sus índices Git.
 - Preservar cambios preexistentes. El rollback debe deshacer solo el patch de
   esta iniciativa, nunca resetear un repo sucio al último commit.
 - La instalación activa no es una fuente paralela: editar primero el dueño
@@ -648,6 +654,124 @@ guías que están respaldadas. Revertir los nuevos tests de este punto si se rev
 el contrato, no borrarlos como archivos ajenos. Mantener historial del plan y
 ajustar estado, sin perder evidencia. Revalidar paridad/config y reiniciar clientes.
 
+### 2.h. Segundo repaso read-only — 2026-10-25
+
+El usuario aclaró que la publicación es exclusivamente canónica y pidió revisar
+otra vez skills, activación del workflow y estilo. No se editaron prompts,
+permisos ni assets de producto en este repaso; solo este registro y memoria curada.
+
+**Carga comprobada más allá de metadata:** siete invocaciones reales del tool
+`skill` en seis roles OpenCode con el runtime administrado y sus permisos reales:
+planner/handoff, master-dev/debugging, master-dev/verificación, reviewer/revisión
+por etapas, code-reviewer/review formal, knowledge-curator/gobernanza y
+dev-test/verificación. Todas devolvieron skill_content y metadata correctos.
+
+Se comprobó `allow` antes de cada llamada con el evaluador nativo: ningún `ask`
+o `deny` se omitió. DB aislada temporal, sin launcher que fija la DB productiva,
+sin cambiar configuración/permisos y sin ejecutar modelos (tokens input/output=0).
+No se ejecutaron formatters, builds ni operaciones de aplicación. QA temporal:
+`/tmp/opencode/second-pass-skill-loads.py` y su resultado JSON.
+
+En Claude se mantiene la evidencia de referencias legibles y `Read` declarado,
+con symlinks que resuelven a los mismos contratos; no se afirma una ejecución
+LLM real por cada rol. Tampoco se probó selección automática en todos los pares
+proyecto/rol: disponibilidad no implica obediencia ni activación correcta.
+
+**Hallazgos para cerrar antes de prometer ausencia de desvíos:**
+
+1. VB `.opencode/commands/ticket-plan.md:12` aún permite preparar handoff
+   «si aporta claridad», mientras CLAUDE/skill local lo condicionan a pedido/
+   adopción. Falta un criterio inequívoco de qué cuenta como pedido explícito.
+   Recomendación: ID aislado no activa; comandos específicos actúan según el
+   workflow que el proyecto habilita, sin decisión espontánea del modelo.
+2. `revision-por-etapas/SKILL.md:37` todavía dice «si existe workflow de tickets»
+   para priorizar verdict/result, sin distinguir handoff de implementación de
+   code review solamente. No crea archivos por sí sola, pero deja una condición
+   más amplia que la del contrato reparado. Recomendar limitarla al handoff
+   aplicable/activo y archivos existentes, no exigirlos en tareas ad-hoc/review-only.
+3. El planner global tiene `edit: deny`, pero el evaluador real devolvió `allow`
+   para Bash `./gradlew spotlessApply`; el plugin convierte perfiles no denegados
+   por defecto en Bash allow con excepciones. No se ejecutó ese comando. Es un
+   límite técnico incompleto, no una carga fallida de skill ni un cambio introducido
+   por el punto 2. Recortar shell necesita diseño aprobado en ambos runtimes,
+   preservando helpers legítimos y sin afirmar que quitar una línea resuelve todo.
+4. UI global y `diseno-ui-web` privilegian Material UI como referencia, sin una
+   precedencia explícita del design system local. VB exige Ant Design; hay riesgo
+   de deriva de estilo, no prueba de que haya ocurrido. Recomendar prioridad
+   explícita de convenciones/design system del repo y MUI solo como referencia
+   compatible/fallback, no reemplazo del stack.
+
+Idioma/estilo de respuesta global siguen alineados: idioma de sesión, conclusiones
+primero y brevedad; no se encontró una orden global de responder siempre en inglés.
+La conformidad de código/UX requiere casos representativos, no solo inspección de
+prompts. No hubo nuevas correcciones operativas ni commits/pushes en este repaso.
+
+**Conclusión:** las skills reparadas sí se pueden cargar. El cierre inicial cubrió
+despliegue, metadata y contratos revisados; no significa blindaje técnico o
+conductual completo. Proponer addendum acotado y pruebas positivas/negativas del
+workflow y estilo con alcance/costo acordados antes de avanzar al punto 3.
+
+### 2.i. Addendum aprobado e implementado — 2026-10-25
+
+El usuario aprobó ambos criterios pendientes y la implementación del addendum.
+Nunca commits/pushes en productos AUNE: solo en los canónicos. No se inicia punto 3.
+
+- **Activación:** en proyectos que admiten handoff, comandos específicos con ticket
+  concreto cuentan como pedido explícito; no repreguntar ni decidir por conveniencia.
+  ID aislado/archivo viejo/review-only no habilitan handoff. Las excepciones sin
+  archivos respetan reglas del proyecto o requieren explicar el conflicto.
+  Contratos globales de ambos clientes y VB alineados.
+- **Referencias:** revisión por etapas solo prioriza handoff de implementación
+  aplicable/activo y existente; no crea ni exige esos archivos en ad-hoc/review-only.
+- **Estilo:** design system, tokens y convenciones locales primero; MUI es referencia
+  compatible/fallback. Los dos roles UI se alinean; la skill UI ahora es compartida
+  por symlink con OpenCode, no una segunda copia.
+- **Shell técnico:** el planner solo admite Bash mediante `planner_shell.py` de Core:
+  Git de lectura y helpers registrados por Knowledge/Ticketing. Read/Grep/Glob y
+  consultas MCP existentes no cambian. No hay nuevas tools, agentes, skills o MCPs.
+  Core no absorbe contratos Jira/corpus: los addons declaran sus entradas/argumentos.
+- Core y planner local Higyrus pasan a Bash deny por defecto con solo dos patrones
+  del ejecutor. `permission-autopilot` conserva esos deny. Un plugin valida el comando
+  del turno ejecutor y falla cerrado ante identidad/política no resuelta; la cache
+  se fija en chat.params, no en mensajes de cambio de agente todavía encolados.
+- Claude mantiene su toolset/modelo, pero incorpora PreToolUse Bash scoped al planner
+  que llama el mismo ejecutor. No se editan settings/hooks globales ni se autoaprueba
+  ningún permiso. Un hook permitido devuelve 0 sin decisión allow; bloqueo devuelve 2.
+- Se rechazan shell general, comandos compuestos, redirección, expansión, intérpretes
+  libres, formateo, builds y Git mutador. Git desactiva locks opcionales, fsmonitor,
+  pager, diff externo y textconv. Los helpers son scripts globales confiables,
+  argumentos declarados y sandbox metadata existente; tmp no puede redirigir a apps.
+- **Tradeoff:** para shell el planner debe usar el ejecutor, no una consola arbitraria.
+  Es control de comandos y programas confiables, no un sandbox OS contra un helper
+  comprometido/operador que altere la configuración ni una garantía sobre otros roles.
+  Los helpers registrados conservan caches/consultas propias; no se usan para evadir
+  guardas de secretos o acceder a credenciales crudas.
+- **Pruebas:** Core 26 Python, Ticketing 2 Python, adaptador OpenCode 4 Bun y contratos
+  cross-stack 6 Bun: **38 pasadas**, sin llamadas LLM. Incluyen comandos positivos/
+  negativos, cambio de rol, identidad no resuelta, límite de repo, quoting literal,
+  mutaciones Git, tmp symlink y helper Jira real sobre un fixture temporal offline.
+  Una primera fixture carecía del archivo example vacío requerido por el helper;
+  se corrigió solo la fixture, sin leer .env real ni modificar el helper.
+- **Runtime:** siete cargas reales de skills/6 roles siguen pasando con allow; 0 tokens,
+  DB temporal. Evaluación nativa planner: edit=deny y spotless Bash=deny (antes allow).
+  Un Bash real vía ejecutor --help pasó y raw shell no creó marcador sintético.
+  Global/Higyrus `opencode debug config` confirman Bash deny por defecto y solo el
+  ejecutor admitido. Los modelos no cambian; guardas de secretos/settings permanecen.
+- **Paridad:** Core status 72 sin diferencias, Claude status 61 sin diferencias y nueve
+  manifests locales pass. Se recompuso el planner aditivo conservando bloques de
+  Knowledge/Ticketing; no se reemplazó por una copia sin addons. Sin deps instaladas,
+  formateos/builds/app tests, operaciones Jira/CodeGraph ni modificaciones funcionales.
+- **Rollback:** backup pinneado
+  `~/.config/opencode/.stack-sync-backups/point2-addendum-20261025T223009Z/` con 36
+  assets de baseline y ledger. Restaurar fuentes/destinos previos revisando cambios
+  posteriores; retirar solo nuevas guardas/registros/tests de este addendum, reponer
+  la skill UI regular previa si se revierte el symlink y recomponer planner aditivo.
+  No reset a HEAD ni borrado de artefactos propios del usuario. No publicar productos.
+- QA temporal: `/tmp/opencode/point2-addendum-deploy.py`, `addendum-contracts.test.ts`,
+  `addendum-runtime-check.py` y reportes; no se instalan ni son archivo durable.
+  No hay evaluación de selección/obediencia LLM ni prueba end-to-end de Claude con
+  modelo. Reiniciar ambos clientes y usar sesiones nuevas; no prometer obediencia 100%.
+
 ## 3. Deduplicar el contrato de code review
 
 **Problema:** procedimiento y reglas repetidos entre agente, skill y comandos.
@@ -853,6 +977,7 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 
 ## Próxima acción
 
-Reiniciar OpenCode/Claude y usar sesiones nuevas. Esperar indicación para explicar
-y pulir el punto 3; no ejecutarlo automáticamente. Si hay ejemplos de desvíos de
-workflow, usarlos como regresión controlada sin atribuir causalidad por adelantado.
+Reiniciar clientes y usar sesiones nuevas tras el addendum 2.i. Esperar indicación
+para explicar/pulir punto 3; no ejecutarlo automáticamente. Nunca publicar productos
+AUNE: solo canónicos. Usar ejemplos de desvío como regresión, sin atribuir causalidad
+por adelantado ni confundir carga de skills con cumplimiento conductual.

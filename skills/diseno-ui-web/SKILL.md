@@ -1,12 +1,12 @@
 ---
 name: diseno-ui-web
-description: Establece criterios para diseñar interfaces web claras, accesibles y consistentes, con fuerte referencia en Material UI.
+description: Diseña interfaces claras y accesibles respetando el design system del proyecto; Material UI es referencia compatible o fallback, no reemplazo del stack local.
 compatibility: opencode
 ---
 ## Que hago
 - Refuerzo patrones de UI web claros, consistentes y faciles de implementar.
 - Priorizo jerarquia visual, espaciado, legibilidad, accesibilidad y comportamiento responsive.
-- Uso Material UI como referencia fuerte para componentes, layout y convenciones visuales.
+- El design system, componentes, tokens y convenciones del repo tienen prioridad. Uso Material UI solo como referencia compatible o fallback si no hay criterio local; no introducirlo para reemplazar Ant Design, Vaadin u otro sistema existente.
 - Evito soluciones visuales vistosas pero poco operativas.
 - Sirvo como criterio compartido para diseño UI y para implementacion frontend cuando hace falta sostener consistencia visual.
 

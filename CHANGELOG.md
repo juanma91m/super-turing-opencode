@@ -4,6 +4,9 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+- Addendum del punto 2: planner usa un ejecutor de shell limitado con validación técnica, sin shell general, formateo, builds o escritura de aplicación; registro de helpers separado por addon y guarda compartida con Claude, sin nuevas tools/agents/skills.
+- La revisión por etapas solo consulta handoff de implementación activo y existente; el diseño respeta primero convenciones y design system locales, con MUI como fallback compatible.
+
 ### Workflow contracts
 
 - se repara la metadata de `debugging-sistematico`, `verificacion-antes-de-cerrar` y `revision-por-etapas`, preservando sus cuerpos y la fuente compartida con Claude.

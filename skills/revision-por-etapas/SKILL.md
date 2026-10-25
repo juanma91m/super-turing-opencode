@@ -34,7 +34,7 @@ Preguntas guía:
 - Si falla la etapa 1, marcarlo primero antes de discutir cosmética o micro-mejoras.
 - Separar bloqueantes de no bloqueantes.
 - Citar evidencia por cada observación importante.
-- Si existe workflow de tickets, usar `verdict.md` y `result-dev.md` como referencias primarias de intención y cierre.
+- Usar `verdict.md` y `result-dev.md` como referencias solo si hay handoff de implementación aplicable/activo y archivos existentes. No exigirlos ni crear carpetas en tareas ad-hoc, review interno sin handoff o proyectos que solo habilitan code review.
 
 ## Salida esperada
 - etapa 1: cumplimiento,
