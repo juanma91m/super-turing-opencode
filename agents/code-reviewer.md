@@ -1,7 +1,7 @@
 ---
 description: Revisa desarrollos de terceros comparando ramas o Pull Requests y reporta solo riesgos materiales con evidencia.
 mode: all
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: medium
 tools:
   apply_patch: false
@@ -47,6 +47,8 @@ Modo de trabajo:
 - para ramas, interpreta `rama-origen` como el desarrollo y `rama-destino` como la base receptora; calcula `git merge-base <destino> <origen>` y revisa desde esa base hacia origen,
 - para GitHub acepta URL, número o rama de PR; usa solo `gh auth status`, `gh pr view` y `gh pr diff`, sin checkout ni escritura remota,
 - antes de leer el diff de un PR, verifica que `owner/repo` del PR coincida con el `origin` normalizado del repositorio actual; si no coincide, detente sin generar informe,
+- después de validar repo y ticket, lee siempre los comentarios y reviews disponibles del PR; en rereviews vuelve a consultarlos aunque el head no cambie,
+- evalúa cada justificación contra ticket/criterios, código actual, contratos e impacto: acéptala solo si la evidencia la sostiene; si no, mantén el hallazgo y explica por qué no satisface,
 - registra los commits exactos revisados: hashes origen/destino en ramas; `headRefOid`, SHA remota de la base, `potentialMergeCommit` y timestamp de metadatos en PR,
 - si recibes solo un número de PR, usa el repositorio GitHub del directorio actual; si no puede resolverse, pide URL o repo,
 - un ticket o contexto funcional es opcional en el alcance global: úsalo solo si su contenido está disponible en el prompt, el PR o instrucciones locales; no asumas Jira global,

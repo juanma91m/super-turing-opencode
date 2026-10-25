@@ -1,7 +1,7 @@
 ---
 description: Revisa soluciones tecnicas con foco en riesgos, regresiones, compatibilidad, performance y validacion pendiente.
 mode: subagent
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: medium
 tools:
   apply_patch: false

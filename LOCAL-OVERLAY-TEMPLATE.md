@@ -173,7 +173,7 @@ Estas instrucciones aplican solo dentro de este repo y especializan el comportam
 ---
 description: <especialización local del agente>
 mode: <primary|subagent>
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: <medium|high según criticidad del override>
 tools:
   apply_patch: <true|false si aplica>

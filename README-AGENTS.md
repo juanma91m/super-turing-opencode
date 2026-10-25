@@ -19,8 +19,10 @@ Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 ## Agentes globales custom
 
 - `planner`: planner tecnico/funcional generico para tickets y analisis previo a implementacion.
-- `agent-design`: diseña y mantiene agentes, skills, comandos, prompts y permisos para OpenCode.
+- `agent-design`: diseña y mantiene agentes, skills, comandos, prompts y permisos para OpenCode; usa `variant: high` por defecto, también en proyectos sin override local del rol.
 - `master-dev`: agente global por defecto y líder técnico genérico para proyectos enterprise; analiza, decide y puede implementar con foco en evidencia, bajo riesgo y mantenibilidad.
+
+Los cambios de defaults requieren reiniciar OpenCode. Una sesión reabierta puede restaurar el modelo y la variante de su último mensaje; las selecciones manuales también tienen precedencia. Si conserva una selección anterior, elegir el modelo y la variante deseados desde el TUI, sin editar la base de sesiones.
 
 ## Subagentes custom
 
@@ -86,6 +88,7 @@ comandos `/ticket-*` y el workflow de handoff asociado.
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
 - `reviewer` conserva el workflow de verificación post-solución durante desarrollo propio; `code-reviewer` se usa para aprobar implementaciones de terceros y ambos comparten solo criterios técnicos reutilizables.
 - Antes de revisar un PR, `code-reviewer` valida repo actual vs URL, consistencia del ticket y snapshot de commits; un cambio posterior del head requiere una nueva revisión incremental.
+- Toda revisión de PR lee comentarios y reviews antes del veredicto. En rereviews, las justificaciones del autor se vuelven a contrastar con el head, los contratos y los hallazgos previos: se aceptan solo con evidencia suficiente y, si no satisfacen, el informe explica por qué el riesgo continúa.
 - SDD/TDD/BDD se aplican como heurística pragmática: usar criterios de aceptación, escenarios y test-first cuando aclaran o reducen riesgo; no forzarlos en microcambios triviales ni en zonas donde el harness vuelva el ritual más caro que útil.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
 - `permission-autopilot` autoaprueba prompts de bajo riesgo, pero conserva confirmación para `sudo`, borrados, Git destructivo/force, infraestructura, bases de datos, publicación y referencias sensibles. Los `deny` de agentes read-only no se modifican.

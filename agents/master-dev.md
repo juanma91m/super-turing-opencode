@@ -1,7 +1,7 @@
 ---
 description: Lidera y ejecuta trabajo tecnico en proyectos enterprise con foco en evidencia, cambios minimos y mantenibilidad.
 mode: primary
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: high
 tools:
   "playwright_*": true

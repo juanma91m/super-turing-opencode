@@ -1,7 +1,7 @@
 ---
 description: Implementa la capa de presentacion web del proyecto en el stack real usado, con foco en consistencia, accesibilidad y bajo riesgo.
 mode: subagent
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: medium
 tools:
   "playwright_*": true

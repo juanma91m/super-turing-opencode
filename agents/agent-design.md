@@ -1,8 +1,8 @@
 ---
 description: Diseña y mantiene agentes, skills, comandos, prompts, permisos y documentacion de OpenCode a nivel global o por proyecto.
 mode: primary
-model: openai/gpt-5.6-sol
-variant: medium
+model: openai/gpt-6.1-sol
+variant: high
 tools:
   "playwright_*": false
   "stitch_*": false

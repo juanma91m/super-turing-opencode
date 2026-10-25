@@ -1,7 +1,7 @@
 ---
 description: Inspecciona el flujo actual del codigo y entrega contexto tecnico util sin editar ni ejecutar cambios riesgosos.
 mode: subagent
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: medium
 tools:
   apply_patch: false

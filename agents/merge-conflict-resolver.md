@@ -1,7 +1,7 @@
 ---
 description: Analiza y resuelve conflictos de merge/rebase preservando la intención funcional de ambas ramas con bajo riesgo.
 mode: subagent
-model: openai/gpt-5.6-sol
+model: openai/gpt-6.1-sol
 variant: medium
 tools:
   "playwright_*": false

@@ -275,8 +275,8 @@ if stitch_enabled:
 
 managed_config = {
     "$schema": "https://opencode.ai/config.json",
-    "model": "openai/gpt-5.6-sol",
-    "small_model": "openai/gpt-5.6-sol",
+    "model": "openai/gpt-6.1-sol",
+    "small_model": "openai/gpt-6.1-sol",
     "default_agent": "master-dev",
     "agent": {
         "build": {
@@ -286,23 +286,23 @@ managed_config = {
             "disable": True,
         },
         "general": {
-            "model": "openai/gpt-5.6-sol",
+            "model": "openai/gpt-6.1-sol",
             "variant": "medium",
         },
         "explore": {
-            "model": "openai/gpt-5.6-sol",
+            "model": "openai/gpt-6.1-sol",
             "variant": "medium",
         },
         "title": {
-            "model": "openai/gpt-5.6-sol",
+            "model": "openai/gpt-6.1-sol",
             "variant": "low",
         },
         "summary": {
-            "model": "openai/gpt-5.6-sol",
+            "model": "openai/gpt-6.1-sol",
             "variant": "medium",
         },
         "compaction": {
-            "model": "openai/gpt-5.6-sol",
+            "model": "openai/gpt-6.1-sol",
             "variant": "medium",
         },
     },

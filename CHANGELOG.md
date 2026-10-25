@@ -4,6 +4,20 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+### Agent design reasoning
+
+- `agent-design` sube de `variant: medium` a `variant: high` por defecto; los overlays sin override de este rol usan el mismo default global, sin duplicar prompts ni permisos.
+
+### Default model
+
+- el modelo global, los agentes base y los agentes internos generados pasan de `openai/gpt-5.6-sol` a `openai/gpt-6.1-sol`; se conserva la variante específica de cada rol
+
+### Code review conversation
+
+- `code-review-branch-to-branch`, `code-reviewer` y `/code-review-pr` ahora exigen leer comentarios y reviews antes del veredicto, especialmente en rereviews.
+- las justificaciones del autor pasan a evaluarse como evidencia: se aceptan solo si son consistentes con criterios, head actual, contratos e impacto; una razón insuficiente mantiene el hallazgo con explicación explícita.
+- las rereviews conservan informes previos, revisan el delta de código y conversación, y clasifican cada hallazgo anterior como resuelto, pendiente o retirado por justificación suficiente.
+
 ### Playwright selectable
 
 - `STACK-MANIFEST.json` sube a `0.15.1`; el router ahora releva requests JSON-RPC iniciados por Playwright (como `roots/list`) y evita el deadlock de 60 segundos al navegar desde OpenCode.
