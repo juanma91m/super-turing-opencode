@@ -10,6 +10,7 @@
   },
   "managedFiles": [
     ".gitignore",
+    "AGENTS.md",
     "CHANGELOG.md",
     "COMPOSITION-MANIFEST.md",
     "CONTEXT7-TECH-CATALOG.md",
@@ -99,6 +100,7 @@
     "~/.cache/opencode/playwright-mcp/"
   ],
   "notes": [
+    "AGENTS.md es la guía global reusable; se instala en ~/.config/opencode/AGENTS.md y evita el fallback implícito a la guía Claude sin modificarla",
     "plan y build forman parte del esquema efectivo de agentes pero no viven como archivos custom en agents/",
     "el installer genera opencode.json por máquina destino y no copia secretos",
     "sync-opencode-stack.sh es el flujo recomendado para cambios incrementales del stack después del bootstrap inicial",

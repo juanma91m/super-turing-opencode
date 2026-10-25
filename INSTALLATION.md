@@ -6,6 +6,7 @@ Esta guía está pensada para un tercero que quiere instalar **todo** el stack d
 
 El modo principal instala:
 
+- guía común `AGENTS.md` en `~/.config/opencode/`, independiente de la guía Claude,
 - agentes y subagentes globales,
 - commands globales,
 - skills globales,

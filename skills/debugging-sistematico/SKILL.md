@@ -1,3 +1,7 @@
+---
+name: debugging-sistematico
+description: "Investiga bugs, fallos de tests o builds y fixes que no resolvieron la causa mediante hipótesis y pruebas mínimas con evidencia."
+---
 # Skill: debugging-sistematico
 
 ## Que hago

@@ -56,4 +56,4 @@ Entrega esperada:
 - evidencia que respalda cada riesgo,
 - validaciones faltantes o recomendadas,
 - observaciones no bloqueantes separadas,
-- si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.
+- Señalá solo faltantes de contexto que afecten el resultado.

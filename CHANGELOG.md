@@ -4,6 +4,17 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+### Workflow contracts
+
+- se repara la metadata de `debugging-sistematico`, `verificacion-antes-de-cerrar` y `revision-por-etapas`, preservando sus cuerpos y la fuente compartida con Claude.
+- se reemplaza el formulario rutinario de evaluación de handoffs por la obligación breve de señalar faltantes relevantes; no se cambian frontmatter, permisos, modelos ni herramientas de los roles.
+- se agregan regresiones de metadata y de salida sin formulario; la coherencia de workflows locales se mantiene en los overlays canónicos, no en reglas de dominio globales.
+
+### Global instructions
+
+- se distribuye `AGENTS.md` propio del Core para evitar el fallback implícito a `~/.claude/CLAUDE.md`; conserva criterios comunes, seguridad y contratos esenciales de addons sin copiar catálogos, hooks ni dominio de Claude.
+- se preservan roles, permisos, plugins, modelos y overlays; los principios comunes de Claude se alinean en su repo canónico, sin equiparar herramientas o autoridad de los runtimes.
+
 ### Agent design reasoning
 
 - `agent-design` sube de `variant: medium` a `variant: high` por defecto; los overlays sin override de este rol usan el mismo default global, sin duplicar prompts ni permisos.

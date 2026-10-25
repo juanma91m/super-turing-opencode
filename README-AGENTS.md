@@ -11,6 +11,24 @@ Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
 
 Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
 
+## Instrucciones globales y separación de runtimes
+
+`AGENTS.md` es la guía común del Core y se distribuye mediante
+`STACK-MANIFEST.json` a `~/.config/opencode/AGENTS.md`. Complementa al agente
+seleccionado y a las instrucciones locales; no reemplaza sus roles ni permisos.
+`README-AGENTS.md` es documentación, no el archivo global de instrucciones.
+
+En el runtime 1.19.4 verificado, OpenCode busca primero ese `AGENTS.md` global y,
+si falta y la compatibilidad está habilitada, usa `~/.claude/CLAUDE.md`. Distribuir
+la guía propia evita ese fallback, sin desactivar el descubrimiento de skills
+externas ni modificar Claude. La guía Claude se mantiene por separado en
+`super-turing-claude-code/base/CLAUDE.md`: se alinean principios, no herramientas,
+roles o permisos por copia literal.
+
+Tras cambiar las guías, reiniciar los clientes para comprobarlas en sesiones
+nuevas. `opencode debug config` valida configuración, pero no prueba por sí solo
+el conjunto completo de instrucciones recibido por el modelo.
+
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
 - `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.

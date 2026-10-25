@@ -1,3 +1,7 @@
+---
+name: verificacion-antes-de-cerrar
+description: "Contrasta afirmaciones de cierre, corrección o validación con evidencia fresca y pertinente, declarando lo no verificado."
+---
 # Skill: verificacion-antes-de-cerrar
 
 ## Que hago

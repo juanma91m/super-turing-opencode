@@ -1,3 +1,7 @@
+---
+name: revision-por-etapas
+description: "Separa cumplimiento del alcance y calidad técnica al revisar una implementación contra un plan, spec o handoff existente."
+---
 # Skill: revision-por-etapas
 
 ## Que hago

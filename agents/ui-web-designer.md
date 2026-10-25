@@ -48,4 +48,4 @@ Entrega esperada:
 - criterios visuales y de UX,
 - prompt o acciones sugeridas para Stitch si aplica,
 - riesgos, dudas abiertas y recomendaciones de implementacion,
-- si vienes por delegacion o con handoff explicito: `Contexto recibido: suficiente|ajustado|insuficiente`, `Faltó: ...`, `Sobró: ...`.
+- Señalá solo faltantes de contexto que afecten el resultado.
