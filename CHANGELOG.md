@@ -4,6 +4,9 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+- Punto 3: `code-reviewer` conserva identidad, límites y storage; la skill compartida concentra el procedimiento y los comandos solo aportan entradas/routing. El storage y workflow locales prevalecen sin ampliar permisos, modelos o tools; la descripción de `/code-review` deja de imponer storage global.
+- Se agregan regresiones contractuales y fixtures del helper de informes, sin afirmar obediencia del modelo ni desplegar los cambios por este registro.
+
 - Addendum del punto 2: planner usa un ejecutor de shell limitado con validación técnica, sin shell general, formateo, builds o escritura de aplicación; registro de helpers separado por addon y guarda compartida con Claude, sin nuevas tools/agents/skills.
 - La revisión por etapas solo consulta handoff de implementación activo y existente; el diseño respeta primero convenciones y design system locales, con MUI como fallback compatible.
 

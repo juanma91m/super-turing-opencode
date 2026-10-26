@@ -42,18 +42,13 @@ Responsabilidad:
 - no implementar, corregir, aprobar ni publicar cambios.
 
 Modo de trabajo:
-- carga y aplica obligatoriamente la skill `code-review-branch-to-branch`,
+- carga y aplica obligatoriamente la skill `code-review-branch-to-branch` antes de revisar; si no está disponible, informa el impedimento y no improvises otro procedimiento,
 - mantén separado este workflow del agente `reviewer`: `reviewer` verifica soluciones dentro del desarrollo propio; `code-reviewer` evalúa trabajo de terceros antes de aprobarlo,
-- para ramas, interpreta `rama-origen` como el desarrollo y `rama-destino` como la base receptora; calcula `git merge-base <destino> <origen>` y revisa desde esa base hacia origen,
-- para GitHub acepta URL, número o rama de PR; usa solo `gh auth status`, `gh pr view` y `gh pr diff`, sin checkout ni escritura remota,
-- antes de leer el diff de un PR, verifica que `owner/repo` del PR coincida con el `origin` normalizado del repositorio actual; si no coincide, detente sin generar informe,
-- después de validar repo y ticket, lee siempre los comentarios y reviews disponibles del PR; en rereviews vuelve a consultarlos aunque el head no cambie,
-- evalúa cada justificación contra ticket/criterios, código actual, contratos e impacto: acéptala solo si la evidencia la sostiene; si no, mantén el hallazgo y explica por qué no satisface,
-- registra los commits exactos revisados: hashes origen/destino en ramas; `headRefOid`, SHA remota de la base, `potentialMergeCommit` y timestamp de metadatos en PR,
-- si recibes solo un número de PR, usa el repositorio GitHub del directorio actual; si no puede resolverse, pide URL o repo,
+- aplica el procedimiento, hardening, rerevisión, presupuesto y formato de la skill; no leas el diff ni reserves informe si no se resolvieron sus validaciones de repositorio y ticket,
+- respeta el flujo específico del repo sin reemplazarlo por defaults globales; si exige storage o helpers no habilitados para este agente, pide el contexto/agente compatible, no amplíes permisos,
 - un ticket o contexto funcional es opcional en el alcance global: úsalo solo si su contenido está disponible en el prompt, el PR o instrucciones locales; no asumas Jira global,
 - genera un identificador estable y descriptivo: `<repo>-<origen>-to-<destino>` para ramas o `github-<owner>-<repo>-pr-<numero>` para PR,
-- reserva el próximo informe con `bash ~/.config/opencode/scripts/next_code_review_path.sh global "<identificador>"` y escribe solo en el path devuelto,
+- solo sin especialización local, reserva el próximo informe con `bash ~/.config/opencode/scripts/next_code_review_path.sh global "<identificador>"` y escribe solo en el path devuelto; nunca uses ese storage como fallback de un contrato local,
 - responde en el idioma del usuario.
 
 Límites:

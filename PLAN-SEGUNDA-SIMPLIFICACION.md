@@ -6,7 +6,8 @@ Estado: puntos 1 y 2 implementados, validados y sincronizados. El punto 2 incluy
 reconciliación de las divergencias previas autorizada por el usuario. Reiniciar
 clientes y usar sesiones nuevas. Segundo repaso y addendum del punto 2 cerrados:
 activación determinista, shell restringido y estilo local prioritario (2.h–2.i).
-Los puntos 3–10 siguen pendientes.
+El punto 3 está implementado, validado y sincronizado (3.b–3.c); su publicación
+fue autorizada para cerrar el punto (3.d). Los puntos 4–10 siguen pendientes.
 
 ## Objetivo
 
@@ -133,7 +134,7 @@ no asumir que ese almacenamiento temporal constituye un archivo durable.
 |---|---|---|---|
 | 1 | A — poda segura condicionada a equivalencia | Guía OpenCode propia y guía Claude alineada y podada | cerrado |
 | 2 | A | Referencias, metadata y workflows coherentes en ambos stacks y nueve overlays | cerrado |
-| 3 | A | Deduplicar el contrato de code review | pendiente |
+| 3 | A | Deduplicar el contrato de code review | cerrado técnicamente; publicación autorizada |
 | 4 | A | Publicidad veraz de herramientas Engram | pendiente |
 | 5 | B — experimento | Memoria proporcional y cierre por hito | pendiente |
 | 6 | B | Carga selectiva de heurísticas genéricas | pendiente |
@@ -793,6 +794,247 @@ editorial del 10–20%, sin convertirlo en cuota ni prometer menos tool calls.
 conversación nueva, e informe incremental; conservar umbral de hallazgos materiales.
 
 **Rollback:** patch inverso y recomposición autorizada, sin tocar informes previos.
+
+### 3.a. Especificación aprobada
+
+Después de planificar y agregar la condición de preservación local, el usuario
+autorizó implementar y validar: «Si ya tenes todo lo que precisas para avanzar,
+hacelo». Esa aprobación no incluía despliegue, commits ni pushes; la sincronización
+se autorizó posteriormente y se registra en 3.c. El punto 2 no se reabre.
+Alcance equivalente para OpenCode y Claude, con adaptadores propios.
+
+**Condición explícita del usuario — preservar cada flujo local:**
+
+Este punto reorganiza instrucciones, no migra los repos al workflow global. Ante
+la contradicción de storage, se corrige el comando global para respetar el agente
+y contrato locales; no se relajan requisitos locales ni se introduce fallback a
+`~/code-reviews`. El storage global solo corresponde donde no hay especialización.
+Se conservan por repo las entradas, ticket requerido, consulta Jira y manejo de su
+indisponibilidad, helper/cuenta, paths, numeración, formato y extensiones del informe,
+criterios de revisión, permisos y separación del handoff de implementación. Las
+guardas de seguridad siguen vigentes. Solo se elimina una repetición si se demuestra
+equivalencia; una diferencia local real se conserva o se consulta antes de cambiarla.
+
+**Diagnóstico verificado:**
+
+- Agente global, skill y comando de PR repiten resolución de repo, snapshot y
+  procedimiento. No toda repetición es inútil: los límites de autoridad deben
+  seguir visibles en el agente aunque la skill explique cómo cumplirlos.
+- Los agentes locales de Higyrus y otros siete overlays son idénticos entre sí;
+  VB agrega selección de cuenta mediante wrapper y permisos correspondientes.
+  No convertirlos en symlinks ni introducir generación: composición es punto 10.
+- Claude ya comparte la skill global mediante symlink; no crear otra copia.
+- `/code-review` en ambos clientes fija storage global aunque el agente local
+  exige ticket y storage local. Debe remitir al storage del agente efectivo.
+- `virtual-broker-code-review` duplica flujo, severidad y plantilla global, y
+  menciona un helper local distinto del que habilita su agente. Conservar dominio,
+  formato y diferencias locales reales; quitar solo duplicación equivalente y
+  remitir al helper local autorizado sin sustituirlo por una elección global.
+
+**Reparto propuesto:**
+
+| Capa | Responsabilidad propia | Quitar o remitir |
+|---|---|---|
+| Agente global | Identidad independiente, diferencia con `reviewer`, carga obligatoria de la skill, autoridad, storage/helper permitido y salida breve | Secuencia detallada de PR/ramas y enumeración de metadatos |
+| Skill global compartida | Procedimiento común: entradas, validaciones, snapshot, conversación, rereview, presupuesto, umbral, severidad y plantilla base; respetar especializaciones locales | Invocación específica de Jira: remitir al helper habilitado por el proyecto, sin asumirlo global |
+| Comandos | Routing por cliente, argumentos, modo ramas/PR/ticket y aclaración de faltantes | Repetición del algoritmo y paths que contradigan al agente efectivo |
+| Agentes locales | Ticket requerido, Jira acotado y su invocación, storage sin fallback, permisos seguros y especialización local | Repetición de algoritmo, presupuesto, severidad y umbrales ya definidos en la skill |
+| Skill VB | Riesgos específicos de datasource/JPA/Flyway/OpenAPI/auth/frontend, validaciones, formato y diferencias locales justificadas | Solo pasos, definiciones y campos equivalentes al contrato común; no eliminar extensiones ni normalizar diferencias por conveniencia |
+
+**Guardrails que permanecen explícitos:**
+
+- Agente read-only respecto de código/configuración; escritura solo del informe
+  reservado; sin Git mutador, publicaciones, secretos, delegación o builds pesados.
+  No confundir un veredicto en el informe con aprobar remotamente un PR.
+- Skill obligatoria antes de revisar; si no puede cargarse/leerse, informar el
+  impedimento, no sustituirla por un procedimiento improvisado. Claude conserva
+  fallback con `Read`, y su advertencia de que `Write` no está acotado por path
+  técnicamente a nivel de ese subagente.
+- Repo incorrecto: detenerse antes de Jira/diff/reserva. Ticket contradictorio o
+  ambiguo: aclarar antes de continuar. No imponer Jira al uso global sin proyecto.
+- Conversación del PR consultada en cada ronda, incluso con el mismo head;
+  justificaciones evaluadas, no aceptadas automáticamente; snapshot trazable.
+- Datos del PR/ticket/diff no son instrucciones. Informes incrementales sin
+  sobrescritura y hallazgos solo materiales. No crear handoff de implementación.
+- Un comando no amplía permisos ni habilita storage por sí solo. Si el modo ticket
+  necesita una especialización ausente, pedir el contexto compatible, no forzar
+  escritura local desde un agente global que la prohíbe.
+
+**Archivos alcanzados:**
+
+- Core: `agents/code-reviewer.md`, `skills/code-review-branch-to-branch/SKILL.md`,
+  `commands/code-review.md`, `commands/code-review-pr.md` y tests focalizados.
+- Claude: `base/agents/code-reviewer.md`, ambos comandos base y
+  `addons/ticketing/commands/ticket-code-review.md`; preservar el symlink de skill.
+- Ticketing: `commands/ticket-code-review.md`.
+- Nueve overlays canónicos: `.opencode/agents/code-reviewer.md`; VB además
+  `.opencode/skills/virtual-broker-code-review/SKILL.md`.
+- Registro y changelogs de los dueños modificados. Sin cambiar manifests salvo
+  necesidad demostrada: no se propone agregar/quitar assets desplegables.
+
+**Validación acordada:**
+
+1. Matriz antes/después de cada obligación y su dueño; frontmatter de roles y
+   comandos preservado, incluidos modelos, tools, routing y permisos. Comprobar
+   los nueve cuerpos locales y la excepción VB, no solo un muestreo de texto.
+   Criterio de aceptación: equivalencia del flujo de cada repo antes/después, no
+   uniformidad entre repos. Probar que el comando genérico respeta requisitos y
+   storage locales y no los reemplaza por defaults globales.
+2. Pruebas contractuales/fixtures offline: repo ajeno sin efectos posteriores;
+   ticket contradictorio/múltiple; ramas orientadas y merge-base; rereview con
+   mismo head y conversación nueva; snapshot incompleto declarado; payload con
+   instrucciones maliciosas; informe nuevo sin sobrescribir; storage global vs.
+   ticket sin fallback ni creación de handoff. Sin PR/Jira reales ni modelos.
+3. Wiring por cliente: skill disponible, symlink existente y lectura alternativa
+   Claude; VB conserva wrapper de cuenta, dominio y formato local. El contrato
+   común conserva snapshot, conversación y estado de hallazgos previos, sin borrar
+   extensiones del informe local ni cambiar su flujo para ajustarlo al global.
+4. `opencode debug config` solo para configuración global y overlays representativos
+   en sandbox preparado si hace falta; contrastar permisos con baseline, sin
+   instalar dependencias ni operar sobre productos. No repetir la auditoría del
+   punto 2 ni toda la suite del stack. Declarar que fixtures no prueban obediencia LLM.
+
+**Fuera de alcance:** nuevos agentes/skills/plugins/generadores, endurecimiento
+adicional de Bash, cambios de modelos/tools/permisos, políticas de memoria,
+presupuestos nuevos, routing general y lógica funcional de aplicaciones. No
+prometer ahorro de latencia ni perseguir una cuota de bytes.
+
+**Despliegue y rollback:** si luego se autorizan, usar los lifecycles existentes y
+solo assets afectados, preservando symlinks y adaptaciones de runtime. Backup/patch
+por dueño; nunca reset general ni tocar informes anteriores. Publicación solo en
+canónicos y con autorización explícita; nunca commits/pushes en productos AUNE.
+
+### 3.b. Implementación y validación en fuentes — antes del despliegue
+
+- **Alcance realizado:** Core, adaptaciones Claude, Ticketing y nueve overlays
+  canónicos. Ningún asset nuevo de instalación: solo se agrega un archivo de tests.
+  Changelogs existentes actualizados en Core/Claude/Ticketing; los overlays sin
+  changelog registran su ajuste aquí, sin crear documentación operativa duplicada.
+- **Reparto:** los agentes conservan identidad, límites, storage y obligación de
+  aplicar la skill; se retiran sus algoritmos detallados de PR/snapshot y los
+  presupuestos locales repetidos. La skill compartida conserva el procedimiento,
+  reglas de seguridad, conversación/rerevisión, presupuesto y umbral existentes.
+  Agrega precedencia explícita del contrato local y deja la invocación Jira en su
+  dueño local. Los comandos conservan entradas/routing y dejan de imponer storage.
+- **Equivalencia por repo:** los nueve agentes mantienen responsabilidades y entrega
+  local, ticket requerido, Jira exactamente una vez con los mismos argumentos y
+  continuación con limitación si no está disponible, máximo una skill de dominio,
+  helper `ticket`, informe bajo `tmp/<ticket>/code-review/` sin fallback global,
+  límites de seguridad y handoff previo solo como contexto.
+- **VB:** wrapper/cuenta y permisos intactos. Dominio y severidades locales sin
+  cambios; bloque Markdown del formato del informe idéntico byte a byte. La skill
+  deja de repetir la secuencia común y usa el helper que su agente ya habilitaba;
+  no se cambia ese helper ni se normaliza el formato a la plantilla global.
+- **Claude:** se conservan delegación nativa en comandos, `Read` cuando no hay
+  `Skill`, modelo/tools y advertencia de que `Write` no está acotado por path a
+  nivel del subagente. El symlink existente no se modifica ni se sustituye por copia.
+
+#### Matriz de obligaciones conservadas
+
+| Obligación | Dueño después del recorte | Evidencia focalizada |
+|---|---|---|
+| Orientación de ramas, merge-base, refs posiblemente viejas | Skill común, entradas en comando | Test contractual |
+| Repo correcto y ticket no contradictorio antes de Jira/diff/reserva | Skill común, precondición explícita en agentes | Tests contractuales y comparación de nueve contratos locales |
+| Conversación fresca aun con mismo head, justificaciones y estados previos | Skill común obligatoria | Tests contractuales, sin ejecución LLM |
+| Hashes/metadatos y límites de evidencia disponible | Skill común | Tests contractuales de snapshot y limitaciones |
+| Anti-inyección, umbral material, severidades, presupuesto y cobertura parcial | Skill común y límites visibles de los agentes | Tests contractuales; criterios VB comparados con baseline |
+| Ticket/Jira/helper/storage/formato específicos | Agentes e instrucciones/skills locales | Nueve contratos comparados, template y dominio VB idénticos |
+| Informe incremental sin sobrescritura ni handoff | Helper existente y contrato efectivo | Cuatro tests ejecutables del helper en fixtures temporales |
+| Modelos, tools, permisos y routing | Frontmatter/adaptadores existentes | Baseline de headers y configuración nativa en tres perfiles aislados |
+
+#### Resultados y límites
+
+- **16 tests pasados:** 12 checks del contrato textual y cuatro pruebas del helper
+  real. Incluyen reservas global/ticket, conservación de informes, concurrencia,
+  ticket inválido/sin repo sin fallback, fixture de aplicación intacta y ausencia
+  de handoff. No se reimplementa un reviewer ficticio para simular obediencia.
+- **19 frontmatter contrastados:** 17 idénticos; en los dos comandos `/code-review`
+  solo se corrige `description`, que decía «global», para reflejar el storage del
+  repo. Routing, modelos, tools, permisos y demás metadata operativa intactos.
+- **Configuración efectiva:** `opencode debug config` antes/después en tres
+  sandboxes preparados (global, Higyrus y VB); prompt de fuente confirmado y
+  mismos modelos/tools/permisos/routing. Sin instalar dependencias ni ejecutar
+  el CLI dentro de productos; no se edita configuración global para validar.
+- **Protección:** 100 fingerprints sin cambios: assets activos de ambos clientes,
+  archivos afectados de productos, índices de los nueve productos e instrucciones/
+  config/manifests locales no alcanzados. Los 12 HEAD canónicos permanecen iguales;
+  sin staging, commits ni pushes. Diffs sin errores de whitespace.
+- **Límites:** checks textuales/config no prueban comportamiento del modelo. No se
+  ejecutaron PR/Jira reales, LLM, CodeGraph, builds/tests de aplicación, cambios
+  de permisos o nuevas guardas. No se afirma ahorro de latencia.
+- **QA temporal:** `/tmp/opencode/point3-qa.py` y
+  `/tmp/opencode/point3-qa/baseline.json`; patch inicial del plan preservado en ese
+  directorio. Son evidencia temporal, no parte del stack desplegable. Regresión
+  durable en `tests/test_code_review_contract.py` del Core.
+- **Pendiente en esa etapa:** autorizar despliegue coordinado y, por separado, publicación. Las
+  instalaciones activas siguen en el punto 2; el enlace Claude sigue leyendo la
+  skill instalada de OpenCode. No cambiarlo para fingir paridad con fuentes aún no
+  desplegadas. No hace falta reiniciar clientes por esta edición de fuentes.
+- **Rollback:** patch inverso solo de este punto en sus dueños, conservando el
+  cambio de planificación previo y cualquier trabajo posterior. No tocar activos,
+  productos ni informes; no usar reset general. Punto 4 no iniciado.
+
+### 3.c. Sincronización autorizada y validada — antes de publicar
+
+- **Autorización:** ante el pedido de autorizar sincronización acotada dejando la
+  publicación separada, el usuario indicó «Perfecto. podes avanzar». Se desplegaron
+  únicamente los assets del punto 3; no se hicieron staging, commits ni pushes.
+- **Preflight:** destinos sin drift respecto del baseline previo; los 12 HEAD
+  canónicos sin cambios y archivos modificados dentro del alcance. Se contrastaron
+  mappings/manifests y los lifecycles existentes. No se ejecutaron syncs amplios:
+  Claude también mergea settings/poda backups y los instaladores locales pueden
+  leer credenciales, sincronizar otros assets o instalar dependencias.
+- **Despliegue:** 20 archivos regulares: cinco Core (agente, skill, dos comandos y
+  changelog), un comando Ticketing, cuatro adaptaciones Claude (agente y tres
+  comandos), nueve agentes locales y la skill de VB. Copia selectiva respaldada
+  según los mappings existentes; sin settings, manifiestos ni helpers nuevos.
+- **Fuente compartida:** cuatro bindings de skills conservados sin retarget:
+  global Claude en fuente/activo hacia la skill instalada OpenCode, y VB en
+  fuente/producto hacia su skill local. Ahora los activos leen el contenido nuevo;
+  no se crearon copias ni enlaces adicionales.
+- **Validación del despliegue:** paridad de los 20 destinos con las fuentes
+  congeladas durante el preflight, y de los cuatro bindings. Descubrimiento nativo
+  OpenCode confirma `code-review-branch-to-branch` en el path instalado esperado.
+  `opencode debug config` global real y perfiles aislados Higyrus/VB confirman
+  prompts desplegados y mismos modelos/tools/permisos/routing que el baseline.
+  No se ejecutó el CLI dentro de productos ni se repitió la suite del punto 2.
+- **Protección:** 155 fingerprints fuera de alcance intactos, incluidos settings,
+  guardas/roles aditivos/Core no alcanzado, instrucciones/config locales e índices
+  de los productos y fuentes. Los 12 HEAD siguen iguales; no publicación remota.
+  Los flujos locales preservados en 3.b se reciben sin sustituirlos por defaults
+  globales. No modificaciones funcionales, dependencias, PR/Jira/CodeGraph o LLM.
+- **Backup pinneado:**
+  `~/.config/opencode/.stack-sync-backups/point3-20261026T000945Z/`, con las 20
+  versiones previas en `targets/`, imágenes desplegadas en `sources/`, ledger,
+  `.pin`, script de rollout y `result.json`. Para rollback, revisar cambios
+  posteriores y restaurar solo esos destinos según el ledger; conservar enlaces,
+  cambios de producto e informes. Nunca reset general.
+- **QA temporal:** `/tmp/opencode/point3-deploy.py` y
+  `/tmp/opencode/point3-deployment.json`; el backup conserva evidencia durable.
+  No confundir pruebas contractuales/config con obediencia demostrada del modelo.
+- **Estado:** sincronización del punto 3 completada. Reiniciar los procesos de
+  OpenCode y Claude Code que sigan abiertos para recargar configuración; no es
+  obligatorio descartar conversaciones existentes. La publicación quedó separada
+  en esa etapa y fue autorizada después (3.d); nunca commits/push en productos AUNE.
+  Punto 4 no iniciado.
+
+### 3.d. Publicación autorizada y cierre
+
+El usuario confirmó el reinicio y autorizó explícitamente «commitear y pushear»
+el punto 3. No queda un bloqueo técnico identificado; se mantienen los límites
+de evidencia de 3.b–3.c, sin reabrir auditorías ni afirmar obediencia del modelo.
+
+- Publicar solo los 12 canónicos afectados: Core, Claude, Ticketing y nueve
+  overlays, en sus ramas `main`; Core también en su mirror ya configurado.
+- Revisar status, diff, últimos commits e identidad/remotos antes de cada commit;
+  stagear únicamente los archivos del punto 3, incluido este registro y los tests.
+- Conservar hooks y guardas; sin amend, force-push ni cambios de configuración Git.
+  Ante divergencia remota o archivos ajenos, detenerse y resolver antes de publicar.
+- El cierre verificable de publicación exige árboles limpios, contenido revisado
+  intacto y HEAD remoto coincidente en cada destino, incluido el mirror del Core.
+  Conservar evidencia del resultado y commits en el registro de publicación/memoria.
+- No hacer operaciones Git de escritura en productos AUNE ni modificar lo ya
+  desplegado por el hecho de publicar. Punto 4 permanece sin iniciar.
 
 ## 4. Publicidad veraz de herramientas Engram
 
