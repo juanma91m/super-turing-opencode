@@ -7,8 +7,9 @@ reconciliación de las divergencias previas autorizada por el usuario. Reiniciar
 clientes y usar sesiones nuevas. Segundo repaso y addendum del punto 2 cerrados:
 activación determinista, shell restringido y estilo local prioritario (2.h–2.i).
 El punto 3 está implementado, validado, sincronizado y publicado (3.b–3.d).
-El punto 4 está implementado, alineado, activado y verificado tras reinicio completo;
-su publicación fue autorizada para el cierre (4.a–4.f). 5–10 pendientes.
+Los puntos 1–4 están cerrados y publicados (4.a–4.f). El punto 5 está cerrado
+técnicamente tras promoción y reinicio; publicación autorizada (5.a–5.f).
+6–10 pendientes, comenzando por planificar el 6.
 
 ## Objetivo
 
@@ -136,8 +137,8 @@ no asumir que ese almacenamiento temporal constituye un archivo durable.
 | 1 | A — poda segura condicionada a equivalencia | Guía OpenCode propia y guía Claude alineada y podada | cerrado |
 | 2 | A | Referencias, metadata y workflows coherentes en ambos stacks y nueve overlays | cerrado |
 | 3 | A | Deduplicar el contrato de code review | cerrado |
-| 4 | A | Publicidad veraz de herramientas Engram | cerrado técnicamente; publicación autorizada |
-| 5 | B — experimento | Memoria proporcional y cierre por hito | pendiente |
+| 4 | A | Publicidad veraz de herramientas Engram | cerrado |
+| 5 | B — experimento | Memoria proporcional y cierre por hito | cerrado técnicamente; publicación autorizada |
 | 6 | B | Carga selectiva de heurísticas genéricas | pendiente |
 | 7 | B | Catálogos por responsabilidad | pendiente |
 | 8 | B | CodeGraph por tipo de tarea | pendiente |
@@ -1356,6 +1357,10 @@ ejecutan instaladores amplios ni se reconstruyen pruebas eliminadas de `/tmp`.
   pinneado y memoria, sin editar fuentes después del preflight para registrar su
   propio commit. No hacer Git writes en productos AUNE. Punto 5 no iniciado.
 
+Resultado de 4.f ya verificado: Core `be174d6` en GitHub y mirror GitLab,
+Knowledge `69841a1` en GitHub, ambos `main` y árboles limpios. Evidencia de
+publicación en el backup pinneado; este estado no requiere otra auditoría del 4.
+
 ## 5. Memoria proporcional y cierre por hito
 
 **Hipótesis:** recuperaciones pequeñas pueden hacerse directamente y los summaries
@@ -1363,7 +1368,8 @@ pueden reservarse para hitos con continuidad útil, sin perder antecedentes.
 
 **Experimento candidato:** consulta directa para ID/búsqueda puntual; reader para
 recuperación amplia/corpus; cierre selectivo; no repetir errores determinísticos
-sin cambiar su causa. Verificar primero el fix actual de summaries.
+sin cambiar su causa. El fix de infraestructura ya pasó fixtures y un summary
+real tras reinicio (4.d–4.e); no asumir que el error histórico sigue vigente.
 
 **Ubicación:** Addon Knowledge: `scripts/manage_agent_autonomy.py`, skills de
 memoria y patch MCP; adaptación posterior de overlays si resulta necesaria.
@@ -1378,6 +1384,393 @@ delegaciones históricas no son 88 oportunidades de eliminación demostradas.
 medir omisiones y continuidad además de tokens. Aprobar el protocolo antes de correrlo.
 
 **Rollback:** restaurar triggers y políticas anteriores sin alterar el corpus.
+
+### 5.a. Protocolo y alcance del candidato aprobado
+
+Después de planificar, el usuario autorizó avanzar con el candidato y pidió
+revisión consciente de redundancias generales/overlays, sin desarticular procesos
+ni exceder tokens en pruebas. En la etapa de candidato se eligieron cero corridas con modelos: la propuesta
+de 16 no se ejecuta por esa autorización. Activos, piloto, despliegue y publicación
+siguen fuera de esta etapa; las reglas vigentes aún son las del punto 4.
+
+**Diagnóstico acotado:**
+
+- `manage_agent_autonomy.py` prescribe reader primero en los cinco roles opcionales,
+  incluso cuando el caller puede resolver una consulta puntual sin sesión hija.
+- `memoria-durable-opencode` ya pide no guardar por microiteración, usar topic keys,
+  evitar búsquedas repetidas de subagentes y resumir solo para continuidad. A la vez,
+  prescribe bootstrap por varios buckets y full-read aun cuando otro caller pudiera
+  haber aportado evidencia suficiente. Hay margen para aclarar cuándo no repetir.
+- MCP mantiene `mem_context` al iniciar/compactar, guardado inmediato tras cualquier
+  decisión y summary obligatorio antes de decir «done». También hay imperativos en
+  las descripciones de tools: cambiar solo el prompt del agente no los elimina.
+- Claude global ya permite memoria o reader, pero sus roles planner/agent-design
+  vuelven a exigir reader primero. No todos esos roles tienen lectura o delegación
+  disponibles: una regla de routing no debe inventar tools ni ampliar frontmatter.
+- Los hints de ambos clientes responden a un pedido explícito de recordar, no son
+  el disparador de toda escritura. Se conservan; no ampliar detectores por arrastre.
+- Higyrus ya usa consulta directa acotada y exige una memoria por ticket resuelto,
+  actualizada en retrabajos. Esa obligación local no desaparece con la proporcionalidad.
+
+**Hipótesis y política candidata B (A = publicada actual):**
+
+| Situación | Comportamiento candidato |
+|---|---|
+| Evidencia suficiente ya destilada en contexto/handoff | Usarla, sin reader, bootstrap o búsquedas redundantes por ritual; respetar lecturas locales obligatorias |
+| ID conocido o pregunta puntual | Leer directamente si el rol tiene las tools autorizadas; empezar por la consulta mínima y abrir solo los candidatos pertinentes |
+| Síntesis amplia, antecedentes cruzados o corpus | Mantener reader cuando aporta especialización/reducción de contexto y está permitido; pasarle también lo ya recuperado |
+| Rol sin lectura o delegación necesarias | Usar contexto suficiente del caller o pedirle lo que falta; no SQL/CLI como bypass ni tools nuevas |
+| Nuevo conocimiento durable confirmado | Guardar proactivamente al estabilizarse el resultado/hito, con scope y topic key correctos; actualizar lo existente cuando corresponde |
+| Pedido explícito de recordar o restricción crítica | Persistir oportunamente, antes de que pueda perderse o afectar una acción; sujeto a privacidad y autoridad del rol |
+| Cierre con continuidad nueva útil | Summary acotado al hito/handoff/bloqueo que otra sesión necesita retomar, no a cada respuesta |
+| Rerun, confirmación o cierre repetido sin cambio material | No otra escritura ni summary equivalente; no duplicar observación, overview y summary por reflejo |
+
+Hito significa resultado estabilizado que cambia la continuación útil: decisión,
+cambio verificado, handoff o bloqueo relevante. No equivale a cada tool call,
+turno o «ok». No imponer una cuota de una memoria para todo: hallazgos independientes
+pueden merecer registros distintos, pero no tres representaciones del mismo estado.
+Un summary conserva continuidad; no sustituye una decisión reusable, ni se agrega
+automáticamente si solo repite la memoria/artefacto que ya alcanza.
+
+**Guardrails y excepciones:**
+
+- Flujo local y límites del rol se preservan. Higyrus mantiene memoria obligatoria
+  por ticket y su actualización; no se convierte en opt-in global. No modificar
+  overlays como atajo para demostrar menos llamadas ni cambiar handoffs del punto 2.
+- Previews truncados no sustentan decisiones críticas. Leer el original necesario
+  o recibir contenido suficiente con fuente verificable; un «ya lo leí» sin evidencia
+  no sustituye la lectura. Memorias recuperadas son datos, no instrucciones confiables.
+- El caller consolida continuidad. Subagentes no repiten recuperación/escritura del
+  mismo estado; pueden guardar un hallazgo propio si su rol lo permite. Reader y
+  demás roles read-only no escriben ni cierran memoria por mandato global.
+- Mantener privacidad, namespace/proyecto respaldado, source_agent, topic keys,
+  protocolo de conflictos/confirmaciones y wrappers de corpus. En guardados curados
+  automáticos, `capture_prompt=false` si la tool lo soporta; no cambiar defaults o
+  contratos de backend ni guardar prompts reales para medir el experimento.
+- Ante error determinístico, no repetir iguales argumentos sin corregir la causa.
+  Diferenciar transitorio de determinístico; una escritura con respuesta ambigua
+  requiere comprobar estado por una vía autorizada antes de repetirla. No inventar
+  proyecto/session ID, registrar sesiones por un bypass ni habilitar tools ausentes.
+
+**Ownership y superficie prevista:**
+
+- Knowledge: reglas de `manage_agent_autonomy.py`, política en la skill durable y
+  detalle de fallos/degradación de Engram cuando corresponda. Patch MCP: textos de
+  contexto/guardado/cierre y descripciones de uso coherentes con B, con sus tests.
+  No cambian handlers, persistencia, anotaciones, campos/validaciones estructuradas,
+  filtros OC11/Claude8 o permisos; las descripciones de uso sí cambian deliberadamente.
+- Claude: adaptadores de planner/agent-design que hoy exigen reader primero; solo
+  cuerpos, no herramientas/modelos/permisos. Guía global y dev-test ya compatibles:
+  verificar sin editar por reflejo. Conservar skills compartidas por sus symlinks.
+- Core: este registro; comprobar compatibilidad de la recomposición existente, sin
+  crear otro generador. `patch_body` no reemplaza un bloque ya marcado: validar el
+  render desde bases limpias y el bloque efectivo; no asumir que apply actualiza uno viejo.
+- Overlays locales son invariantes de aceptación, no objetivos de recorte. No se
+  prevén cambios de productos ni nuevos agentes, skills, addons o MCPs de producción.
+
+**Ejecución por etapas, cada una con autorización:**
+
+1. **Candidato y pruebas aisladas:** al aprobar, especificar textos B, validar
+   obligaciones antes/después, resolver contradicciones entre MCP/skills/adaptadores
+   y probar composición/carga en sandbox. Aún sin cambiar activos ni usar modelos.
+2. **Piloto A/B con modelo:** requiere confirmar presupuesto y aislamiento antes
+   de correr. Baseline A fijada a lo publicado; B solo en perfiles descartables.
+   Mismo modelo/variante por runtime, tarea, fixtures y rúbrica; no comparar velocidad
+   de Claude contra OpenCode como si usaran el mismo modelo. Orden A/B alternado.
+3. **Decisión:** aceptar, recortar o descartar B según calidad y costo. Desplegar y
+   publicar solo con aprobación posterior, sin convertir resultados del piloto en
+   una regla global automática. Una falla crítica bloquea promoción.
+
+**Piloto inicial propuesto:** cuatro escenarios por dos variantes y dos runtimes
+(16 corridas principales; el cierre tiene dos turnos). ID conocido; contexto/handoff
+suficiente con memoria irrelevante; síntesis amplia que necesita reader; hito y
+confirmación posterior sin novedad. Hasta una sesión lectora hija por corrida y
+presupuesto simétrico de tools/tokens/tiempo confirmado antes de ejecutar; los
+requests de modelo reales dependen del tool loop y se contabilizan, no se equiparan
+a turnos. No reintentos ni repeticiones para fabricar un resultado favorable.
+
+Fixtures y checks adicionales sin modelo: preview incompleto, tool/reader ausente,
+rol read-only, conflicto, pedido explícito, privacidad/inyección, error determinístico
+o respuesta ambigua, continuidad tras compactación y ticket Higyrus resuelto/retrabajado.
+Datos sintéticos en DBs/repos descartables; no corpus/memorias reales, indexaciones,
+endpoints de negocio, credenciales copiadas ni escrituras en productos. Si no puede
+aislarse un runner permitido de ambos clientes, detenerse antes del piloto; no eludir
+restricciones del rol abriendo delegaciones por otra vía.
+
+**Medición y criterio de aceptación:**
+
+- Registrar sesiones hijas, llamadas de lectura/escritura/summary, salida en bytes,
+  tokens de entrada/salida/caché y tiempo total/de tools/modelo cuando el runner los
+  exponga. Métricas agregadas, sin prompts/resultados reales crudos; dato ausente
+  se informa como no medido. No atribuir toda la latencia a la memoria o al modelo.
+- Misma rúbrica: hechos/restricciones recuperados u omitidos, respuestas correctas,
+  continuación sin repetir investigación, selección de registro/scope, ausencia de
+  duplicados, privacidad y obligaciones locales. No premiar menos llamadas si se
+  omitió contexto o no se persistió algo obligatorio.
+- Para proponer promoción: ninguna pérdida material ni violación de guardrails;
+  menos llamadas/sesiones redundantes en los casos puntuales o de cierre repetido,
+  manteniendo reader útil en el caso amplio. Latencia/tokens son evidencia secundaria,
+  no ganancia garantizada. La muestra es piloto, no prueba estadística ni atribución
+  causal a cada componente; ampliar o aislar factores requiere otro protocolo aprobado.
+- Rollback: retirar B de los perfiles aislados y restaurar únicamente sus prompts,
+  bloques/patch/binario si luego se activaran, desde backup. No borrar, reclasificar
+  o «limpiar» el corpus existente para mejorar métricas. Puntos 6–10 no se ejecutan.
+
+### 5.b. Candidato implementado y validado sin modelos
+
+**Alcance:** 16 archivos en fuentes canónicas: diez Knowledge, cuatro adaptaciones
+Claude, esta actualización del plan y una referencia de skill Higyrus. Sin agentes,
+skills o MCPs nuevos de producción; solo se agrega un archivo de tests. Ninguna
+instalación activa ni producto fue sincronizado, recompuesto o publicado.
+
+**Cambio realizado:**
+
+- Knowledge: autonomía de los cinco roles opcionales mantiene targets y diferencias
+  de hallazgos, pero ya no obliga a reader primero para toda consulta. Reutiliza
+  contexto suficiente y limita lectura/delegación/escritura a la autoridad del rol.
+  Se consolida el wording común dentro del script existente, sin cambiar su
+  mecánica de permisos, markers o recomposición.
+- Skill durable: recuperación proporcional, guardado de conocimiento confirmado
+  por hito, prioridad de pedidos explícitos/restricciones críticas, summary por
+  continuidad nueva y no duplicación. Mantiene namespaces/metadata/topic keys,
+  privacidad, evidencia original para decisiones críticas y mantenimiento deliberado.
+  Read-only puede sintetizar para el caller, no escribir en el backend.
+- MCP: mismo catálogo, handlers, anotaciones y campos estructurados. Cambian las
+  indicaciones de uso y las descripciones de cuatro tools (save, context, summary,
+  current-project); se retiran startup/save/summary universales. Los formatos de
+  observación y las seis secciones del summary se conservan. El bloque de conflictos
+  permanece idéntico y no se cambia el comportamiento idempotente del backend.
+- Claude: planner condiciona recuperación a contexto/capacidad; agent-design no
+  delega ni intenta lectura que no tiene y puede pedir contexto al caller. Los
+  readers de ambos clientes reutilizan evidencia y solo consultan si falta historial.
+  La descripción de routing del reader Claude se acota; tools/modelos no cambian.
+- Fallos: no repetir errores determinísticos ni escrituras ambiguas sin comprobar
+  estado legítimamente. No inventar project/session, usar CLI/SQL como bypass ni
+  reinstalar/reparar por reflejo. Los hints de pedidos explícitos no se modifican.
+
+**Poda y preservación por capa:**
+
+| Elemento revisado | Recorte/corrección | Lo que se conserva |
+|---|---|---|
+| Skill durable | Bootstrap fijo de tres grupos/buckets y repetición de reglas de lectura/cierre | Taxonomía, metadata, fuentes completas, promociones, privacidad y autoridad |
+| Tool save | Dos ejemplos completos y listado de categorías repetido por el campo type | What/Why/Where/Learned, título, tipos estructurados y prioridad de hallazgos durables |
+| Tool summary | Guidelines genéricas duplicadas por template/condiciones | Seis secciones, continuidad, evidencia y no sustitución de observación local obligatoria |
+| Reader Claude | Lista de cuatro skills sugeridas para una tarea ya delimitada | Rol read-only, wrappers, evidencia destilada y acceso existente a esas skills si hicieran falta |
+| Higyrus skill de ticket | Dos referencias inexistentes a memoria-escritura/higiene reemplazadas por memoria-durable existente | Todo el workflow desde Cuándo usarme, una memoria por ticket, topic key, formato y retrabajos, idénticos |
+| VB y Keycloak | Sin recorte del reader local obligatorio | Consulta explícita al reader en sus master-dev como excepción local |
+| Otros seis overlays y roles locales | Sin cambios por parecer «inferibles» | Memoria pertinente, dominio, helpers, handoffs, permisos y cierres respectivos |
+
+El relevamiento automático acotado incluyó 228 archivos de instrucciones en los
+tres stacks fuente y nueve overlays, con revisión manual de los contratos afectados.
+No se borran guardas por ser repetidas: un override homónimo no hereda automáticamente
+el cuerpo ni permisos globales. Poda más amplia de heurísticas/catálogos queda en
+6–7, no se utiliza para alterar el alcance de este candidato.
+
+**Validación y evidencia:**
+
+- 12 tests Python de política y seis de integración/metadatos, más diez tests Go
+  focalizados (matriz de diez subcasos). Todos pasaron sin requests de evaluación a
+  modelos. Los tests contractuales comprueban wording/wiring, no simulan un LLM ni
+  prueban que vaya a obedecer o consultar menos en una tarea real.
+- Probes nativos de nueve filtros con el candidato: nombres registrados correctos,
+  parámetros, anotaciones, capabilities, protocolo y conflicto iguales al binario
+  activo salvo las cuatro descripciones de uso deliberadamente cambiadas. Solo
+  initialize/tools-list con DB/HOME temporales y autosync=0, sin tools de escritura.
+- Patch reaplicado limpiamente desde el pin existente; 19 bloques previos ajenos
+  idénticos y todo el código de handlers conservado. Build Go offline/CGO=1 con
+  módulos ya disponibles; sin upgrade, descargas o cambio del checkout gestionado.
+- Recomposición existente desde bases limpias y `opencode debug config` en sandbox:
+  prompts nuevos cargados, mismos modelos/tools/permisos para agent-design,
+  master-dev, planner y reader; bloques Ticketing intactos. Se comprobó la limitación
+  de apply sobre bloques ya marcados, no se afirmó que un apply in-place los actualice.
+- 207 frontmatter contrastados: solo cambia description del reader Claude; ninguna
+  herramienta, modelo o permiso. Symlinks compartidos y alias Higyrus de Claude
+  preservados. 456 fingerprints de activos/productos/índices/managed intactos; HEADs
+  sin mover y sin staging/commits/push. Las obligaciones locales no se normalizaron.
+- Texto medido, no tokens: skill durable de 8.000 a 6.576 bytes; instrucciones más
+  descripciones MCP de OC 8.014 a 7.913 y Claude 5.323 a 5.227. Algunos cuerpos
+  crecen para aclarar autoridad/errores y no todos se cargan juntos. No se atribuye
+  una reducción de contexto total ni ahorro de tokens/latencia a esas cifras.
+
+**Artefactos y siguiente decisión:** QA temporal en `/tmp/opencode/point5-qa.py` y
+`point5-candidate/` con baseline, audit, composición, métricas y result. Candidato
+aislado SHA-256 `319895e58c7be806c13644180373c30ec8d4c013faf8f3ebe8043a8f02c2deff`.
+La fuente durable son patch, reglas, skills y tests canónicos, no los temporales.
+Los activos siguen en 4: no hace falta reiniciar. No se ejecuta el piloto de 16
+corridas sin otro presupuesto/aprobación, ni se promueve B automáticamente por
+estos checks. La siguiente decisión puede autorizar una promoción conservadora
+aceptando explícitamente esta limitación de evidencia, o mantenerlo aislado; una
+evaluación con modelos, despliegue y publicación requieren sus autorizaciones.
+Rollback solo del diff de este candidato, preservando el plan previo y cualquier
+trabajo ajeno; jamás borrar memorias/corpus ni resetear repos para demostrar ahorro.
+
+### 5.c. Piloto mínimo autorizado — detenido en el control de consumo
+
+El usuario eligió la opción de prueba mínima: dos escenarios A/B en un runtime,
+cuatro corridas principales, en lugar de las 16 propuestas originalmente. Se
+seleccionó OpenCode y se verificó el runner antes de realizar la primera petición.
+La autorización no habilita gasto sin un presupuesto efectivo ni relajar guardas.
+
+- **Escenarios previstos:** consulta puntual de memoria y cierre/confirmación sin
+  novedades. Mismo modelo/variante, fixtures y permisos por par A/B, sin reintentos.
+  No se crearon sesiones de evaluación, hijos, perfiles ni un proxy para ejecutarlas.
+- **Runtime observado:** `1.19.4--202610232249`. `steps` limita rondas y su permiso
+  se reinicia con una nueva entrada; no es un presupuesto total de tokens/costo.
+  El CLI run tampoco ofrece por sí solo un tope monetario total.
+- **Bloqueo concreto:** en la fuente de este runtime,
+  `packages/opencode/src/plugin/openai/codex.ts:569–573`, el hook `chat.params`
+  asigna `output.maxOutputTokens = undefined` para el provider OpenAI. Por ello no
+  puede asumirse que `limit.output` o `OPENCODE_EXPERIMENTAL_OUTPUT_TOKEN_MAX` lleguen
+  al proveedor como límite de generación, aunque request.ts los prepare antes.
+- `opencode auth list` confirmó que el acceso disponible a OpenAI es OAuth. Solo
+  se consultó el listado no sensible y código público local, no tokens ni archivos
+  de credenciales. No se cambió auth, provider, plugins, runtime ni permisos.
+- **Resultado:** cero peticiones a modelos de evaluación y ninguna métrica A/B
+  nueva. Las cifras estáticas y pruebas determinísticas de 5.b siguen vigentes,
+  pero no demuestran ahorro conductual. Contar cuatro corridas no equivale a
+  limitar cuatro peticiones: el tool loop y un lector pueden generar más.
+- **Pendiente de decisión:** usar un mecanismo/proveedor que permita comprobar
+  un tope efectivo, o aceptar explícitamente una promoción conservadora y observar
+  tareas habituales, sin corridas artificiales ni pretender evidencia causal A/B.
+  No montar una capa de autenticación/proxy ni modificar el plugin sólo para evitar
+  este control; no activar B por el hecho de haber autorizado el piloto.
+
+### 5.d. Microprueba real de primera decisión — cuatro peticiones, sin promoción
+
+Después de explicar el bloqueo de 5.c, el usuario delegó el criterio y aceptó un
+gasto pequeño, manteniendo su restricción de no consumir excesivamente la cuota.
+Se redujo el alcance a primera decisión del modelo: no se modificó el plugin
+OpenAI para fingir un cap que no aplica ni se creó un proxy de autenticación.
+
+- **Diseño:** dos escenarios (observación conocida y confirmación de hito ya cerrado),
+  variantes A/B, solo OpenCode `1.19.4`, `openai/gpt-6.1-sol`, esfuerzo `low` en todos.
+  Orden A-lookup, B-lookup, B-ack, A-ack. Fragmentos de autonomía + instrucciones y
+  descripciones MCP reales por variante, sobre el mismo caller mínimo y fixture.
+  No se cargó el agente completo ni los overlays: no es una prueba de producción.
+- **Superficie acotada:** cinco tools de memoria iguales por par y task para mostrar
+  la opción de reader, permisos endurecidos idénticos A/B. Metadatos extraídos de
+  ambos binarios, transporte MCP sintético y sin datos reales. Guard cargado junto
+  al env-guard intercepta antes de cualquier tool/task; no hijos ni mutaciones.
+- **Consumo controlado:** una petición de generación permitida por proceso, máximo
+  cuatro, sin reintentos; otra generación se bloquea antes del provider. `steps=2`
+  conserva tools en el primer paso, pero el guard impide pagar el siguiente. Corte
+  de proceso a 40 s. Sin techo duro de tokens por OAuth: umbrales posteriores de
+  10.000 tokens reportados para continuar tras el primer par y 20.000 globales.
+  El primer par consumió 5.892 y permitió continuar. No hubo timeout.
+- **Aislamiento:** HOME/config/cache/state y DB de conversaciones descartables;
+  se reutilizó autenticación OAuth normal del SDK sin copiar credenciales. Fuentes,
+  configs y runtime activos intactos según los 456 fingerprints. Los logs técnicos
+  habituales del SDK y su eventual renovación de token no son un cambio de cuenta
+  o configuración. El harness no guardó headers, credenciales, razonamiento ni logs raw.
+
+| Escenario/variante | Primera decisión observada | Entrada | Salida | Razonamiento reportado | Total | Tiempo de corrida |
+|---|---|---:|---:|---:|---:|---:|
+| Consulta A | Selecciona task/knowledge-reader, detenido antes de abrir hijo | 2.886 | 134 | 0 | 3.020 | 6,223 s |
+| Consulta B | Selecciona mem_get_observation(17), detenido antes de leer | 2.850 | 22 | 0 | 2.872 | 4,163 s |
+| Confirmación B | Respuesta textual sin tools | 2.859 | 8 | 0 | 2.867 | 4,783 s |
+| Confirmación A | Respuesta textual sin tools | 2.895 | 10 | 13 | 2.918 | 4,179 s |
+
+- **Totales:** cuatro generaciones completadas, 11.677 tokens reportados: 11.490
+  entrada, 174 salida y 13 razonamiento; caché reportada cero. A suma 5.938 y B
+  5.739: diferencia descriptiva de 199 tokens (-3,35 %) en esta microprueba.
+  No incluye preparación ni esta conversación, y no permite conocer un porcentaje
+  de cuota semanal. OAuth no informa aquí un precio monetario útil para ese cálculo.
+- **Lectura de resultados:** señal favorable a lectura puntual directa en B; no se
+  ejecutó el reader ni se midió su costo ahorrado. No hubo mejora nueva observada en
+  confirmación: A también evitó tools. B fue más lenta en esa corrida de confirmación;
+  las cuatro duraciones incluyen arranque y red, no prueban mejora de latencia.
+  Los exits de lookup son cortes intencionales por el guard, no fallos del candidato.
+- **Límites:** una muestra por condición, variante low, política aislada y tools no
+  ejecutadas. No se comprobó la respuesta factual de la consulta, calidad end-to-end,
+  memoria persistida, obligaciones locales en un modelo o comportamiento con el rol
+  completo/variante habitual. No usar estos datos como prueba estadística, ahorro
+  operacional general o promoción automática. Los checks de preservación siguen
+  siendo los determinísticos de 5.b.
+- **Estado al cerrar la microprueba:** límite de cuatro agotado; no habrá más corridas bajo esta autorización.
+  Artefactos temporales en `/tmp/opencode/point5-micro/summary.json` y result por
+  corrida; harness `point5-micro.py` y guards/fixture asociados. Este registro conserva
+  las métricas durables. No se desplegó, sincronizó, stageó ni publicó el candidato.
+  Siguiente decisión: revisión/promoción conservadora aceptando explícitamente esas
+  limitaciones, o mantener aislado. No se recomienda gastar más por reflejo.
+
+### 5.e. Promoción conservadora y despliegue autorizados
+
+Tras explicar el alcance y las limitaciones de la microprueba, se propuso promover
+con backup, desplegar de forma acotada y verificar sin modelos, dejando publicación
+separada. El usuario indicó «Ok, avanza». No se toma el -3,35 % descriptivo de 5.d
+como ganancia global ni prueba de calidad end-to-end.
+
+- **Preflight:** fuente/artefacto coincidentes con el candidato validado; binario
+  anterior alineado del punto 4, patch previo y activos sin drift. Se contrastaron
+  contratos de tools antes/después: solo cambian las cuatro descripciones previstas,
+  no inputs, anotaciones, capabilities, protocolo, handlers ni filtros.
+- **Autonomía:** render existente desde Core para agent-design/master-dev/planner,
+  conservando Ticketing. Los archivos opcionales plan/build sí estaban instalados:
+  se reemplazó solo su bloque Knowledge publicado y conocido, reutilizando las
+  funciones existentes, sin regenerar sus templates ni tocar header/resto de cuerpo.
+  Apply in-place no se utilizó como si actualizara bloques ya presentes.
+- **Destinos:** 17 archivos: cinco roles OpenCode de autonomía, cinco assets
+  Knowledge (reader, dos skills, patch y playbook), tres roles Claude, la skill de
+  cierre Higyrus, dos archivos MCP gestionados y el ejecutable compartido. Manager
+  canónico se conserva en su repo según el marker/lifecycle existente; no se inventó
+  un asset instalado fuera del manifest. README/changelogs/tests no se copiaron sobre
+  archivos de otros dueños.
+- **Enlaces:** seis bindings preservados, sin retarget: skills durable/Engram en
+  fuente Claude bajo `addons/knowledge/skills/` y activos Claude, más alias de la
+  skill de ticket en fuente/producto Higyrus. La promoción actualiza sus targets,
+  no crea copias paralelas ni usa `base/skills/` como ubicación supuesta de Knowledge.
+- **Backup y activación:** pinneado
+  `~/.config/opencode/.stack-sync-backups/point5-20261026T163329Z/`, con before/after,
+  ledger, script y resultados/evidencia del candidato. Se reemplazó cada archivo
+  atómicamente, binario último; rollback acotado automático disponible ante fallo,
+  sin sobrescribir cambios de terceros. No fue necesario ejecutarlo. No instalador
+  amplio, reset/clean, descarga, cambio de cuenta/auth o publicación.
+- **Verificación:** 17 targets en paridad; patch gestionado completo y reverse-check
+  correctos; paths de tracked/untracked del managed conservados. Native config global
+  valida seis roles (los cinco anteriores y reader) con mismos modelos, variantes,
+  tools/permisos y flags de activación. Metadatos nativos OC11/Claude USER8 muestran
+  política nueva y coinciden con candidato, sin mandatory-before-done ni tool nueva.
+- **Protecciones:** 440 fingerprints fuera de alcance intactos, incluidos configs,
+  plugins, instrucciones/permisos locales e índices de fuentes/productos. Frontera
+  activa deliberadamente excluye los targets y contenidos de aliases que deben
+  actualizarse; los links se verificaron aparte. No staging/commits/push. VB/Keycloak
+  conservan reader requerido y Higyrus su memoria por ticket/retrabajo; no se
+  reinterpretaron como opcionales por la regla global.
+- **Artefacto activo:** SHA-256
+  `319895e58c7be806c13644180373c30ec8d4c013faf8f3ebe8043a8f02c2deff`.
+  Pruebas del despliegue: cero corridas de modelos nuevas, solo configuración y
+  initialize/tools-list con fixtures temporales; no escrituras de memoria de prueba
+  en la DB real. El presupuesto de cuatro generaciones de 5.d no se amplió.
+- **Uso y pendientes:** reiniciar procesos OpenCode/Claude Code abiertos para relanzar
+  MCP y recargar roles/skills; no hace falta reiniciar la PC ni descartar conversaciones.
+  No se mataron procesos. La sesión actual puede seguir con metadatos previos hasta
+  esa recarga; observar trabajo habitual, sin nuevos benchmarks automáticos. Publicación
+  pendiente de autorización; punto 6 no iniciado.
+- **Evidencia:** `/tmp/opencode/point5-deploy.py` y `point5-deployment.json` son
+  temporales; el backup conserva ledger/result y resultados del candidato para no
+  depender de `/tmp` tras un reinicio. Rollback restaura solo los 17 artefactos del
+  ledger, nunca una DB, corpus, repo entero o cambios locales del producto.
+
+### 5.f. Reinicio confirmado y publicación autorizada
+
+El usuario confirmó el reinicio de todos sus OpenCode abiertos y luego pidió
+«Publica y decime si aun hay punto 6 para planificar». No hay otro bloqueo técnico
+identificado; se conserva la limitación de evidencia del microensayo, sin nuevas
+corridas de modelos ni reinstalaciones para publicar.
+
+- Publicar solo cuatro canónicos, un commit por repo en `main`: Core (este plan),
+  Knowledge (diez archivos), Claude (cuatro) y overlay Higyrus (una referencia de
+  skill). Total 16 archivos. Core también en su mirror habitual.
+- Contrastar paridad de los 17 destinos/aliases con el ledger pinneado, revisar
+  status/diff/log/identidad/remotos y congelar los archivos aprobados. No stagear
+  cambios ajenos, el binario ni el checkout gestionado. Sin amend, force o bypass
+  de hooks, ni cambios de configuración Git.
+- Verificar árboles canónicos limpios y HEAD remoto coincidente, manteniendo el
+  runtime/roles desplegados y protecciones intactos. Guardar hashes/resultados de
+  publicación en el backup y memoria, no mediante otra edición circular del plan.
+- No Git writes en productos AUNE. La publicación no necesita otro reinicio.
+  El punto 6 sigue pendiente: heurísticas genéricas por tipo de tarea, con su
+  especificación y aprobación propias; no se ejecuta por cerrar el 5.
 
 ## 6. Carga selectiva de heurísticas genéricas
 
