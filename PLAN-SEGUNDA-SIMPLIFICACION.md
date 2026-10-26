@@ -6,8 +6,9 @@ Estado: puntos 1 y 2 implementados, validados y sincronizados. El punto 2 incluy
 reconciliación de las divergencias previas autorizada por el usuario. Reiniciar
 clientes y usar sesiones nuevas. Segundo repaso y addendum del punto 2 cerrados:
 activación determinista, shell restringido y estilo local prioritario (2.h–2.i).
-El punto 3 está implementado, validado y sincronizado (3.b–3.c); su publicación
-fue autorizada para cerrar el punto (3.d). Los puntos 4–10 siguen pendientes.
+El punto 3 está implementado, validado, sincronizado y publicado (3.b–3.d).
+El punto 4 está implementado, alineado, activado y verificado tras reinicio completo;
+su publicación fue autorizada para el cierre (4.a–4.f). 5–10 pendientes.
 
 ## Objetivo
 
@@ -134,8 +135,8 @@ no asumir que ese almacenamiento temporal constituye un archivo durable.
 |---|---|---|---|
 | 1 | A — poda segura condicionada a equivalencia | Guía OpenCode propia y guía Claude alineada y podada | cerrado |
 | 2 | A | Referencias, metadata y workflows coherentes en ambos stacks y nueve overlays | cerrado |
-| 3 | A | Deduplicar el contrato de code review | cerrado técnicamente; publicación autorizada |
-| 4 | A | Publicidad veraz de herramientas Engram | pendiente |
+| 3 | A | Deduplicar el contrato de code review | cerrado |
+| 4 | A | Publicidad veraz de herramientas Engram | cerrado técnicamente; publicación autorizada |
 | 5 | B — experimento | Memoria proporcional y cierre por hito | pendiente |
 | 6 | B | Carga selectiva de heurísticas genéricas | pendiente |
 | 7 | B | Catálogos por responsabilidad | pendiente |
@@ -1056,6 +1057,304 @@ conflictos, adjudicación y confirmaciones quedan preservados.
 y lifecycle. No reconstruir ni instalar el runtime sin autorización de ese alcance.
 
 **Rollback:** restaurar el patch anterior y el artefacto gestionado, si fue desplegado.
+
+### 4.a. Especificación aprobada
+
+La primera etapa fue solo planificación e inventario. Después de explicar alcance,
+beneficio y cobertura de ambos clientes, el usuario indicó «Perfecto, avancemos»:
+autorizó patch canónico, tests y build aislado; no reemplazo del binario activo,
+checkout gestionado, configuraciones ni publicación. El punto 3 no se reabre.
+
+**Diagnóstico y evidencia:**
+
+- En el baseline, `internal/mcp/mcp.go` del Engram fijado usa `serverInstructions`
+  constante y se entrega sin ajustarla al registro filtrado por `--tools`.
+  El patch Knowledge previo no corregía ese bloque.
+- El wiring canónico OpenCode y la superficie visible de esta sesión contienen
+  11 tools. Un proceso del binario instalado, con ese filtro, confirmó las 11 por
+  `tools/list`; sus instrucciones mencionan 10 tools ausentes y no `mem_doctor`.
+  También prescriben `ToolSearch`, inexistente en esta superficie OpenCode.
+- El template canónico Claude contiene ocho tools, incluida `mem_delete`, sin
+  `mem_judge`. Un proceso con ese filtro confirmó ocho, pero instrucciones con
+  12 nombres ausentes y adjudicación presentada como disponible. Esto no prueba
+  el inventario del cliente Claude activo: no se leyó su configuración sensible
+  ni se conectó a su sesión. No igualar perfiles ni habilitar herramientas aquí.
+- Ambos inventarios usaron solo `initialize` y `tools/list`: cero `tools/call`,
+  sin modelo. HOME/cwd/datos temporales, autosync deshabilitado y entorno mínimo;
+  SQLite vacío precreado para impedir la migración automática de una DB huérfana
+  durante el arranque. No se usó memoria real ni endpoints cloud.
+- Evidencia temporal: `/tmp/opencode/point4-inventory.py` y
+  `/tmp/opencode/point4-inventory.json`. El protocolo observado fue `2025-06-18`;
+  este punto no migra MCP, SDK ni upstream.
+
+**Cambio propuesto:**
+
+1. Construir el catálogo de instrucciones a partir de las herramientas realmente
+   registradas, no de una lista manual ni de tokens solicitados que podrían no
+   corresponder a tools existentes. Orden estable y compacto; sin duplicar schemas.
+2. Retirar afirmaciones fijas de «always available», «core/deferred» y la orden de
+   usar `ToolSearch`. La entrega, prefijos y descubrimiento los decide el cliente;
+   usar solo las tools que ese cliente/rol expone. No deshabilitar descubrimiento
+   nativo de Claude ni cambiar anotaciones de carga diferida.
+3. Conservar reglas de lectura, guardado proactivo y cierre para operaciones
+   disponibles, sin cambiar frecuencias ni criterios. Los cambios de política y
+   el error `unknown_session` siguen en el punto 5.
+4. Con `mem_judge` disponible, preservar completo el protocolo de conflictos:
+   `judgment_required`, iteración de `candidates[]`, su propio `judgment_id`,
+   umbral de confianza, confirmación de decisiones sensibles y evidencia.
+   Si falta, informar la limitación y dejar el juicio pendiente para un contexto
+   autorizado; no invocar una tool ausente, simular adjudicación ni usar CLI como
+   bypass. No modificar detección, persistencia o estados de conflicto.
+5. Mantener allowlists y capacidades actuales: no añadir `mem_judge` a Claude,
+   no retirar `mem_delete`, no cambiar permisos o catálogos por rol como atajo.
+   La diferencia de perfiles queda explícita; revisarla requiere otro alcance.
+
+**Ownership y archivos previstos:**
+
+- Knowledge: `patches/engram-source-agent.patch`, incorporando el ajuste de
+  instrucciones y sus tests en `internal/mcp/`; regresión de la integración en
+  `tests/test_opencode_integration.py`, documentación y changelog pertinentes.
+- El addon mantiene su base upstream fijada y todos los cambios previos del patch.
+  No editar como fuente ni commitear el checkout gestionado
+  `~/.local/src/engram-opencode-stack`.
+- Salvo este registro, no se prevén cambios de Core, overlays, templates MCP Claude, plugins, hooks ni
+  settings para arreglar la publicidad. Ambos clientes consumen el mismo binario
+  con filtros distintos: se corrige una sola implementación parametrizada.
+
+**Validación acotada si se aprueba implementar:**
+
+- Aplicar el patch sobre la base fijada en un sandbox, sin reset/clean del checkout
+  gestionado ni descarga/upgrade automático. Compilar y ejecutar tests focalizados
+  con dependencias ya disponibles; si faltan, detenerse antes de instalar/descargar.
+- Matriz: filtro OpenCode, template Claude, perfil de solo lectura, subset custom,
+  registro vacío/selección desconocida y perfil completo. Verificar igualdad entre
+  catálogo operativo anunciado y registro real, sin tools inventadas ni promesas
+  de loader. Una capacidad ausente solo puede aparecer como limitación explícita,
+  nunca como una operación invocable.
+- Confirmar schemas, anotaciones y handlers sin cambios. Pruebas de metadatos para
+  política conservada y adjudicación disponible/no disponible; no invocar escritura
+  de memoria ni diagnosticar summaries para probar este punto.
+- Smoke de `initialize`/`tools/list` del binario candidato en fixtures aisladas.
+  El chequeo del cliente Claude activo queda para despliegue autorizado, mediante
+  un mecanismo que no exponga credenciales; no asumir que su template ya lo describe.
+
+**Activación, autorización y rollback:**
+
+- Primero aprobar implementación del patch y validación con build aislado. No
+  reemplazar todavía `~/.opencode/bin/engram`, registrar servidores ni tocar datos.
+- Para activar luego, hace falta autorizar reemplazo del binario compartido y
+  recomposición del checkout gestionado por su lifecycle, con preflight/backup;
+  no ejecutar el instalador amplio por reflejo. Reiniciar los procesos MCP/clientes
+  pertinentes para recibir instrucciones nuevas; publicar es otra autorización.
+- Backup del patch y binario anterior; rollback solo de esos artefactos y del
+  estado gestionado afectado, no de la DB, memorias ni configuración ajena.
+- Beneficio esperado: instrucciones ejecutables y menor contradicción. No se
+  promete ahorro de latencia/tokens ni se modifican los workflows de los repos.
+
+### 4.b. Implementación y build aislados — activación no autorizada
+
+- **Fuente durable:** patch de Knowledge actualizado en `internal/mcp/mcp.go` y
+  tests. El catálogo se deriva de `srv.ListTools()` después del registro y se
+  ordena antes de entregar instrucciones; no enumera tokens desconocidos pedidos
+  en una allowlist. Usa la API existente de mcp-go 0.44.0, sin upgrade de SDK/MCP.
+- **Política:** los siete textos de uso existentes se conservan para las tools
+  disponibles, igual que la regla de guardado proactivo. El bloque de adjudicación
+  con `mem_judge` conserva literalmente sus heurísticas, IDs por candidato,
+  confirmaciones y evidencia; con judge pero sin save, no exige la tool ausente.
+  Sin judge se declara limitación y juicio pendiente, sin falsa persistencia ni
+  bypass. Cliente/rol controla naming, discovery y permisos; sin prometer loader.
+- **Regresiones:** nuevo `internal/mcp/instructions_test.go` dentro del patch;
+  dos tests previos pasan de comprobar la constante a comprobar `initialize`,
+  manteniendo sus obligaciones. `tests/test_opencode_integration.py` valida ambos
+  filtros y permite probes solo con un candidato explícito, nunca el activo por
+  defecto. Sin candidato, los tres tests nativos se omiten explícitamente.
+- **Docs:** README/playbook/changelog de Knowledge documentan las instrucciones
+  del patch y la activación pendiente. Se aclara que la superficie curada descrita
+  es OpenCode, sin inferir igualdad con el perfil Claude.
+- **Ajuste de soporte:** `.gitattributes` limita la excepción de whitespace al
+  archivo unified-patch: sus líneas de contexto requieren espacio antes de tabs y
+  líneas vacías. No cambia whitespace de fuentes normales ni configuración Git
+  global. El código expandido pasa `gofmt -d` y el patch pasa
+  `git apply --check --whitespace=error-all` sobre la base fijada.
+- **Reproducibilidad:** se exportó el ref fijado a `/tmp/opencode/point4-build/a`,
+  se aplicó el patch previo y se editó únicamente la copia `b`. Se compiló baseline
+  previo y candidato con Go 1.26.2, módulos ya disponibles, `GOTOOLCHAIN=local`,
+  `GOPROXY=off`, `GOSUMDB=off` y `-mod=readonly`; sin descargas ni instalaciones.
+  El patch canónico coincide con el candidato generado y se reaplicó desde cero.
+  Sus 18 bloques ajenos al cambio permanecen idénticos; el registro, schemas,
+  anotaciones y todos los handlers de `mcp.go` conservan su código previo.
+- **Pruebas:** RED esperado con las nuevas regresiones antes del fix, luego GREEN.
+  Pasaron 32 tests Go focalizados de instrucciones, selección, perfiles, constructor
+  y anotaciones, con matriz de diez subcasos. Pasaron seis tests Python, incluidos
+  tres de metadatos nativos. No se ejecutó la suite completa de Engram ni handlers
+  de guardado/summary para validar este punto.
+- **Probes:** nueve perfiles del binario candidato y del baseline compilado: OC,
+  template Claude, lectura, subset con typo, save sin judge, judge solo, selección
+  desconocida, filtro vacío (=all) y all. Catálogo real coincidente, sin publicidad
+  falsa ni `ToolSearch`. Tool definitions completas, capabilities y protocolo son
+  iguales antes/después; el bloque de conflicto disponible también es idéntico.
+  Solo `initialize`/`tools/list`, sin modelo ni `tools/call`, con HOME/cwd/SQLite
+  temporales, autosync deshabilitado y DB vacía precreada para evitar migración.
+- **Protección:** binario instalado, configs/filtros, plugins, HEAD e índices de
+  Core/Knowledge/Claude y checkout gestionado intactos. `go.mod`/`go.sum` sin cambios.
+  No ediciones de overlays, datos reales, settings, permisos ni procesos cliente;
+  sin staging, commits o pushes. No se ejecutó el instalador ni `opencode debug
+  config`: este paso no cambia configuración del cliente y solo valida MCP aislado.
+- **Artefactos:** `/tmp/opencode/point4-build/engram-candidate`, baseline y fuentes
+  de prueba en ese directorio; baseline/QA en `point4-build.json`, `point4-build.py`
+  y `point4-build/result.json`. Son temporales; el patch/tests son la fuente durable.
+  SHA-256 del candidato:
+  `de4f6f00abcc18c2a47daf72cb6b00cc468644bbe37eda2ae78e2b26f67205a9`.
+- **Pendiente en esa etapa:** autorizar activación coordinada del binario compartido/checkout
+  gestionado con backup y preflight, sin modificar perfiles; confirmar el cliente
+  Claude activo sin exponer credenciales. El checkout aún tiene el patch previo:
+  un status puede señalar actualización pendiente; no repararlo por reflejo.
+  Publicación separada. No hace falta reiniciar todavía: el runtime no cambió.
+  Punto 5 y `unknown_session` permanecen fuera de alcance. No se promete obediencia
+  del modelo ni ahorro medido de latencia.
+
+### 4.c. Activación autorizada, detenida antes de escribir
+
+Ante la propuesta de activar con backup/preflight sin publicar, el usuario indicó
+«Perfecto avanza». La comprobación contra el ejecutable realmente instalado
+detectó un desfase que no estaba cubierto por la comparación de builds de 4.b.
+
+- **Wiring confirmado:** proyección filtrada de `command`/`args` del bloque Engram
+  en OpenCode global y registro usuario Claude. Ambos apuntan al mismo ejecutable;
+  OpenCode tiene 11 tools y Claude ocho, coincidentes con sus fuentes canónicas.
+  No se volcaron otros campos, credenciales ni archivos `.env`; no se ejecutó
+  `claude mcp get`, que podría arrancar un healthcheck con la DB real. No se prueba
+  que una sesión cliente ya abierta haya recargado sus metadatos.
+- **Bloqueo:** candidato y binario activo no tienen la misma definición de
+  `mem_session_summary` en ninguno de los dos filtros. Cambian exactamente dos
+  campos visibles: `annotations.idempotentHint` (`false` instalado, `true` en
+  fuentes previas al punto 4) y la descripción de `session_id`, que en esas fuentes
+  ya explicita upserts idempotentes. Tools restantes, capabilities y protocolo no
+  muestran diferencias en estos probes de metadatos.
+- **Causa delimitada:** el baseline compilado ANTES del fix y el candidato tienen
+  la misma definición de summary; la diferencia respecto del binario instalado
+  es preexistente. Los tests de 4.b compararon con el baseline de fuentes, no
+  demostraron equivalencia de ese baseline con el ejecutable instalado. Tampoco
+  una comparación de metadatos prueba que no haya otras diferencias de handlers.
+- **Decisión que faltaba (resuelta en 4.d):** para mantener el alcance estricto, resolver primero la
+  procedencia/base exacta del runtime; o autorizar explícitamente su alineación con
+  la base canónica actual, incluida la actualización previa de summaries, con
+  pruebas aisladas adicionales antes de activar. No asumir ese alcance por la
+  autorización limitada al punto 4 ni cambiar la política de memoria del punto 5.
+- **Estado:** no se creó aún el backup de activación ni se reemplazó el binario;
+  checkout gestionado, configs, filtros, plugins, HEAD e índices siguen intactos
+  respecto del baseline. No se invocaron tools de memoria para diagnosticarlo,
+  solo `initialize`/`tools/list` con DB/HOME temporales y autosync deshabilitado.
+  Sin publicación ni cambios de aplicación. No hace falta reiniciar por este intento.
+- **Evidencia temporal:** `/tmp/opencode/point4-activate.py` (`inspect`, `compare`,
+  `explain`) y `/tmp/opencode/point4-activation-blocker.json`. No ejecutar `compare`
+  ignorando su fallo para seguir con una activación no autorizada.
+
+### 4.d. Alineación canónica segura, activación y validación
+
+Después de explicar las alternativas y el desfase, el usuario delegó la decisión:
+«Hace lo que consideres más seguro». Se eligió alinear el runtime con una única
+base canónica, incluidas las correcciones previas de summaries, con pruebas
+adicionales antes de reemplazar. No se hizo un fork del binario ni se cambió la
+política de memoria del punto 5. Publicación sigue separada.
+
+- **Procedencia y build:** el ejecutable previo declara el mismo ref fijado
+  `1dafc0f63051b2214100f7bd801357e4aab61c26`, Go 1.26.2 y CGO habilitado. Se compiló
+  el runtime alineado con CGO=1 para conservar esa característica, en vez de activar
+  el primer candidato aislado CGO=0. Misma fuente probada, sin upgrades ni descargas;
+  build aislado con `-mod=readonly -buildvcs=false`, pin trazable en el ledger.
+- **Validación ampliada:** 109 tests Go de primer nivel, 146 casos al contar
+  subcasos, en MCP, store, diagnostics y CLI doctor/conflicts. Incluyen upsert de
+  summaries, sesiones distintas, IDs inyectados, lectura diagnóstica sin escritura
+  y dry-runs semánticos con mocks, sin llamadas reales a modelos/cloud.
+  Dos tests iniciales dependían de estar dentro de un repo llamado `engram`;
+  el export aislado detectaba `mcp`. Se recreó solo metadata Git ficticia con origin
+  `example.invalid/engram.git`, sin commits ni contactos remotos, y pasaron todas
+  las regresiones sin cambiar código productivo ni relajar validaciones.
+- **Fixtures end-to-end:** antes y después de activar, en ambos filtros instalados,
+  el summary crea sesiones de prueba con IDs `ses-...` y `ses_...`, actualiza la
+  misma observación sin duplicarla y separa otra sesión. `mem_save` sigue rechazando
+  una sesión inexistente. DB/HOME/repos temporales, autosync=0, cero LLM y aplicación
+  fixture intacta. Estas pruebas sí invocan tools de memoria, exclusivamente en
+  SQLite descartable; no se abrió ni restauró la DB real para validarlas.
+- **Preflight y backup:** fuente/candidato congelados, perfiles instalados confirmados
+  y drift previo limitado en metadatos a los dos campos de summary revisados. La
+  alineación con esos cambios previos se autorizó explícitamente por la decisión
+  anterior; el guard de comparación estricta de 4.c no se ignoró para instalar.
+  Backup pinneado en
+  `~/.config/opencode/.stack-sync-backups/point4-20261026T034158Z/` con versiones
+  before/after, ledger, validación, build info y script; sin backups de credenciales
+  ni datos de memoria. La DB está fuera del rollback de artefactos.
+- **Cambio aplicado:** seis destinos: binario compartido, tres archivos MCP del
+  checkout gestionado (incluido el test nuevo), patch instalado y playbook Engram
+  declarados en el manifest. Copia selectiva, sin instalador amplio, fetch/reset/
+  clean ni staging. El binario se reemplazó último mediante rename atómico de un
+  archivo preparado en el mismo directorio, preservando su modo ejecutable.
+  Rollback acotado automático previsto ante fallo, sin sobrescribir cambios ajenos;
+  no fue necesario ejecutarlo porque la verificación pasó.
+- **Resultado:** binario instalado idéntico al alineado probado; managed checkout
+  coincide con el patch completo y su reverse-check pasa, incluidos los 18 bloques
+  previos conservados. El nuevo test no se stagea: el dirty state gestionado es
+  intencional y no se commitea como fuente. Catálogo nativo correcto con OC11 y
+  Claude USER8; sin `ToolSearch`, filtros sin normalizar y perfiles sin ampliar.
+- **Protección:** 218 fingerprints fuera de alcance intactos: configuraciones de
+  ambos clientes, plugins, otros assets, instrucciones y permisos locales e índices
+  de fuentes/productos. HEAD de fuentes y managed sin mover; no Git writes en
+  productos, dependencias, configuraciones cloud ni lógica de aplicaciones.
+- **Artefacto activo:** SHA-256
+  `b4a8a47462502a31effb9de74997dcb659c9ef4a44ed875509459d710d027c12`.
+  El hash CGO=0 de 4.b queda como evidencia del primer candidato, no como runtime
+  instalado. QA temporal: `point4-activate.py`, `point4-activation.json` y
+  `point4-build/alignment-validation.json`; el backup conserva ledger/resultados.
+- **Uso y cierre:** reiniciar procesos OpenCode/Claude Code que sigan abiertos para
+  que lancen el binario nuevo y reciban instrucciones nuevas. No se mataron procesos
+  activos ni se exige descartar conversaciones. Las pruebas aisladas no certifican
+  que una sesión existente ya haya recargado el backend ni garantizan obediencia o
+  ahorro de latencia. Publicación pendiente de autorización; punto 5 no iniciado.
+
+### 4.e. Verificación tras reinicio completo — cierre técnico
+
+El usuario confirmó que reinició la PC. No se reinstaló ni recompiló nada: se
+contrastó el estado activo con la evidencia durable de 4.d.
+
+- El ejecutable conserva SHA-256
+  `b4a8a47462502a31effb9de74997dcb659c9ef4a44ed875509459d710d027c12`.
+  El status nativo confirma ref esperado, patch aplicado y MCP habilitado.
+- Las instrucciones de esta conexión ya presentan catálogo registrado, sin
+  prescribir `ToolSearch`. El cierre real mediante `mem_session_summary` fue
+  aceptado: `Session summary saved for project "opencode-stack"`. No se repitió
+  `unknown_session` en esta comprobación, ni se registró una sesión por un bypass.
+  Esto no garantiza ausencia de todos los errores futuros o validación de una
+  conversación de modelo en Claude; sus pruebas nativas y wiring constan en 4.d.
+- Los temporales `/tmp/opencode/` del build/rollout ya no están después del
+  reinicio. Es esperable: se conservan el backup pinneado, ledger y `result.json`.
+  No reconstruir pruebas ni tratar los paths temporales como archivo durable.
+- No quedan bloqueos técnicos identificados del punto 4. No se modificaron
+  configuraciones, filtros, permisos, política de memoria ni workflows locales en
+  esta comprobación; no hace falta otro reinicio. Punto 5 no iniciado.
+- Al cerrar esa comprobación quedaba pendiente exclusivamente la publicación: un commit acotado en Core (este plan)
+  y otro en Knowledge (patch, tests, documentación y `.gitattributes`), con pushes
+  solo a canónicos y mirror habitual del Core cuando se autoricen explícitamente.
+  No commitear el checkout gestionado de Engram ni los productos AUNE.
+
+### 4.f. Publicación autorizada y cierre
+
+El usuario autorizó explícitamente «sincroniza lo que haga falta, commitea y
+pushea». La sincronización se limita a faltantes demostrados del punto 4; no se
+ejecutan instaladores amplios ni se reconstruyen pruebas eliminadas de `/tmp`.
+
+- Publicar únicamente Core (este plan) y Knowledge (patch, tests, documentación y
+  `.gitattributes`), un commit por canónico, en `main`. Core también en su mirror
+  habitual. No se publica el runtime binario ni se commitea el checkout gestionado.
+- Verificar paridad con los seis destinos activados y fuentes de los dos assets
+  instalables antes de publicar; no recopiarlos ni exigir otro reinicio si coinciden.
+- Revisar status, diff, historial e identidad/remotos; stagear solo los siete
+  archivos aprobados. Preservar hooks, sin amend ni force-push; detenerse ante
+  divergencia remota, cambio ajeno o modificación del contenido por un hook.
+- El cierre de publicación exige árboles canónicos limpios, HEAD remoto coincidente
+  y paridad/protecciones intactas. Conservar el resultado y hashes en el backup
+  pinneado y memoria, sin editar fuentes después del preflight para registrar su
+  propio commit. No hacer Git writes en productos AUNE. Punto 5 no iniciado.
 
 ## 5. Memoria proporcional y cierre por hito
 
