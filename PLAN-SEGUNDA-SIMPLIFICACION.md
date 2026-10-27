@@ -11,16 +11,18 @@ completada en trece canónicos mediante trece commits y catorce pushes, incluido
 Core a GitHub y GitLab. Ledger, hashes y rollback en
 `~/.config/opencode/.stack-sync-backups/point6-20261027T015258Z/`; los fixes locales
 del wrapper GitHub también quedaron publicados. Nunca se publicaron productos AUNE.
-El reinicio de clientes afectados sigue sin confirmación del usuario; no asumir
-hot-reload. Punto 7.A cerrado, promovido y publicado (7.f–7.g): Knowledge
+El usuario confirmó el reinicio de OpenCode al abrir la planificación de 8; no
+se asume hot-reload ni un reinicio adicional de Claude no declarado. 7.A cerrado,
+promovido y publicado (7.f–7.g): Knowledge
 `0362aef`, Core `452ca97`, dos commits/tres pushes; hashes completos y verificación
-en el ledger durable de 7.g. Reiniciar OpenCode; aún sin confirmación del usuario.
-7.B implementado/validado (7.l) y promovido selectivamente con verificación del
-stack activo completo y los nueve perfiles instalados (7.m). Publicación de
-Background y Core autorizada; hashes/resultados finales en el ledger durable de
-7.m, sin commit circular del plan. La delegación background válida se conserva.
-7.C no propone otra poda editorial. Puntos 8–10 pendientes. No hay promociones
-ni publicaciones de 6/7.A todavía por ejecutar.
+en el ledger durable de 7.g. 7.B también cerrado/desplegado/publicado (7.l–7.m):
+Background `93cb55d`, Core `acb28a7`, dos commits/tres pushes; ledger final en 7.m.
+La delegación background válida se conserva. 7.C no propone otra poda editorial.
+8.A implementado/validado y promovido selectivamente, con carga real global y
+nueve perfiles instalados comprobada (8.g–8.i). Bloqueo VB resuelto sin tocar el
+índice del usuario. Publicación de CodeGraph/Claude/Core autorizada; resultado y
+hashes finales en el ledger durable de 8.i, sin commit circular. 8.B sigue diferido.
+9–10 pendientes. No hay promociones/publicaciones de 6/7.A/7.B todavía por ejecutar.
 
 ## Objetivo
 
@@ -4124,6 +4126,470 @@ captura persistida de métricas agregadas, sin prompts ni outputs crudos. No esc
 
 **Rollback:** restaurar routing anterior; conservar evidencia del experimento.
 
+### 8.a. Alcance y diagnóstico confirmado — 2026-10-27
+
+**Pedido vigente:** planificar, considerando CodeGraph en cada proyecto específico.
+El usuario confirmó que ya reinició OpenCode. Esto no autoriza editar routing,
+permisos, índices o productos, ejecutar modelos/benchmarks ni iniciar daemons del
+grafo. Solo se modifica este plan. No se delegó el relevamiento.
+
+Se leyeron fuentes del addon CodeGraph, contratos OpenCode/Claude, reglas de los
+nueve overlays, instrucciones de agentes y referencias locales. Se contrastaron
+instalados/canónicos y metadata nativa de permisos en nueve sandboxes, cargando el
+stack activo; no se consultó el contenido de los grafos.
+
+**La integración es global, los índices son locales:** runtime/package fijado
+`1.5.0`, MCP global habilitado con filtro `explore`, telemetría desactivada y
+`codegraph_*` oculto globalmente. En **cada uno de los nueve perfiles efectivos**
+la familia está permitida/visible para `master-dev`, `planner`, `code-inspector`,
+`reviewer` y `code-reviewer`, no para los demás roles observados. Higyrus planner
+conserva acceso efectivo aunque no lo reitere en su header local: no inferir
+permisos solo por grep ni agregar un allow para resolver una ausencia textual.
+Esto prueba la familia de permisos, **no una llamada MCP ni calidad del grafo**.
+
+- Nueve roots Git independientes con `<root>/.codegraph/codegraph.db` presentes,
+  archivos físicos distintos y sin compartir por symlink el directorio de índice.
+- Los **59 agentes locales**, `AGENTS.md`, `CLAUDE.md` y `opencode.json` están en
+  paridad por proyecto. Todos los assets managed CodeGraph coinciden con fuente.
+- **1.555 fingerprints protegidos** intactos; también permanecen iguales las
+  estadísticas de filesystem de DB/WAL/SHM y marcadores observadas antes/después.
+  No se leyeron filas SQLite ni logs de daemon, fuentes de aplicación, secretos,
+  realms privados, certificados o contenidos documentales para hacer esta matriz.
+- El registro machine-local `projects.json` conserva fechas de agosto para estos
+  nueve roots. Son fechas de registro/adopción, **no evidencia de frescura actual**.
+  También contiene `higyrus-AN`, fuera del alcance: no abrirlo, usarlo como default
+  ni modificarlo por esta planificación.
+- Ocho roots no tienen `codegraph.json`; OMS sí, en paridad con su canónico, con
+  cuatro exclusiones: `postman/`, `docs/postman/`, `oms-sandbox-e2e.md` y
+  `caucion-colocadora-e2e.md`. Preservarlas; no ampliar inclusiones por conveniencia.
+- Hay marcadores PID/socket en VB y OMS, pero **no se comprobó liveness**. Su
+  presencia no prueba watcher sano; su ausencia en otros roots no prueba que el
+  MCP no pueda consultarlos. Tamaño/mtime tampoco prueban cobertura o frescura.
+
+No se ejecutó `codegraph status`/SDK sobre índices reales: el wrapper llama al CLI
+upstream y no se verificó aquí que el pin y ese recorrido carezcan de migraciones,
+recovery o efectos secundarios al abrir DB. Tampoco `serve`, `explore`, history,
+capture, init, sync, reindex, unlock o uninstall de CodeGraph. Los únicos servidores
+efímeros de auditoría fueron OpenCode, con metadata de agentes, sin iniciar un
+proceso MCP CodeGraph ni ejecutar sus tools. No afirmar índices saludables,
+compatibles, completos o actualizados a partir de esta inspección de filesystem.
+
+Context7 aportó referencia upstream, contrastada con `.d.ts` del package instalado.
+No trasladar automáticamente opciones de `main` al pin: por ejemplo `deprioritize`
+aparece en docs actuales pero no en el contrato `ProjectConfig` instalado revisado.
+No se propone cambiar versión, parser, exclusiones o configuración de índice.
+
+### 8.b. Matriz individual: qué conservar y dónde poner el límite
+
+Las cantidades son **archivos versionados por extensión**, no archivos realmente
+indexados ni cobertura del parser. MB son tamaño físico decimal de DB, no tokens
+de una consulta ni costo de exploración. Los ejemplos son escenarios propuestos
+a partir de instrucciones locales, no recorridos o findings ya demostrados.
+
+| Proyecto / evidencia local | Cuándo aporta el grafo | Cuándo preferir evidencia directa / límite específico | Decisión local propuesta |
+|---|---|---|---|
+| **Higyrus**, 11 agentes, 8.593 `.java`, DB ~1.043,7 MB | Coupling entre módulos Java/Vaadin/JDO, callers de un símbolo afectado y personalizaciones `irmo/clients/*` pertinentes | No pedir mapa completo del monolito por defecto. Fijar módulo/símbolo; SQL/JDOQL, reglas financieras y overrides de cliente deben verificarse en fuente/tests. No sustituir Higyrus por AN | Conservar las preferencias estructurales ya condicionales de master/inspector/reviewer; sin patch local |
+| **Virtual Broker**, 7 agentes, 841 `.java`, 336 `.ts`, 338 `.tsx`, DB ~328,7 MB | Una frontera concreta frontend/BFF/auth/backend o contrato afectado, no todos los servicios a la vez | Desde `backend/` o `frontend/`, usar el root Git VB como `projectPath`. CSS/config conocida: lectura directa; tipos OpenAPI generados no se excluyen del índice sin evidencia/otro alcance | Conservar sus condiciones estructurales y separación de datasources. No copiar política Higyrus |
+| **Market Data**, 7 agentes, 937 `.py`, 271 `.ts`, 302 `.tsx`, DB ~51,9 MB | Símbolo/pipeline de un collector/processor/exposer/frontend y el cruce que la pregunta realmente necesite | Elegir primero componente. Redis/Celery, contratos HTTP, timestamps y wiring runtime requieren corroboración; el grafo no demuestra por sí solo una cadena entre procesos | Conservar prioridad estructural de inspector y mapas del master/reviewer; no convertir el flujo de dominio completo en consulta obligatoria |
+| **Keycloak**, 4 agentes, 45 `.java`, también JSON/FTL, DB ~4,3 MB | Jerarquías y dependencias de Provider SPI/OTP/JWE cuando el cambio toca Java | Realms JSON, templates FTL, claims/redirects o configuración conocida: lectura directa autorizada. Declarar límites del parser y no inferir configuración efectiva del despliegue | Conservar preferencias ya condicionales y reader obligatorio. No imponer grafo a cambios solo de realm/theme |
+| **Gateway**, 6 agentes, 28 `.java`, DB ~1,8 MB | Caller/orden de filtros y dependencias de `RouteConfig`/servicios para un cambio de ruteo/auth | Un mapping YAML conocido puede leerse directamente; el perfil `external` toma datos de `clients-configs`/`demos-configs` que el índice del checkout no garantiza. No inventar rutas runtime | Conservar el grafo para estructura del pipeline; no exigirlo para todo mapping o lookup literal |
+| **Aggregator**, 6 agentes, 519 `.java`, DB ~27,1 MB | Dependencias adapters→application→domain, ETL/jobs/NATS y las dos ubicaciones de posición valuada pertinentes | No volver un análisis acotado en mapa de todos los módulos. Cálculos, SQL/jOOQ, Liquibase y comportamiento del broker se verifican directamente. Build solo por `mise` | Conservar prioridad estructural y contrato local de duplicación/validación, sin patch de permisos o agentes |
+| **Documento API**, 6 agentes, 49 `.java`, DB ~3,1 MB | Flujo acotado `DocumentoRest`/service/repo/BYMA OMS, impacto de una integración | Graph no autoriza abrir documentos firmados, PII o tokens. Paths/DTOs conocidos y atomicidad DB/archivo se verifican con fuente/contratos/tests, no ausencia de aristas | Conservar la prioridad estructural y los límites documentales; no confundirlo con Addon Documents |
+| **Perfil Inversor**, 6 agentes, 55 `.java`, DB ~2,5 MB | Impacto entre controller/service/mapper/repository/entity, activación/evaluación cuando hay coupling | Una regla de puntaje conocida se lee y contrasta con tests; el grafo no fija vigencia ni prueba seguridad frente a carrera. No habilitar handoff por este análisis | Conservar su routing por dependencias y sus invariantes. Nada de graph universal por ser backend |
+| **OMS API**, 6 agentes, 311 `.ts`, DB ~11,0 MB | Un tramo pre-trade/orden/outbox/listener/execution report, indicando modo FIX u OMS y frontera concreta | NATS/STOMP/TypeORM dinámicos requieren corroboración. Consulta literal/config ya ubicada: directa. No quitar las cuatro exclusiones sensibles ni usar sandbox/colecciones excluidas para medir | Conservar prioridad estructural y separación FIX/OMS. No dividir/mover índice ni cambiar config local |
+
+**Conclusión de los nueve casos:** no hay evidencia que justifique quitar
+CodeGraph a ninguno ni reescribir sus 59 agentes. Las instrucciones existentes
+ya describen preguntas estructurales; incluso los seis masters más breves nombran
+relaciones concretas, no obligan a usarlo en cada tarea. No hacer 18–27 ediciones
+cosméticas para repetir una regla común. Las diferencias de dominio quedan donde
+están, y una política compartida debe conservarlas, no absorberlas.
+
+### 8.c. Primer candidato 8.A: precisar el contrato compartido, sin tocar índices
+
+**Candidato aprobado, implementado y validado en 8.g–8.h:** afinar skill/playbook y
+adaptación Claude, con regresiones de contrato. Sin cambiar tools, permisos, lifecycle,
+runtime, presupuestos numéricos existentes o los nueve overlays.
+
+1. Antes de consultar, identificar si falta **relación estructural** o solo un
+   dato literal/archivo ya localizado. Para callers/callees, impacto o un flujo
+   no conocido, conservar prioridad del grafo existente si el rol puede usarlo.
+   Para lectura puntual sin incertidumbre estructural, no convertir la existencia
+   de un índice o el tamaño del repo en motivo de invocación.
+2. Pasar **`projectPath` absoluto del root Git/worktree real en cada consulta**,
+   también desde subdirectorios. No depender de un default implícito en sesiones
+   cross-project. Cada índice solo representa su checkout; una reference hermana
+   no crea aristas cross-repo ni habilita indexarla. No usar un root canónico de
+   overlay como si fuera el producto. Roots y ejemplos concretos permanecen locales.
+3. Acotar la primera pregunta al símbolo/módulo/componente y frontera solicitados.
+   El mapa global de arquitectura sigue permitido si **es** el pedido, no una
+   estación previa a todo cambio. No proponer `maxFiles`/otros parámetros ni caps
+   de output sin verificar el schema real del cliente/pin; ningún tuning de motor.
+4. Mantener review formal con una consulta compacta del diff si reemplaza lectura;
+   planning/implementación normalmente hasta tres, **no cuota obligatoria**.
+   No asignar una consulta a cada uno de nueve roots por reflejo ni duplicar todo
+   el recorrido con grep/read después. Leer solo lo que falta materialmente.
+5. Tratar únicamente el **fragmento realmente devuelto** como ya leído, no el
+   archivo entero por ver su nombre. Contrastar límites del parser, contenido
+   dinámico/generado, configuración externa y findings críticos con evidencia
+   directa/tests. No usar ausencia de aristas como prueba de ausencia de impacto.
+6. Si falta índice/tool/acceso, el resultado es parcial, hay aviso de staleness/
+   degradación o no reduce exploración, declarar el límite y pasar a búsqueda
+   directa. Una respuesta de orientación sin `isError` no prueba que hubo grafo
+   útil. No repetir los mismos argumentos ni usar CLI/otro agente como bypass.
+   No iniciar/reindexar ni reparar por el fallo. No alterar watcher/autosync ya
+   configurados ni añadir una llamada `status` antes de cada consulta.
+
+**Archivos exactos propuestos para 8.A, seis en total:**
+
+- CodeGraph: `skills/codegraph-analisis-estructural/SKILL.md`,
+  `PLAYBOOK-CODEGRAPH.md`, `README.md`, `tests/test_task_routing.py` nuevo.
+- Adaptación Claude: `addons/codegraph/skills/codegraph-analisis-estructural/SKILL.md`.
+  Conserva su identificador `mcp__codegraph__explore` y su contrato de tools; no
+  normalizar el nombre MCP entre clientes, ampliar allowlists o crear un loader.
+  El dueño de la política es CodeGraph; Claude adapta el cliente, sin agregar
+  reglas AUNE. Contrastar equivalencia de cláusulas, no igualdad byte a byte de
+  dos documentos que hoy tienen metadata/identificadores distintos. No crear un
+  symlink que introduzca otra dependencia silenciosa de instalación en este lote.
+- Core: este plan para registrar resultados. **Cero archivos locales runtime**
+  propuestos tras el análisis individual. Si luego un caso exige modificar un
+  contrato local, delimitar ese delta y volver a aprobación; no extender el lote.
+
+No se edita `codegraph.json`, `.codegraph/`, exclusiones Git, registro projects,
+config MCP, scripts de status/init/sync, métricas, modelos ni roles. No desplazar
+dominio de proyecto a la skill global. Conservar políticas formales de review,
+lecturas/memoria obligatorias, handoff y aislamiento de worktrees.
+
+### 8.d. Validación propuesta de 8.A — sin ejecutar modelos
+
+- Regresiones del contrato compartido y equivalencia de la adaptación Claude:
+  elección por pregunta, `projectPath`, acotación, fragmentos efectivamente leídos,
+  límites de evidencia, presupuestos existentes, fallback y no bypass. Los tests
+  de texto/fixtures prueban presencia/consistencia de contratos, no obediencia LLM.
+- Revisar tres escenarios por proyecto de 8.b: estructural, literal/ya localizado,
+  y cobertura/estado insuficiente. **27 escenarios de contraste documental**,
+  no 27 tareas de modelo ni un clasificador runtime nuevo.
+- Una pasada global + nueve perfiles con loader nativo y dependencias existentes:
+  permisos y modelos exactamente iguales al baseline, familia CodeGraph con los
+  mismos cinco roles, 7.A/7.B intactos, sin shadows de skill local que oculten la
+  fuente global y sin pérdida de cláusulas de los 59 agentes/guías. Comprobar
+  lectura de la skill actualizada en ambos clientes sin afirmar conducta real.
+- Tests focalizados del addon (proyecto/config/métricas existentes y routing
+  nuevo) sin tocar DB/índices reales. No ejecutar la captura ni history para
+  fabricar una métrica por cerrar cambios documentales.
+- Fingerprints antes/después de assets locales/productos, índices Git, configs,
+  registry y metadata de filesystem de los índices CodeGraph. No atribuir posibles
+  cambios de un watcher externo a esta tarea ni detenerlo por ese motivo.
+
+**Al planificar solo se ejecutó el relevamiento de 8.a–8.b**; las pruebas del
+candidato autorizadas después están en 8.g, sin benchmark ni llamadas al grafo.
+No prometer reducción de tokens, latencia
+o retrabajo por precisar este contrato; podría aumentar su texto para guiar mejor.
+
+### 8.e. Experimento 8.B opcional, con aprobación propia
+
+No es requisito para implementar 8.A ni se ejecuta por aprobarlo. Antes de un
+experimento real, un operador/rol autorizado debe establecer compatibilidad,
+root correcto y cobertura/frescura suficiente para **ese** caso mediante un
+diagnóstico seguro del pin; presencia de DB/registro/daemon no alcanza. No usar
+esa necesidad para permitir más tools a `agent-design` o lanzar delegaciones
+desde este rol que las tiene prohibidas. No auto-init/sync/reindex como preparación.
+
+Si se quiere medir, empezar con dos casos estructurales contrastantes elegidos
+por el usuario (por ejemplo un impacto acotado Java de Higyrus y un flujo de
+filtros de Gateway), **dos pares / cuatro sesiones**, no nueve suites por defecto.
+Cada par debe tener el mismo proyecto, snapshot, pregunta, modelo/variant,
+política declarada y criterio de aceptación; no comparar Higyrus contra Gateway
+como si fueran dos variantes equivalentes. Presupuesto y sesiones a aprobar
+antes de ejecutarlas; conservar criterios locales y no editar aplicaciones.
+
+La variante `with-codegraph` debe usar realmente el grafo y `without-codegraph`
+ninguna llamada: así lo exige el helper v2 existente. Un caso literal que ambas
+políticas resuelven sin grafo es un caso negativo de routing, **no un par with
+válido con cero llamadas**, ni un motivo para forzar una consulta innecesaria.
+No debilitar guardrails vigentes de un rol/proyecto para producir un control.
+
+Usar herramientas existentes del dueño para capturar desde una sesión operadora
+separada, con equivalencia/alcance/policy-version reales y sin contaminar las
+sesiones medidas con el comando de captura. Reportar tokens/tiempos/bytes con
+cobertura, lectura manual, calidad y correcciones evaluadas; solo pares accepted
+y elegibles alimentan el porcentaje principal. La telemetría histórica puede
+orientar una pregunta, pero no demuestra ahorro causal ni versión de política.
+Persistir solo agregados sanitizados: nunca prompts, argumentos o outputs crudos.
+
+### 8.f. Puerta de aprobación y rollback
+
+**8.A aprobado:** seis archivos compartidos canónicos y validación sandbox, sin
+permisos nuevos ni cambios locales tras analizar los nueve casos. El usuario
+recordó además considerar todos los cambios globales necesarios, no solo los
+específicos. **8.B queda diferido** hasta que quiera medir y apruebe casos,
+diagnóstico previo seguro y presupuesto. La aprobación de 8.A no incluye
+despliegue/publicación ni un experimento real.
+
+Si luego se autoriza promover 8.A: backup y ledger solo de skill/playbook/alias
+Claude alcanzados, comprobar global y nueve perfiles instalados antes/después,
+sin instalar runtime o regenerar MCP/markers. No desplegar README/tests/plan a
+productos ni actualizar nueve índices para promover instrucciones. Reiniciar
+solo clientes cuyos assets cambien; el reinicio ya confirmado no es hot-reload
+de futuros cambios.
+
+Rollback: restaurar exclusivamente documentos/adaptación del lote y sus copias
+promovidas si las hubo, rechazando drift. No tocar DB, config de índices, secretos,
+Git de productos ni métricas históricas. Un caso que no aporte mejora puede
+concluir conservando la política anterior; no existe obligación de podar CodeGraph.
+
+### 8.g. Implementación de 8.A — 2026-10-27, bloqueo histórico resuelto en 8.h
+
+**Aprobación:** usuario aceptó implementar/validar canónicos y sandbox, recordando
+expresamente cubrir los cambios globales necesarios. Se anunció el límite de no
+desplegar/publicar, cambiar índices o ampliar roles/permisos por arrastre.
+
+**Cobertura global real:** se revisaron `AGENTS.md` Core, los cinco roles base
+que consumen CodeGraph y el procedimiento `code-review-branch-to-branch`, además
+de la guía Claude y las fuentes del addon. Son compatibles con priorizar
+estructura y conservar límites locales/formales: no se necesitó añadirles otra
+copia de la política de un addon opcional. El delta necesario queda donde tiene
+ownership: **skill global, playbook y README de CodeGraph**, más su adaptación
+Claude. El resto de guías/roles globales quedó protegido, no ignorado.
+
+**Seis archivos exactos:** los previstos en 8.c. CodeGraph modifica skill,
+playbook, README y agrega `tests/test_task_routing.py`; Claude modifica solo su
+skill adaptadora; Core modifica este plan. Frontmatter/metadata de ambas skills
+**idénticos al baseline**, IDs del cliente preservados y ningún symlink nuevo.
+La fuente global ahora exige root explícito por consulta y acotación del alcance;
+distingue lectura literal de incertidumbre estructural, fragmento recibido de
+archivo completo y fallback de evidencia útil, sin dar nuevas capacidades.
+Un símbolo localizado sigue justificando grafo si falta resolver callers/impacto.
+
+**Preservado:** presupuesto de una consulta compacta de review y normalmente
+hasta tres en planning/implementación; no son cuotas por root. Lifecycle,
+worktrees, roles y la sección completa de medición A/B del playbook permanecen
+literales respecto del baseline. No se cambió runtime `1.5.0`, MCP/filtro,
+permisos, modelos, scripts/metrics/registro, exclusiones OMS, watcher/autosync,
+guías de dominio ni los 59 agentes locales. 7.A/7.B y los índices Git intactos.
+
+**Validación ejecutada:**
+
+- `python3 -m unittest discover -s tests -p 'test_*.py' -v`, con source Claude
+  explícito: **39 tests pasados, cero omitidos** (28 anteriores + 11 nuevos).
+  Los tests de proyecto/métricas/telemetría usan fixtures y DB temporales; no son
+  capturas/history de sesiones reales ni consultas al índice CodeGraph.
+- Regresiones de contratos sobre selección, root, scope, fragmentos, budgets,
+  fallback, límites y privacidad. Secciones comunes equivalentes tras normalizar
+  solo nombres/formato propios del cliente, sin confundir IDs MCP ni sus permisos.
+- **Diez perfiles nativos**: global + nueve overlays con los 59 agentes y skills
+  locales canónicos contrastados con instalados. `debug config`, metadata nativa
+  de agentes y `debug skill` cargaron el cuerpo exacto candidato y su metadata.
+  Permisos/modelos/identidades/controles efectivos iguales al baseline; solo el
+  cuerpo de la skill cambia. Sin shadow CodeGraph local ni pérdida de cláusulas.
+- Los sandboxes aíslan HOME/XDG/config/data, usan dependencias ya existentes y
+  mantienen MCPs vacíos, sin plugins de autenticación ni fetch de modelos.
+  Se parte de la política global efectiva
+  seleccionada, sin credenciales; solo una skill CodeGraph por fixture evita una
+  falsa prueba por selección no determinista de copias con el mismo nombre.
+  No es una promoción ni una prueba de toda interacción futura del stack activo.
+- Claude: lectura/metadata de la adaptación y equivalencia de cláusulas verificadas
+  en source y fixture legible, **sin ejecutar Claude ni afirmar discovery nativo
+  o conducta de ese cliente**. No se instalaron assets para hacer pasar el check.
+- **27 casos documentales sintéticos**, tres por proyecto: estructural, literal
+  sin coupling pendiente y evidencia insuficiente. Conservan roots y límites
+  específicos de 8.b. Son paquetes de contraste de contrato, no 27 respuestas LLM,
+  tests de un clasificador nuevo o mediciones de calidad.
+- En la **primera pasada**, 1.551 fingerprints protegidos sin cambios: capas no autorizadas,
+  activos globales instalados, guías/roles/locales, configs, registro y Git. HEAD
+  de los tres canónicos igual; `git diff --check` correcto. El preflight comprobó
+  que editar ambas skills fuente **no las despliega por un alias implícito**.
+
+**Skills nativas adicionales preservadas:** Aggregator tiene en producto tres
+skills Claude propias además de las cuatro del overlay: `fechas`, `psql` y
+`zalando-api-guidelines`. Sus archivos/referencias ya figuraban en las huellas del
+baseline y no se modificaron; metadata revisada no declara un shadow CodeGraph.
+No son drift ni assets obsoletos. El chequeo adicional inicialmente exigió igualdad
+de inventarios y se corrigió para respetar el carácter **aditivo**: los assets
+managed deben existir/encontrarse en paridad, los extras propios del producto se
+preservan sin copiarlos al addon ni ejecutar sus instrucciones. La carga aislada
+descrita arriba no se presenta como ejecución/discovery Claude de esos extras.
+
+**Variación de transitorios observada, sin atribuir causa:** la primera
+comparación de metadata de índices se detuvo porque en VB desaparecieron el WAL
+vacío y SHM/PID/socket. Se inspeccionó solo filesystem. La metadata de las nueve
+DB persistentes (tamaño/mtime) permanece igual, y los demás assets protegidos
+también. Se conservó el baseline y se registró el delta: no se reabrió la DB, no se
+repusieron sidecars y no se inició ni detuvo ningún proceso CodeGraph. La comprobación final acepta
+solo esa retirada de transitorios con WAL previo vacío y DB persistente igual;
+**no declara inmutabilidad byte a byte del índice ni todo su directorio intacto**.
+
+**Bloqueo histórico en la verificación final, resuelto en 8.h:** después de la pasada nativa
+anterior, la nueva comparación de fingerprints detectó dos deltas no incluidos
+en 8.A: `virtual-broker/AGENTS.md` ya no está disponible en filesystem y cambió
+`virtual-broker/.git/index`. La guía figuraba en el baseline y coincide allí con
+el canónico. `git check-ignore` confirma que es un asset ignorado por
+`.git/info/exclude`; status/diff limitado a esa ruta no muestra una eliminación
+versionada. Esto no autoriza restaurarla ni explica el cambio del índice Git.
+
+Se detuvo el cierre sin escribir en VB, restaurar su guía, tocar su índice Git,
+reconciliar por defecto con el canónico ni rebaselinizar para hacer pasar el check.
+El origen/autoría de ambos cambios **no está determinado**. Los tests y perfiles
+ya ejecutados conservan su evidencia temporal, pero **no certifican el estado
+actual de los nueve proyectos** después de ese delta. Antes de concluir hay que
+confirmar con el usuario si es trabajo concurrente/intencional y revalidar VB y
+el alcance final sobre un estado acordado. No descartar trabajo ajeno.
+
+**Recomprobación solicitada por el usuario:** informó que había repuesto la guía
+y que él realizó la operación previa. La lectura directa y el listado del root
+Git confirmado siguen sin encontrar
+`~/TRABAJO/AUNE/higyrus-workspace/virtual-broker/AGENTS.md`. Sí existe la guía
+canónica en `super-turing-opencode-virtual-broker/AGENTS.md`. No apareció una
+variante de nombre en el root y sigue siendo una ruta ignorada por Git. No se
+repitieron pruebas amplias ni se repuso la copia: falta aclarar **en qué ruta**
+se restauró antes de dar por resuelto el bloqueo o aceptar otra baseline.
+
+**Medición estática, no ahorro:** skill OC **2.134 → 3.807 bytes**, adaptación
+Claude **2.562 → 4.313**, playbook **5.828 → 7.519**, README **5.983 → 6.992**.
+Son cuerpos/documentos; metadata de catálogo de skills no crece al conservar sus
+headers. No sumarlos como si todos residieran en cada turno ni convertir bytes a
+tokens. El texto aumenta para precisar decisiones; no se probó ahorro operativo,
+latencia, calidad ni obediencia LLM. 8.B no se ejecutó ni queda autorizado.
+
+Evidencia temporal: `/tmp/opencode/point8a-qa.py`, `point8a-index-diff.py` y
+`point8a-candidate/{baseline,profiles-after,result,documentary-scenarios,
+observed-index-metadata-delta}.json`. El registro durable es esta sección y los
+tests canónicos, no la permanencia de `/tmp` ni outputs del grafo en memoria.
+
+**Pendiente al registrar esta pasada:** aclarar el delta de VB y completar la
+validación final; ya resuelto con autorización en 8.h. Los contratos globales
+instalados de CodeGraph conservan la versión anterior: su promoción/publicación
+sigue pendiente. No se modifican índices para afinar instrucciones ni se ejecutan
+modelos/benchmarks. El reinicio posterior a 7 sigue confirmado.
+
+### 8.h. Restauración autorizada de la guía VB y revalidación final — 2026-10-27
+
+**Autorización adicional acotada:** el usuario pidió restaurar la copia de producto
+desde el canónico después de aclarar su operación previa. Se comprobó que aún
+estaba ausente y se restauró **únicamente**
+`virtual-broker/AGENTS.md` desde `super-turing-opencode-virtual-broker/AGENTS.md`.
+Comparación final byte a byte idéntica al canónico y a la guía del baseline inicial.
+No se ejecutó un sync amplio, comandos Git que escriban ni reparación del índice.
+
+**Estado del usuario preservado:** se capturó el hash actual de
+`virtual-broker/.git/index` inmediatamente antes de restaurar y se verificó igual
+después y al concluir. No se restauró su hash antiguo ni se juzgó el contenido del
+índice. El baseline original se conserva sin sobrescribir: un control separado
+admite exclusivamente ese estado actual del índice, con paths/hashes explícitos
+y la guía recuperada. No se excluyen otros archivos ni se acepta drift general.
+
+**Revalidación final fresca, no solo reutilización del snapshot anterior:**
+
+- Inventarios y contenido de los 59 agentes, `AGENTS.md`, `CLAUDE.md` y
+  `opencode.json` de los nueve productos contrastados otra vez con sus canónicos.
+  Assets managed de skills en paridad; las tres skills nativas adicionales de
+  Aggregator siguen preservadas como extensiones legítimas.
+- Nueva ejecución nativa en **global + nueve perfiles**: cuerpo candidato de skill
+  cargado exactamente; metadata, permisos, modelos y controles sin delta frente
+  al baseline de 8.A. Se mantienen las fronteras de aislamiento y lectura Claude
+  de 8.g; no se declara ejecución de un modelo ni discovery Claude nativo.
+- **39 tests pasados, cero omitidos**, repetidos sobre el estado final. Son los
+  mismos 28 anteriores y 11 nuevos; no sumar la repetición como tests extra.
+  Los 27 escenarios documentales siguen cubiertos, no son tareas LLM.
+- **1.551 archivos/huellas controlados**: 1.550 coinciden con el baseline original
+  y el restante es el índice Git del usuario preservado byte a byte según el
+  control explícito. No afirmar que los 1.551 siguen teniendo su hash histórico.
+  La guía restaurada sí recupera su hash original. HEAD canónicos intactos.
+- Metadata de las nueve DB persistentes igual en la comprobación; se conserva
+  el registro de la retirada de transitorios VB descrita en 8.g, sin restituirlos
+  o intervenir procesos. No se abrió SQLite CodeGraph ni se invocó su CLI/MCP,
+  init/sync/reindex, métricas reales, modelos o benchmarks.
+
+La única escritura de producto adicional fue esta restauración autorizada de
+**un archivo de instrucciones**, independiente del candidato global de 8.A.
+**Cero escrituras Git en productos.** La restauración no debe deshacerse como
+parte de un rollback de los contratos globales de CodeGraph.
+
+Trazabilidad temporal: `/tmp/opencode/restore-vb-agents-8a.py`,
+`point8a-candidate/vb-agents-restoration.json` y `user-reconciled-state.json`,
+además del `result.json`/perfiles/escenarios actualizados de 8.g. La continuidad
+durable útil es esta sección: guía recuperada, índice del usuario preservado,
+baseline inicial conservado y validación final completada sin ampliar el alcance.
+
+**Estado:** bloqueo resuelto; 8.A listo en canónicos/sandbox. Siguen pendientes
+autorizaciones de promoción selectiva y publicación de sus seis archivos; no se
+promovieron assets globales CodeGraph/Claude ni se hicieron commits/pushes. Si la
+sesión de VB estaba abierta sin su guía, reiniciarla para asegurar que la cargue.
+No hace falta repetir la promoción de 7 ni ejecutar 8.B, que continúa diferido.
+
+### 8.i. Promoción selectiva y publicación autorizada de 8.A — 2026-10-27
+
+**Aprobación posterior:** el usuario autorizó la promoción y publicación propuesta
+de CodeGraph, Claude y Core. Actualiza el pendiente histórico de 8.h; no autoriza
+8.B, cambios de índices, otro runtime ni ampliar permisos.
+
+**Tres contratos instalados, ningún producto adicional:**
+
+1. `~/.config/opencode/skills/codegraph-analisis-estructural/SKILL.md`.
+2. `~/.config/opencode/PLAYBOOK-CODEGRAPH.md`.
+3. `~/.claude/skills/codegraph-analisis-estructural/SKILL.md`.
+
+Los tres son archivos regulares, en paridad con sus fuentes. Se copiaron
+selectivamente tras comprobar hashes y drift, sin ejecutar instaladores completos,
+metrics-only o registros MCP. No se tocó marker, runtime/package `1.5.0`,
+configuración/allowlists, métricas, registro de proyectos, watcher/autosync,
+índices, daemons o datos de aplicación. README/tests/plan no se instalaron.
+La guía VB restaurada antes y su índice Git actual permanecen preservados.
+
+**Backup durable pinneado:**
+`~/.config/opencode/.stack-sync-backups/point8a-20261027T173905Z/`.
+Incluye `000–002-before/after.md`, `ledger.json` con paths/hashes/modos/alcance,
+`profiles-before/after.json`, `verification.json` y `rollback.py` autónomo.
+El dry-run verificó integridad de los tres contratos sin restaurarlos. Con
+autorización expresa: `python3 <backup>/rollback.py --apply`; valida **todos** los
+destinos antes de escribir y rechaza drift. No revierte la guía VB ni un índice,
+fuente canónica, base de datos o configuración por ese rollback. Reiniciar los
+clientes afectados tras restaurar, sin reinstalar el runtime.
+
+**Verificación real post-sync:**
+
+- `opencode debug config`, metadata de agentes y `debug skill` sobre **el stack
+  global activo completo**, más nueve perfiles desde assets instalados. No se
+  inyectó el cuerpo candidato ni se aisló la copia global para aparentar carga.
+  En los diez perfiles el loader seleccionó el path global OpenCode esperado,
+  antes y después, y ahora su cuerpo coincide exactamente con la fuente nueva.
+- Los 59 agentes y guías/configs de los nueve productos se contrastaron con sus
+  canónicos. Se preservaron inventarios managed y extras nativos: fixtures locales
+  conservan solo metadata/directorios de skills no afectadas, sin copiar cuerpos
+  de helpers ajenos ni ejecutarlos. No se escribió en worktrees de productos.
+- Identidades, prompts de agentes (hash), permisos, modelos y controles efectivos
+  iguales antes/después. La adaptación Claude está en paridad source/instalado y
+  pasa equivalencia de cláusulas; no se afirma ejecución de Claude ni discovery
+  nativo de ese cliente por leer y comprobar su asset.
+- **39 tests post-sync pasados, cero omitidos**, usando la adaptación Claude
+  **instalada** para las regresiones cross-client. Son los mismos tests, no una
+  suma de reruns. No se ejecutó benchmark, history/capture real ni modelo.
+- **1.551 fingerprints protegidos** intactos respecto del preflight de promoción,
+  con los tres destinos autorizados comprobados aparte por sus hashes. La guía
+  VB restaurada y el hash actual de su índice Git se verificaron explícitamente.
+  Se preservan los contratos de 7.A/7.B, otros assets y los estados machine-local.
+- Comparación de metadata de filesystem de índices realizada sin abrir DB ni
+  ejecutar CodeGraph. No se transforma tamaño/mtime en prueba de salud, frescura
+  o cobertura ni se atribuye un cambio transitorio a una causa no comprobada.
+
+**Publicación autorizada:** seis archivos canónicos en tres commits `main`:
+cuatro CodeGraph, adaptación Claude y este plan Core. Cuatro pushes: CodeGraph y
+Claude a GitHub; Core a GitHub y GitLab. Owner/cuenta GitHub `juanma91m`, alias
+SSH `github-juanma91m-v2`; Core GitLab conserva `juanma.91m`. Identidad Git previa
+preservada, sin cambiar remotes/config ni usar `auth switch`. Los cuatro HEAD
+remotos coincidían con sus bases locales antes de publicar.
+
+Guardar `publication-plan.json` y `publication.json` en el backup con hashes y
+verificación final de árboles limpios y HEAD remotos iguales; no editar/commitear
+otra vez el plan solo para insertar su propio hash. Nunca publicar productos AUNE
+ni restaurar su índice Git para satisfacer un ledger de publicación.
+
+**Activación:** reiniciar OpenCode y Claude y usar sesiones nuevas. Con OpenCode
+`serve/attach`, reiniciar el servidor que cachea instancias. El reinicio confirmado
+después de 7 no carga automáticamente estas nuevas instrucciones de 8.A.
+8.B sigue diferido, sin presupuesto/modelos autorizados; no ejecutarlo por cerrar
+la promoción. Los siguientes puntos requieren pedido y especificación propios.
+
 ## 9. Separación de artifact-planner y artifact-renderer
 
 **Decisión requerida:** evaluar si `documenter` debe planificar/renderizar lo
@@ -4214,16 +4680,21 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 | 2026-10-27 | Punto 7.B, especificación | Usuario pidió planificar. Fuentes V1 y metadata de trece nombres de rol distinguen roles visibles, ocultos y plan no disponible; nueve overlays/59 agentes en paridad y 1.501 fingerprints sin drift desde 7.A. Se propone hook `config` aditivo del dueño Background: cuatro denies finales por rol excepto master, sin allows globales/excepciones, nativos cubiertos y guards intactos. Cinco archivos Background + plan, pruebas en 7.j y puerta de aprobación 7.k. Solo documento; sin candidato, deploy, Git writes o modelos. |
 | 2026-10-27 | Punto 7.B, implementación | Usuario autorizó tras aclarar que nadie pierde background válido. Cinco archivos Background + plan implementados/validados: 18 tests sin omisiones, plugin completo en global+nueve perfiles sandbox, 59 agentes locales y 253 registros perfil×rol; 203 retiran solo cuatro schemas, 50 sin pérdida. Masters/matriz read-only/otras nueve tools/7.A intactos, 1.503 fingerprints protegidos, guards/lifecycle literal. Sin deploy/publicación/modelos; detalle y límites en 7.l. |
 | 2026-10-27 | Punto 7.B, promoción y publicación autorizada | Usuario autorizó promover y publicar los dos canónicos. Plugin server y cuatro campos de su entrada managed actualizados con API del dueño y backup. Stack activo completo + nueve perfiles instalados verificados, 59 agentes y 1.507 fingerprints protegidos, cero escrituras de producto, 18 tests sin omisiones; salud managed idéntica adopted/sin drift. Backup/ledger final en `point7b-20261027T144600Z`, publicación dos commits/tres remotos; detalle en 7.m. Reiniciar OpenCode/servidor si aplica. |
+| 2026-10-27 | Punto 7.B, publicación verificada | Background `93cb55d` y Core `acb28a7` publicados, dos árboles limpios y tres HEAD remotos iguales al cierre. Ledger final `point7b-20261027T144600Z/publication.json`. El usuario confirmó después el reinicio de OpenCode al pedir planificación de 8. |
+| 2026-10-27 | Punto 8, planificación por proyecto | Usuario recordó que CodeGraph tiene índices específicos. Auditados nueve roots/índices físicos distintos, 59 agentes/guías/configs en paridad, cinco roles habilitados en cada perfil, assets managed iguales y 1.555 fingerprints sin cambios. Índices presentes no certifican frescura; registro antiguo y marcadores no se interpretan como salud. Matriz individual y propuesta 8.A de seis archivos compartidos sin patches locales; 8.B opcional diferido con autorización propia. Solo plan, sin abrir DB/CLI CodeGraph, benchmarks, modelos, init/sync/reindex, deploy o Git writes. |
+| 2026-10-27 | Punto 8.A, implementación y bloqueo final | Usuario aprobó y exigió cambios globales. Se precisan skill/playbook/README globales de CodeGraph y adaptación Claude, más test/plan: seis archivos sin delta local de este patch. 39 tests sin omisiones y primera pasada de diez perfiles/59 agentes/27 casos documentales correctas; luego cierre bloqueado por AGENTS.md ausente e índice Git cambiado de VB, fuera del alcance y sin autoría establecida. No restaurar ni rebaselinizar sin aclaración. Nativas extra Aggregator preservadas; transitorios CodeGraph VB registrados sin intervención. Sin deploy/publicación/modelos; 8.g conserva evidencia y límites, 8.B diferido. |
+| 2026-10-27 | Punto 8.A, desbloqueo y revalidación final | Usuario autorizó restaurar solo AGENTS.md de VB desde el canónico; copia idéntica al original, índice Git actual del usuario preservado y baseline sin sobrescribir. Revalidación fresca global+nueve perfiles/59 agentes y 39 tests sin omisiones; 1.550 huellas originales iguales más un índice explícitamente controlado. Una escritura de producto autorizada y cero Git writes. 8.A listo canónicos/sandbox, no promovido/publicado; detalle en 8.h. |
+| 2026-10-27 | Punto 8.A, promoción y publicación autorizada | Usuario autorizó promover y publicar CodeGraph/Claude/Core. Tres contratos globales copiados selectivamente, carga real en global+nueve perfiles, 59 agentes, 39 tests sin omisiones y 1.551 fingerprints protegidos; guía VB e índice del usuario preservados, sin escrituras de producto en esta promoción. Backup/ledger final `point8a-20261027T173905Z`; alcance tres commits/cuatro remotos. Reiniciar clientes/servidor si aplica; 8.B no ejecutado. |
 
 ## Próxima acción
 
-**7.B implementado, validado y promovido** con stack global completo+nueve perfiles
-instalados (7.l–7.m). Completar la publicación ya autorizada y registrar hashes,
-estado remoto y árboles limpios en ledger durable y memoria, sin commit circular.
-Reiniciar OpenCode y el servidor `serve` si aplica; sesiones nuevas.
-Los puntos 1–6, fixes GitHub y 7.A están publicados; no repetir esas operaciones.
-Reiniciar OpenCode y usar sesiones nuevas para activar 7.A; aún sin confirmación.
-7.C no añade poda editorial. No tocar memoria activa en ensayos ni correr modelos
-por arrastre. Nunca publicar productos AUNE.
+**8.A implementado, validado y promovido; bloqueo VB resuelto** (8.g–8.i).
+Completar publicación ya autorizada y registrar hashes/HEAD remotos/árboles limpios
+en ledger durable y memoria, sin commit circular. Reiniciar OpenCode/Claude y el
+servidor `serve` si aplica. Guía VB e índice actual del usuario preservados; no
+volver a restaurarlos por esta publicación. 8.B sigue diferido y exige aprobación.
+Los puntos 1–6, fixes GitHub y 7.A/7.B están publicados; no repetir esas operaciones.
+Reinicio de OpenCode confirmado por el usuario. 7.C no añade poda editorial.
+Nunca publicar productos AUNE ni abrir/reparar sus índices por cerrar un plan.
 No confundir relevamiento de fuentes, configuración o fixtures con llamadas
 efectivas probadas, obediencia de modelos o ahorro operativo demostrado.
