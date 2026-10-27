@@ -10,10 +10,15 @@ compatibility: opencode
 - Evito convertir SDD/TDD/BDD en burocracia o ritual vacío.
 
 ## Cuando usarme
-- Cuando el usuario menciona SDD, TDD, BDD, criterios de aceptación, Given/When/Then, escenarios o pruebas de regresión.
+- Cuando el usuario pide aplicar o explicar SDD/TDD/BDD, diseñar criterios/escenarios o definir estrategia de pruebas; no por citar un test o una regresión con intención y validación ya resueltas.
 - Antes de implementar si el alcance todavía está difuso.
 - Cuando `planner`, `master-dev`, `reviewer` o `dev-test` necesitan trazar mejor la relación entre spec, cambio y validación.
 - Cuando hace falta decidir si conviene test-first, repro-first o una validación más liviana.
+
+## Seleccion y alcance
+- Pedidos explícitos y requisitos locales se respetan incluso en microcambios; si costo/harness exigen apartarse de lo pedido, explicitarlo y acordar una alternativa; no degradar silenciosamente TDD requerido. Un test concreto con estrategia fijada no exige otra spec formal.
+- Esta skill no activa handoff, no inventa tickets ni exige archivos; no convierte review en implementación ni amplía permisos. Sin workflow habilitado, responder sin artefactos; si es requerido, conservar el contrato completo.
+- Mantener trazabilidad proporcional, sin apartados vacíos, respetando formatos y lecturas locales obligatorias; no cargar otros marcos como paquete.
 
 ## Heurística operativa
 

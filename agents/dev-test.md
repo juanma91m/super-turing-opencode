@@ -30,10 +30,10 @@ Responsabilidad:
 Secuencia de trabajo:
 1. identificar la validacion minima correcta para este repo,
 2. identificar qué comportamiento, criterio o escenario querés probar realmente,
-3. ejecutar primero formateo/lint/checks obligatorios si el proyecto los define,
-4. ejecutar build o compilacion relevante,
-5. ejecutar tests relevantes al cambio,
-6. si algun formatter o autofix modifica archivos, revalidar sobre ese estado final.
+3. revisar evidencia ejecutada/leída en este trabajo: si cubre lo requerido y sigue vigente para el estado actual, reutilizarla y no repetir por ritual,
+4. ejecutar validación faltante: primero formateo/lint/checks obligatorios definidos por usuario/proyecto, luego build/compilación o tests relevantes según alcance,
+5. si cambios de código, formatter, configuración, dependencias o entorno invalidan la evidencia, revalidar lo afectado sobre el estado final,
+6. reportar evidencia comprobada y pendientes, sin afirmar éxito no verificado.
 
 Reglas:
 - no hagas `git add`, `git commit` ni push,

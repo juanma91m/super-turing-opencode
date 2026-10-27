@@ -1,18 +1,12 @@
 ---
 name: revision-por-etapas
-description: "Separa cumplimiento del alcance y calidad técnica al revisar una implementación contra un plan, spec o handoff existente."
+description: "Usar para estructurar una revisión de cumplimiento y calidad cuando ese contraste no esté ya cubierto por el procedimiento aplicado, o por pedido explícito; no por la mera existencia de un plan, ticket o handoff."
 ---
 # Skill: revision-por-etapas
 
-## Que hago
-- Estructuro la revisión en dos etapas para evitar mezclar cumplimiento funcional con calidad técnica.
-- Primero verifico si el cambio cumple lo pedido; después reviso riesgos, calidad y validación.
-- Ayudo a que `reviewer` y `master-dev` den feedback más claro y accionable.
-
 ## Cuando usarme
-- En revisiones técnicas de cambios implementados.
-- Cuando existe plan, spec, verdict o handoff previo.
-- Antes de cerrar tareas de implementación importantes.
+- Por pedido explícito o para estructurar una revisión real de cumplimiento y calidad que necesite este marco.
+- No por la mera existencia de un plan, ticket o handoff; si el procedimiento aplicado ya cubre las etapas, no duplicarlo (por ejemplo, `code-review-branch-to-branch`).
 
 ## Etapa 1: cumplimiento contra intención
 Preguntas guía:
@@ -30,6 +24,7 @@ Preguntas guía:
 - ¿Hay deuda, supuestos no probados o zonas frágiles?
 
 ## Reglas
+- Cargues o no esta skill, el contraste de cumplimiento y calidad exigido por rol/proyecto sigue siendo obligatorio; no crear una revisión formal ad-hoc.
 - No mezclar las dos etapas en un bloque confuso.
 - Si falla la etapa 1, marcarlo primero antes de discutir cosmética o micro-mejoras.
 - Separar bloqueantes de no bloqueantes.
@@ -37,9 +32,5 @@ Preguntas guía:
 - Usar `verdict.md` y `result-dev.md` como referencias solo si hay handoff de implementación aplicable/activo y archivos existentes. No exigirlos ni crear carpetas en tareas ad-hoc, review interno sin handoff o proyectos que solo habilitan code review.
 
 ## Salida esperada
-- etapa 1: cumplimiento,
-- criterios o escenarios cubiertos/desviados cuando existan,
-- etapa 2: calidad/riesgos,
-- evidencia,
-- validaciones faltantes,
-- observaciones no bloqueantes.
+- Cumplimiento y criterios cubiertos/desviados antes de calidad/riesgos, evidencia, validaciones y no bloqueantes relevantes; no seis bloques vacíos. Conservar formatos locales exigidos, snapshot, conversación, rereview y storage del review formal.
+- Con Verificación: No cargarlas como paquete automático; revisar no sustituye ejecutar una prueba ni viceversa.

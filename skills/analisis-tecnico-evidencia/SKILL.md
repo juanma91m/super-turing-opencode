@@ -1,20 +1,17 @@
 ---
 name: analisis-tecnico-evidencia
-description: Refuerza analisis tecnico con separacion explicita entre hechos, inferencias, riesgos e informacion faltante.
+description: "Usar cuando evidencia incompleta o contradictoria requiera ordenar hechos y supuestos para decidir, o por pedido explícito de análisis de evidencia; no para tareas rutinarias con evidencia suficiente."
 compatibility: opencode
 ---
-## Que hago
-- Obligo a separar hechos observables, inferencias razonables, riesgos e informacion faltante.
-- Evito que se asuma que el codigo existente es correcto solo por existir.
-- Refuerzo decisiones tecnicas con evidencia concreta del flujo, contratos, consultas, logs o configuracion observada.
-
 ## Cuando usarme
-- Antes de proponer una solucion tecnica.
-- Cuando el problema es difuso o hay que entender un flujo existente.
-- Cuando conviene explicitar que se sabe, que se sospecha y que falta confirmar.
+- Por pedido explícito de esta skill o de auditar hechos, inferencias y supuestos.
+- Ante evidencia incompleta o contradictoria material para una decisión que requiera estructurar lo sabido y lo pendiente.
 
-## Salida esperada
-- Hechos confirmados.
-- Inferencias y su fundamento.
-- Riesgos tecnicos.
-- Contexto faltante o validaciones necesarias.
+## Cuando no cargarla por rutina
+- No por hacer planning, entender código o proponer cualquier solución; una consulta puntual puede bastar.
+- Si debugging, review u otra skill específica ya cubre el análisis, no duplicarlo. No cargarla como pareja fija con Cambio seguro; ambas pueden aportar si sus necesidades son distintas.
+
+## Contrato y salida
+- Cargues o no esta skill: distinguir hechos, inferencias fundamentadas, riesgos y faltantes relevantes; no asumir que el código existente es correcto.
+- Sustentar decisiones con evidencia concreta de código, contratos, consultas, logs o configuración; declarar límites y validación realizada o pendiente.
+- Salida proporcional, no cuatro secciones vacías. Ante contradicciones materiales, explicitar evidencia, inferencias, riesgo y qué falta resolver; respetar la matriz o formato solicitado por el usuario.

@@ -94,19 +94,19 @@ Los cambios de defaults requieren reiniciar OpenCode. Una sesión reabierta pued
 - `investigacion-web`: investigacion web con evidencia verificable y heuristica Context7-first para docs de librerias/APIs.
 - `diseno-agentes-opencode`: criterios para crear o ajustar agentes, skills, comandos y permisos.
 - `diseno-ui-web`: criterios de diseño web claros, accesibles e implementables, con fuerte referencia en Material UI.
-- `analisis-tecnico-evidencia`: separa hechos, inferencias, riesgos e informacion faltante.
-- `cambio-seguro-enterprise`: prioriza cambios minimos, seguros y auditables en sistemas enterprise o legacy.
+- `analisis-tecnico-evidencia`: organiza evidencia material incompleta/contradictoria para decidir o auditar hechos y supuestos; no se carga por toda solución técnica.
+- `cambio-seguro-enterprise`: delimita cambios con decisiones no triviales de alcance/compatibilidad; no se carga por la sola etiqueta enterprise/legacy ni por el tamaño del diff.
 - `code-review-branch-to-branch`: criterio común para revisar ramas o Pull Requests con evidencia, severidad y umbral anti-ruido.
 - `debugging-sistematico`: obliga a investigar causa raiz antes de proponer fixes.
-- `performance-cache-concurrencia`: fuerza revisar costo, cache, transacciones y riesgos de concurrencia.
-- `contratos-api-y-datos`: refuerza compatibilidad de contratos e impacto en acceso a datos.
+- `performance-cache-concurrencia`: evalúa superficies afectadas o riesgos plausibles de costo, cache, orden y consistencia; no se carga por la sola presencia de backend/DB/cache.
+- `contratos-api-y-datos`: evalúa impacto en interfaces, datos compartidos o acceso a datos riesgoso; no se carga por la sola presencia de API/DB. Ambas conservan sus checklists y pueden solaparse sin imponer una pareja fija.
 - `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
 - `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
 - `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI, incluida la selección dinámica entre navegador headless y visible.
 - `sdd-tdd-bdd-pragmatico`: conecta especificación, comportamiento esperado y estrategia de pruebas sin imponer ceremonias rígidas.
-- `verificacion-antes-de-cerrar`: evita declarar cierre o éxito sin evidencia fresca.
+- `verificacion-antes-de-cerrar`: evalúa evidencia material pertinente y vigente; permite reutilizar pruebas comprobadas aún válidas, sin convertir confirmaciones en reruns ni omitir validaciones requeridas.
 - `workflow-ticket-handoff` puede estar disponible cuando se instala el addon Ticketing; no pertenece al core.
-- `revision-por-etapas`: separa revisión de cumplimiento funcional vs revisión de calidad/riesgo técnico.
+- `revision-por-etapas`: conserva cumplimiento antes de calidad/riesgo, con carga selectiva cuando ese marco no está ya cubierto; no activa handoffs por archivos viejos ni duplica el review formal.
 
 ## Comandos globales reutilizables del core
 
@@ -125,6 +125,7 @@ comandos `/ticket-*` y el workflow de handoff asociado.
 
 ## Criterios globales resumidos
 
+- Evidencia y Cambio seguro se seleccionan por su necesidad específica o por pedido explícito, no como set fijo. Sin cargarlas siguen vigentes evidencia, incertidumbre, cambio mínimo, compatibilidad y validación. No duplicar un marco ya suficiente ni imponer secciones vacías; las skills específicas y contratos locales conservan sus requisitos.
 - Mantener agentes globales genéricos, reutilizables y sin dominio de proyecto; lo específico debe vivir en el `AGENTS.md` local o en overlays del repo.
 - Distinguir siempre entre agentes base de OpenCode y agentes custom del stack; `agent-design` debe proteger esa separación.
 - Para docs externas de librerías o APIs, Context7 es la fuente preferida cuando esté disponible; IDs canónicos, versiones objetivo o fuentes privadas deben quedar en la capa local del proyecto.

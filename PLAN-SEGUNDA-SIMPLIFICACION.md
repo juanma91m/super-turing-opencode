@@ -7,9 +7,20 @@ reconciliación de las divergencias previas autorizada por el usuario. Reiniciar
 clientes y usar sesiones nuevas. Segundo repaso y addendum del punto 2 cerrados:
 activación determinista, shell restringido y estilo local prioritario (2.h–2.i).
 El punto 3 está implementado, validado, sincronizado y publicado (3.b–3.d).
-Los puntos 1–4 están cerrados y publicados (4.a–4.f). El punto 5 está cerrado
-técnicamente tras promoción y reinicio; publicación autorizada (5.a–5.f).
-6–10 pendientes, comenzando por planificar el 6.
+Los puntos 1–5 están cerrados y publicados (4.a–4.f y 5.a–5.f; hashes finales en
+el backup de publicación y memoria). Punto 6 conserva ocho subsecciones (6.1–6.8),
+agrupadas en cinco etapas de revisión. Etapa A (6.1 + 6.2) cerrada técnicamente en
+canónicos (6.g), sin despliegue ni publicación. Etapa B (6.3 + 6.5) también cerrada
+técnicamente en canónicos (6.i), igual que C (6.7 + 6.8; resultado en 6.k).
+D (6.4) también cerrada técnicamente en canónicos (6.m), igual que E (6.o).
+Candidato global A–E validado en canónicos y VB alineado solo en su canónico (6.r).
+Los otros ocho overlays y los tres ajustes compartidos adicionales ya están
+implementados/validados en canónicos como lote consolidado (6.t). La cobertura local
+incluye los nueve repos; promoción conjunta ejecutada y verificada (6.u). Publicación
+autorizada al preparar este cierre; hashes finales en su backup/ledger y memoria,
+sin edición circular posterior del plan. Puntos 7–10 pendientes.
+Se acumulan candidatos
+para una promoción conjunta, sin ejecutarla durante esta revisión.
 
 ## Objetivo
 
@@ -138,8 +149,8 @@ no asumir que ese almacenamiento temporal constituye un archivo durable.
 | 2 | A | Referencias, metadata y workflows coherentes en ambos stacks y nueve overlays | cerrado |
 | 3 | A | Deduplicar el contrato de code review | cerrado |
 | 4 | A | Publicidad veraz de herramientas Engram | cerrado |
-| 5 | B — experimento | Memoria proporcional y cierre por hito | cerrado técnicamente; publicación autorizada |
-| 6 | B | Carga selectiva de heurísticas genéricas | pendiente |
+| 5 | B — experimento | Memoria proporcional y cierre por hito | cerrado y publicado |
+| 6 | B | Carga selectiva de heurísticas genéricas | desplegado y validado global + nueve overlays; publicación autorizada, resultado final en ledger; sin resultado operativo LLM medido |
 | 7 | B | Catálogos por responsabilidad | pendiente |
 | 8 | B | CodeGraph por tipo de tarea | pendiente |
 | 9 | C — decisión arquitectónica | Separación de artifact-planner y artifact-renderer | pendiente |
@@ -1777,8 +1788,9 @@ corridas de modelos ni reinstalaciones para publicar.
 **Hipótesis:** cargar skills que repiten obligaciones del rol agrega ceremonia en
 tareas simples sin mejorar necesariamente el resultado.
 
-**Experimento candidato:** estrechar triggers de `analisis-tecnico-evidencia` y
-evaluar otras heurísticas una por una, no retirarlas en bloque.
+**Experimento candidato:** revisar primero los triggers de
+`analisis-tecnico-evidencia` y `cambio-seguro-enterprise` como etapa A; evaluar las
+restantes por etapas acotadas, sin retirar skills ni cambiar todas en bloque.
 
 **Ubicación:** Core: skills genéricas y referencias desde agentes.
 
@@ -1792,6 +1804,1535 @@ skill relevada son un techo histórico, no un ahorro previsto.
 evidencia, supuestos y retrabajo. Resolver explícitamente cualquier skill no cargable.
 
 **Rollback:** restaurar triggers y referencias, sin cambiar permisos.
+
+Se conservan las ocho subsecciones **6.1–6.8** y una decisión por heurística, pero
+se comparten relevamiento, propuesta y pruebas cuando aportan ahorro real:
+
+| Etapa de revisión | Subsecciones | Criterio |
+|---|---|---|
+| A — Principios generales | 6.1 Evidencia + 6.2 Cambio seguro | Revisar cargas que repiten obligaciones de guías/roles, sin fusionar skills. |
+| B — Revisión y cierre | 6.3 Verificación + 6.5 Revisión por etapas | Compartir escenarios, preservando responsabilidades distintas. |
+| C — Riesgos técnicos específicos | 6.7 Contratos/datos + 6.8 Performance/cache/concurrencia | Revisar fronteras y doble carga, conservando ambos checklists. |
+| D — Debugging | 6.4 | Procedimiento propio de reproducción, hipótesis y causa raíz. |
+| E — Especificación y pruebas | 6.6 | Decisión independiente sobre criterios y estrategia de pruebas. |
+
+El detalle 6.a–6.f especifica únicamente la **etapa A (6.1 + 6.2)**. La agrupación
+no autoriza su implementación ni anticipa cambios de B–E. Si una heurística exige
+un cambio material distinto, separarla de su grupo antes de implementar. Revisar
+puede concluir en conservar, acotar la carga o diferir/descartar la propuesta.
+
+**Promoción conjunta:** al pasar a B, el usuario pidió «despleguemos todo junto».
+Se adopta como criterio operativo acumular los candidatos A–E para una promoción
+consolidada al terminar la revisión, salvo que el usuario aclare otro alcance.
+No se ejecuta un despliegue ahora ni se toma esa frase como permiso para instalar
+componentes, sumar assets ajenos, publicar o modificar controles técnicos. El
+manifiesto final de destinos y backups se delimita al preparar el lote consolidado.
+
+### 6.a. Diagnóstico y decisión de alcance propuesta
+
+Baseline de especificación al 2026-10-26. La implementación/validación canónica
+fue autorizada después y se registra en 6.g; no incluye despliegue, publicación ni
+ensayos con modelos. Los fixes posteriores al punto 5 del wrapper GitHub en ocho overlays son
+trabajo independiente, ya sincronizado pero no publicado; no incluirlos en el
+patch, los backups ni una eventual publicación del punto 6 por arrastre.
+
+Hallazgos verificados en las fuentes canónicas:
+
+- `analisis-tecnico-evidencia` tiene 20 líneas en Core. Su trigger «Antes de
+  proponer una solucion tecnica» y la descripción actual abarcan casi cualquier
+  tarea técnica. Las guías comunes y roles ya exigen distinguir evidencia,
+  inferencias y faltantes; la obligación no depende de cargar esta skill.
+- Los once agentes Core ya no la sugieren explícitamente. Esa poda existe y no
+  debe rehacerse ni atribuirse como beneficio nuevo del punto 6.
+- Claude conserva diez referencias planas en `base/agents/` y una en el adaptador
+  `addons/knowledge/agents/knowledge-curator.md`. Esos once roles tienen `Read` y
+  no anuncian `Skill`: explicitar lectura permitida, no agregar herramientas.
+- Knowledge y Ticketing conservan una referencia plana en cada plantilla opcional
+  `agents/plan.md` y `agents/build.md`: cuatro referencias adicionales. Son assets
+  de sus addons, no del Core. No reabrir sus políticas de memoria o tickets.
+- La skill Claude `base/skills/analisis-tecnico-evidencia/SKILL.md` es una copia
+  regular: mismo cuerpo, sin el campo `compatibility: opencode`. Otras skills ya
+  usan symlinks y el sync Claude preserva ese binding. Se propone extender ese
+  patrón a las dos skills de la etapa A; Claude ya tolera esa metadata adicional.
+- No se encontraron referencias explícitas a esta skill en los nueve overlays
+  canónicos AUNE. No necesitan cambios para este candidato; sus reglas locales de
+  análisis, dominio y validación siguen vigentes.
+
+- `cambio-seguro-enterprise` tiene 21 líneas en Core. Sus triggers incluyen
+  preservar comportamiento fuera de alcance o decidir la solución más simple:
+  obligaciones ya explícitas en guías y roles, no exclusivas de un cambio complejo.
+- Esta segunda skill tiene nueve referencias planas en Claude `base/agents/`
+  (los mismos roles que Evidencia salvo `code-reviewer`) y una en
+  `addons/knowledge/agents/knowledge-curator.md`. También es copia regular en
+  `base/skills/`, con el mismo cuerpo Core salvo `compatibility: opencode`.
+- No se encontraron referencias a Cambio seguro en agentes Core, plantillas
+  Knowledge/Ticketing ni overlays canónicos AUNE. No agregarlas donde no existen.
+
+Propuesta conjunta: acotar **solo estas dos heurísticas**, con **25 entradas** en
+**15 archivos de roles/plantillas**: 21 entradas en once archivos Claude, más cuatro
+entradas de Evidencia en plantillas Knowledge/Ticketing. No retirar skills del
+catálogo, fusionar sus responsabilidades ni extender el recorte a otras heurísticas.
+
+### 6.b. Contrato candidato de selección y responsabilidad restante
+
+**Evidencia (6.1).** Descripción propuesta para la implementación a aprobar:
+
+> Usar cuando evidencia incompleta o contradictoria requiera estructurar hechos,
+> inferencias y supuestos para una decisión técnica, o se pida auditar esa
+> evidencia; no para tareas rutinarias con evidencia suficiente.
+
+La implementación debe alinear descripción, «Cuándo usarme» y salida de la skill:
+
+1. **Cargar/aplicar** ante pedido explícito de la skill o de un análisis de
+   evidencia, o cuando contradicciones/incertidumbre material requieran organizar
+   evidencia para decidir. No exigir que el usuario nombre la skill.
+2. **No cargar por reflejo** por estar en planning, entender código existente,
+   proponer cualquier solución, trabajar en legacy o ejecutar un microcambio.
+   Una duda resoluble con una lectura o prueba puntual no exige otro marco.
+3. **Evitar acumulación:** si debugging, review u otra skill específica ya cubre
+   ese análisis, no sumar esta solo para repetir sus pasos. Sigue disponible si
+   hay una necesidad adicional real o el usuario la pide.
+4. **Siempre conservar** evidencia verificable, separación entre hechos y
+   supuestos, riesgos/faltantes relevantes y validación honesta, se cargue o no la
+   skill. No deducir corrección del código existente ni ocultar incertidumbre.
+5. La salida se adapta al problema; no imponer cuatro secciones vacías o una
+   matriz formal a toda respuesta. Si se pide una matriz o hay contradicciones
+   materiales, sí explicitar evidencia, inferencias, riesgo y qué falta resolver.
+6. En las referencias de agentes, una condición breve remite al trigger de la
+   skill; no copiar su checklist en quince prompts. En Claude, añadir el acceso
+   por `Read` a `~/.claude/skills/analisis-tecnico-evidencia/SKILL.md` cuando no
+   existe `Skill`, sin ampliar tools ni inventar loaders.
+
+La guía global y los roles mantienen sus obligaciones actuales; no se añade otra
+guía global ni un clasificador/plugin para decidir si se carga la skill. Esto es
+guidance de selección, no enforcement técnico ni garantía de obediencia del LLM.
+
+**Cambio seguro (6.2).** Descripción propuesta:
+
+> Usar para delimitar cambios con riesgo de regresión o compatibilidad no trivial,
+> cuando haga falta decidir alcance, comportamiento a preservar y validación, o
+> por pedido explícito; no por la sola etiqueta enterprise/legacy ni por toda edición.
+
+Su description, triggers y salida deben expresar:
+
+1. Aplicarla cuando planificar o revisar un cambio exige decisiones no triviales
+   sobre alcance, compatibilidad o comportamiento que debe preservarse; incluye
+   riesgos plausibles aunque todavía no exista una regresión demostrada.
+2. No cargarla por el nombre del repo/rol, por cualquier edición ni para repetir
+   una estrategia de cambio seguro ya suficiente en el workflow o skill específica.
+   El tamaño del diff no determina el riesgo: una línea puede cambiar auth o datos.
+3. Mantener siempre cambio mínimo, comprensión del flujo y patrón previo,
+   compatibilidad, preservación de trabajo ajeno y separación fix/cleanup, se
+   cargue o no la skill. No introducir formularios, archivos ni aprobaciones extras.
+4. Conservar una salida proporcional: decisión de alcance, comportamiento que se
+   preserva y validación pertinente cuando aporten; no cuatro secciones vacías.
+5. Condicionar sus diez referencias Claude con el mismo acceso por Read permitido
+   que Evidencia; no ampliar tools ni copiar el checklist en cada prompt.
+
+**Frontera entre ambas:** Evidencia organiza qué se sabe y qué permite concluir;
+Cambio seguro delimita cómo modificar preservando comportamiento. Pueden aplicar
+ambas si cada una cubre una necesidad real, pero no se cargan como pareja por
+defecto. Un pedido explícito de una o ambas se respeta. Si un procedimiento
+específico ya cubre el trabajo, no sumar marcos genéricos solo para duplicarlo.
+
+### 6.c. Archivos y ownership de la eventual implementación
+
+| Dueño | Alcance candidato |
+|---|---|
+| Core | `skills/{analisis-tecnico-evidencia,cambio-seguro-enterprise}/SKILL.md`; sus dos entradas de `README-AGENTS.md`; registro en `CHANGELOG.md` y este plan; regresiones focalizadas bajo `tests/` según el harness existente. No cambiar agentes Core ni guías comunes. |
+| Claude | Evidencia: diez `base/agents/` (`planner`, `code-inspector`, `code-reviewer`, `reviewer`, `dev-test`, `merge-conflict-resolver`, `backend-java-developer`, `backend-python-developer`, `backend-typescript-developer`, `frontend-web-developer`) y `addons/knowledge/agents/knowledge-curator.md`. Cambio seguro: los mismos salvo `code-reviewer`, donde no existe esa entrada. Condicionar solo las 21 entradas de estas dos skills. |
+| Claude, skills compartidas | Reemplazar las dos copias `base/skills/{analisis-tecnico-evidencia,cambio-seguro-enterprise}/SKILL.md` por symlinks a sus respectivos assets OpenCode siguiendo el patrón existente; registrar ambos bindings en `STACK-MANIFEST.json` y actualizar README/changelog. No crear otro mecanismo de composición. |
+| Knowledge y Ticketing | Condicionar exclusivamente la referencia a Evidencia en sus cuatro plantillas `agents/{plan,build}.md`, más el registro documental correspondiente. No agregar Cambio seguro ni cambiar generadores, bloques de autonomía, reglas de memoria, hooks o lifecycle. |
+| Overlays AUNE / productos | Lectura y comprobación de no regresión; **cero ediciones** por este candidato. Los fixes GitHub previos deben preservarse. |
+
+Permisos, modelos, variantes, hooks, MCP, esquema de tools, targets de delegación,
+catálogos y disparadores obligatorios de otras skills quedan fuera de alcance.
+Resumen de decisiones de alcance:
+
+| Heurística revisada | Decisión para esta entrega |
+|---|---|
+| `cambio-seguro-enterprise` | Incorporada a la etapa A con relevamiento propio y contrato distinto de Evidencia; no se fusionan las skills. |
+| `verificacion-antes-de-cerrar` | Conservar contrato y triggers; no confundir evitar una carga con eliminar la obligación de verificar. |
+| `debugging-sistematico` | Conservar: aporta procedimiento específico de hipótesis, reproducción y causa raíz. |
+| `revision-por-etapas` / `sdd-tdd-bdd-pragmatico` | Conservar criterios y aplicación pragmática; no reabrir el handoff ni el addendum del punto 2. |
+| `contratos-api-y-datos` / `performance-cache-concurrencia` | Conservar checklists específicos íntegros. |
+
+### 6.d. Criterios de aceptación y validación sin modelos por defecto
+
+Antes de editar, congelar baseline de archivos, bindings y headers efectivos de
+los roles alcanzados. Preservar archivos ajenos y trabajo previo no publicado.
+
+- Metadata válida y ambas skills descubribles por el loader real OpenCode; Claude recibe
+  una fuente por skill mediante symlink resuelto, con el mismo contrato y acceso por Read
+  en los roles sin Skill. La aprobación del candidato no permite ampliar tools.
+- Las 25 entradas quedan condicionadas, no desaparecen obligaciones ni
+  se retiran otras skills. Headers de los quince roles/plantillas byte-idénticos;
+  comprobar además configuración efectiva de los roles OpenCode alcanzados.
+- Revisar fixtures de selección/contraejemplos y asserts contractuales, sin hacer
+  pasar un clasificador casero o un test textual por comportamiento del modelo:
+
+| Caso | Contrato esperado |
+|---|---|
+| Cambio literal acotado o explicación con archivo/resultado suficiente | No exigir esta skill; seguir validando lo afirmado. |
+| Planning con requerimiento claro y evidencia disponible | No cargarla solo por el nombre del rol o por proponer solución. |
+| Falta un dato verificable con una consulta puntual | Obtenerlo o declarar el límite; no activar automáticamente una ceremonia. |
+| Logs y código sostienen explicaciones incompatibles y la decisión depende de conciliarlos | Aplicar análisis explícito de evidencia e incertidumbre. |
+| Usuario pide auditar hechos, inferencias y supuestos o nombra la skill | Aplicarla, con el formato pedido cuando corresponda. |
+| Bug con repro y estrategia de debugging ya suficiente | Mantener skill/procedimiento específico; no sumar otra carga redundante. |
+| Cambio API/SQL/cache o review formal | Mantener skills específicas, snapshot, contratos, checks y validación local; este candidato no los recorta. |
+| Cambio acotado con alcance/compatibilidad ya resueltos | No exigir Cambio seguro solo por trabajar en legacy; conservar sus obligaciones. |
+| Cambio con consumidores o comportamiento fuera de alcance cuya preservación exige una decisión no trivial | Aplicar Cambio seguro aunque la evidencia del comportamiento actual sea clara. |
+| Diff de una línea con impacto sensible en auth/datos | No clasificarlo como trivial por tamaño; evaluar riesgo real y preservar skills específicas. |
+| Incertidumbre material más decisión de compatibilidad no trivial | Ambas skills pueden aportar; justificar la necesidad diferenciada sin cargarlas como set fijo. |
+| Pedido explícito de una o ambas skills | Aplicar las solicitadas sin usar el filtro de rutina para ignorar el pedido. |
+
+- Ejecutar regresiones focalizadas, `git diff --check` y `opencode debug config`
+  en sandbox con dependencias existentes; sin instalar ni llamar modelos. No
+  exponer configuración resuelta cruda ni correr installers globales para validar.
+- Comprobar que los otros cuerpos de skills y bloques de Knowledge/Ticketing
+  permanecen iguales; registrar tamaño de skill, descripciones y referencias
+  residentes por separado. Agregar condiciones puede aumentar algo el prompt
+  estático: explicitarlo, no presentar toda poda como ahorro.
+
+La aceptación técnica prueba metadata, contratos y ausencia de drift. **No prueba
+menor consumo, latencia, retrabajo ni igual calidad del modelo.** Las 161 cargas y
+162.610 bytes son históricos y no predicen ahorro con el modelo actual. No repetir
+la microprueba del punto 5 ni presupuestar otro A/B por defecto; un ensayo real
+necesita diseño, costo, límites y autorización propios.
+
+### 6.e. Despliegue y rollback propuestos, aún no autorizados
+
+Una aprobación inicial debería limitarse a **implementar/validar canónicos**.
+Despliegue y publicación se autorizan después sobre el diff real:
+
+- Promover solo las dos skills Core, los dos bindings Claude y las 21 entradas en
+  once agentes Claude; documentación según el lifecycle de su dueño, sin sync amplio
+  que mergee settings/hooks/permisos. Instalar el destino OpenCode antes de activar
+  los dos symlinks Claude; verificar referencias resueltas, no links rotos.
+- Las plantillas opcionales plan/build de addons se corrigen para instalaciones
+  futuras. En activos existentes, si la entrada genérica sigue presente y coincide
+  con la baseline, actualizar **solo esa entrada**; nunca reemplazar el archivo
+  por una plantilla ni recrear agentes ausentes. Preservar headers y bloques
+  compuestos del punto 5, y el estado habilitado/oculto de cada rol.
+- No sincronizar overlays ni productos AUNE; los clientes reciben la skill global
+  por sus rutas existentes. Tras una promoción, reiniciar los clientes afectados;
+  no afirmar que una sesión abierta ya usa los triggers nuevos.
+- Backup de los archivos/links exactos y ledger antes/después. Rollback restaura
+  solo esos assets, incluidos copia versus symlink, sin revertir los fixes GitHub,
+  bloques de autonomía, configuración ni trabajo ajeno. No Git writes en productos.
+
+### 6.f. Estado y siguiente decisión
+
+Etapa A aprobada, implementada y validada en canónicos; resultado en 6.g. No hay
+un bloqueo técnico pendiente que justifique prolongarla por microoptimizaciones.
+El usuario indicó avanzar a B si A estaba lista: se completa su especificación
+en 6.h. La promoción de A queda acumulada para el lote conjunto; no se inicia
+implementación B ni etapas C–E por el cierre de A.
+
+### 6.g. Etapa A implementada y validada en canónicos
+
+El usuario respondió «Perfecto. Avancemos» a la propuesta explícita de implementar
+y validar solo los canónicos, dejando despliegue/publicación para después.
+
+- **Implementado:** ambas skills con triggers selectivos y salida proporcional;
+  25 entradas condicionadas en 15 archivos (21 Claude y cuatro plantillas addon),
+  sin modificar sus headers ni el resto de sus cuerpos. No se fusionan skills ni
+  se cargan como pareja fija. Pedidos explícitos y obligaciones permanentes siguen
+  presentes; un diff pequeño no equivale a bajo riesgo.
+- **Fuente compartida:** dos copias Claude convertidas a symlinks al asset
+  OpenCode instalado, con manifest y documentación actualizados. Esos enlaces
+  canónicos todavía leen la **versión activa anterior**, porque no se desplegó
+  Core. El contenido candidato y el acceso Read de Claude se contrastaron en
+  staging con dos enlaces a copias del candidato; no editar el activo a través de
+  un enlace ni confundir el binding con una promoción ya realizada.
+- **Archivos:** siete Core (incluido el plan preexistente y dos nuevos assets de
+  tests), 16 Claude, tres Knowledge y tres Ticketing: 29 en cuatro canónicos.
+  Ningún agente Core, guía común, generador, script de runtime o archivo producto
+  cambió; se preserva el trabajo anterior de los overlays GitHub.
+- **Regresiones:** 11 tests nuevos de contrato, cuatro de metadata/workflow y
+  16 de code review/helper: **31 tests pasados**. Los doce escenarios del fixture
+  vinculan expectativa con cláusulas del texto: no son doce decisiones de un LLM.
+  El test del trigger amplio se ejecutó primero y falló con el texto previo.
+- **Pruebas nativas:** `opencode debug config` antes/después en dos perfiles
+  aislados (Knowledge y Ticketing, plan/build), con configuración efectiva sin
+  cambios salvo los prompts autorizados; `opencode debug skill` cargó los dos
+  candidatos desde la ruta staged esperada, con metadata y cuerpos correctos.
+  No se instaló nada ni se lanzó Claude/modelos para estas pruebas.
+- **Integridad:** headers de los 15 archivos byte-idénticos; fuera de sus entradas
+  seleccionadas, sus cuerpos permanecen iguales. **588 fingerprints** de fuentes
+  ajenas al alcance, instalaciones activas, overlays/productos e índices Git se
+  mantienen; HEAD de los cuatro canónicos intacto y `git diff --check` correcto.
+
+**Tradeoff estático medido, no ahorro operativo:**
+
+| Texto | Antes (bytes UTF-8) | Después | Diferencia |
+|---|---:|---:|---:|
+| Skill Evidencia completa | 840 | 1.379 | +539 |
+| Su descripción de catálogo | 109 | 202 | +93 |
+| Su cuerpo on-demand | 652 | 1.096 | +444 |
+| Skill Cambio seguro completa | 843 | 1.511 | +668 |
+| Su descripción de catálogo | 79 | 245 | +166 |
+| Su cuerpo on-demand | 687 | 1.187 | +500 |
+| Suma de los 15 archivos de roles/plantillas | 39.032 | 43.368 | +4.336 |
+
+La última fila agrega archivos distintos, **no es el incremento de cada request**;
+el máximo por un agente Claude es +360 bytes. Las condiciones y rutas de lectura
+explicitan selección y acceso, pero aumentan el texto. Las descripciones también
+crecen y los cuerpos son más largos si se cargan. El candidato reduce duplicación
+de mantenimiento y busca evitar cargas innecesarias: **no demuestra una reducción
+de contexto, tokens, latencia ni retrabajo**. No se ejecutó un A/B ni corresponde
+atribuirle el techo histórico de ahorro. Si este costo no se acepta, revisar el
+wording antes de promover, no ocultarlo como si fuera una poda neta.
+
+**Artefactos y rollback:** `/tmp/opencode/point6a-qa.py` y
+`/tmp/opencode/point6a-candidate/{baseline,result}.json` conservan el chequeo,
+snapshots anteriores y métricas de esta corrida; son temporales, no un archivo
+durable. El plan conserva resultados y alcance. Un rollback canónico debe
+restaurar solo ambas skills, las dos copias previas de Claude, sus 25 entradas y
+documentación de esta etapa, conservando el plan previo y los fixes GitHub. No
+resetear repos, restaurar índices ni ejecutar installers. Antes de una promoción
+se requiere backup durable/ledger de los destinos exactos según 6.e.
+
+**Estado:** cerrada técnicamente en canónicos, no desplegada ni publicada. El
+tradeoff queda registrado, sin afirmar ahorro. Por indicación posterior del
+usuario se pasa a especificar B y se difiere la promoción para hacerla conjunta.
+Una regresión material permitiría reabrir A; no prolongarla solo por wording.
+
+### 6.h. Etapa B — Verificación y Revisión por etapas
+
+**Estado:** aprobada, implementada y validada solo en canónicos. El usuario respondió
+«Perfectro. vamos por B!» a ese alcance explícito; resultado en 6.i, sin despliegue
+ni publicación. Activos y candidato A se preservan.
+Alcance: **6.3 `verificacion-antes-de-cerrar` + 6.5 `revision-por-etapas`**.
+
+#### Diagnóstico y alcance
+
+- Ambas skills tienen 45 líneas en Core y ya están compartidas con Claude por
+  symlinks declarados. No crear copias ni tocar esos bindings/manifest.
+- Verificación contiene triggers como «Antes de entregar resultado final o pedir
+  review» y «Antes de cerrar una tarea». La obligación de evidencia es permanente,
+  pero cargar el marco completo en toda confirmación no agrega necesariamente
+  validación. «Completa y fresca» debe referirse a la afirmación y estado relevantes,
+  no interpretarse como volver a correr una suite íntegra en cada respuesta.
+- Revisión por etapas contiene un checklist específico de cumplimiento y calidad;
+  se conserva. Su selección puede duplicar un procedimiento de review ya suficiente
+  o activarse por la mera existencia de un plan/ticket, sin una revisión real.
+- Claude tiene seis referencias a Verificación (`dev-test`, `reviewer`,
+  `frontend-web-developer` y los tres backends Java/Python/TypeScript) y dos a
+  Revisión (`reviewer`, `merge-conflict-resolver`): **ocho entradas en siete roles**.
+  Todos tienen Read y no anuncian Skill. No añadir referencias a otros agentes.
+- No hay referencias explícitas a estas skills en agentes Core, plantillas
+  Knowledge/Ticketing ni overlays canónicos AUNE. Ninguno necesita cambios por B.
+  El procedimiento formal de `code-reviewer` y el workflow local conservan prioridad.
+
+#### Contrato candidato: Verificación (6.3)
+
+Descripción orientativa:
+
+> Usar para evaluar qué evidencia vigente y pertinente sostiene una afirmación
+> material de corrección, validación o cierre, o por pedido explícito; no para
+> confirmaciones sin cambios ni afirmaciones nuevas.
+
+- Mantener siempre el deber de no afirmar éxito sin evidencia comprobada. No
+  convertir la carga selectiva en permiso para omitir pruebas o inventar resultados.
+- Seleccionar la skill cuando aporte evaluar pertinencia, cobertura o vigencia de
+  la evidencia, no como paso rutinario por emitir una respuesta final.
+- Aclarar el paso de ejecución: verificación suficiente/completa **respecto de la
+  afirmación y el alcance**, sin exigir por defecto toda la suite/build pesado.
+  Preservar las validaciones explícitamente requeridas por usuario o contrato local.
+- Si la prueba ya se ejecutó y su resultado se leyó en este trabajo sobre el estado
+  relevante, puede reutilizarse sin un rerun ritual. Código, formatter, configuración,
+  dependencias o entorno que invaliden esa evidencia requieren revalidar lo afectado.
+  No equiparar una evidencia histórica o no inspeccionada con una prueba vigente.
+- Una skill no habilita comandos fuera del rol ni salta confirmaciones. Si no hay
+  acceso o no es viable verificar, declarar qué queda sin comprobar y por qué; no
+  afirmar que pasó ni ejecutar tests desde un rol read-only que no los permite.
+- Conservar las distinciones lint/build/tests/comportamiento y la conexión entre
+  prueba y criterio esperado. Una salida verde no prueba por sí sola el cambio.
+- Salida breve con afirmación, evidencia, resultado y límites relevantes; no exigir
+  un formulario vacío ni cambiar el formato requerido por el proyecto.
+
+#### Contrato candidato: Revisión por etapas (6.5)
+
+Descripción orientativa:
+
+> Usar para estructurar una revisión de cumplimiento y calidad cuando ese contraste
+> no esté ya cubierto por el procedimiento aplicado, o por pedido explícito; no
+> por la mera existencia de un plan, ticket o archivo de handoff.
+
+- Conservar íntegros los dos checklists y su orden: intención/alcance primero,
+  calidad/riesgo después; si falla cumplimiento, señalarlo antes de cosmética.
+- Acotar description/triggers a una revisión real que necesita ese marco. No cargar
+  una segunda skill solo para repetir `code-review-branch-to-branch` o un workflow
+  local ya suficiente. El usuario puede pedirla explícitamente.
+- No hacer opcional el contraste de cumplimiento/calidad requerido por el rol o
+  el proyecto, aunque no se cargue esta skill. No crear una revisión formal para
+  una consulta ad-hoc que no la pidió.
+- Mantener literalmente el guardrail actual de handoff aplicable/activo y archivos
+  existentes: no exigir ni crear `verdict.md`, `result-dev.md` o carpetas por detectar
+  un ticket o una referencia vieja. Las lecturas locales obligatorias siguen vigentes.
+- Conservar evidencia por hallazgo material y separación bloqueante/no bloqueante.
+  Adaptar presentación sin seis bloques vacíos; conservar formatos locales exigidos,
+  snapshot, conversación, rereview y storage del review formal.
+
+Las dos skills siguen separadas. Revisión evalúa alcance/calidad; Verificación
+evalúa qué evidencia respalda una afirmación. No cargarlas como paquete automático
+ni suponer que revisar sustituye ejecutar una prueba o viceversa.
+
+#### Archivos, pruebas y promoción
+
+| Dueño | Patch B candidato |
+|---|---|
+| Core | Dos `skills/{verificacion-antes-de-cerrar,revision-por-etapas}/SKILL.md`; sus entradas de README-AGENTS; CHANGELOG/plan; un test contractual focalizado (`tests/test_review_closure_contract.py`). No cambiar guías comunes ni agentes. |
+| Claude | Solo las ocho entradas en los siete `base/agents/` ya identificados, condicionales y con acceso Read permitido; registro breve en README/CHANGELOG. No tocar headers, manifest, symlinks ni otras entradas, incluidas las de A. |
+| Knowledge/Ticketing, overlays/productos | Cero ediciones. Preservar templates, autonomía, fixes GitHub, índices y configuraciones. |
+
+Antes de implementar, congelar una baseline B que incluya **A como trabajo válido
+preexistente**. No reutilizar a ciegas los fingerprints de QA A como si los archivos
+que B cambia debieran seguir intactos; proteger el contenido A explícitamente y
+marcar solo los nuevos paths/entradas autorizados. No resetear repos sucios.
+
+| Caso contractual | Comportamiento que el texto debe preservar |
+|---|---|
+| Confirmación sin cambios ni nueva afirmación técnica | No forzar skill ni rerun; no inventar una validación nueva. |
+| Se pretende afirmar tests pasados sin resultado comprobado | No declararlos pasados; verificar dentro de autoridad o explicitar el pendiente. |
+| Evidencia ejecutada/leída en el mismo trabajo y aún vigente | Puede reutilizarse; no repetir la suite por cada cierre. |
+| Formatter/código/config/entorno invalidan la prueba anterior | Revalidar lo afectado antes de sostener la afirmación. |
+| Lint verde o test que no representa el criterio solicitado | No presentarlo como prueba de build ni de corrección funcional. |
+| Reviewer sin permiso para ejecutar build/tests | Respetar el límite y declarar evidencia faltante, sin bypass. |
+| Implementación se aparta del alcance aunque sus tests pasen | Señalar primero incumplimiento, sin ocultarlo tras calidad o tests verdes. |
+| Review formal ya aplica el procedimiento completo | No duplicar cargas; conservar snapshot, conversación, formatos y rereview. |
+| Consulta ad-hoc con ticket o handoff viejo | No crear handoff, carpetas ni workflow formal por reflejo. |
+| Pedido explícito de una o ambas skills | Respetarlo con salida pertinente, sin equiparar revisión a ejecución. |
+
+Pruebas: asserts de contrato/metadata y revisión de estos ejemplos, no un
+clasificador ni una evaluación conductual del LLM. Ejecutar loader real de las dos
+skills en sandbox y comprobaciones de configuración pertinentes, sin instalaciones
+ni modelos. Reusar los tests existentes de handoff, metadata y review cuando cubran
+una frontera modificada; no repetir toda la auditoría A sin cambios que la invaliden.
+Verificar siete headers byte-idénticos, ocho entradas y cuerpos restantes intactos,
+checklists y guardrail de handoff preservados, y assets A sin regresión.
+
+Medir tamaño de descripciones, cuerpos y referencias por separado; buscar wording
+acotado y no repetir el protocolo en siete prompts. El precedente A mostró costo
+estático: no prometer que más condiciones equivalen a menos tokens o llamadas.
+
+La promoción B se acumula con el lote conjunto. En el futuro bastaría promover
+las dos skills Core (Claude ya las comparte) y las siete definiciones Claude;
+documentación por lifecycle y backups focalizados, sin sync amplio ni settings.
+Hasta entonces los links canónicos siguen leyendo la versión instalada anterior;
+validar el contenido nuevo mediante staging, no editando a través del enlace.
+Rollback B debe revertir solo su patch, **preservando A y los fixes GitHub**.
+
+**Siguiente decisión:** B queda acumulada para el despliegue conjunto; por indicación
+del usuario se podrá especificar C. C–E no se implementan automáticamente y no hay
+autorización de modelos, publicación o despliegue inmediato por cerrar B.
+
+### 6.i. Etapa B implementada y validada en canónicos
+
+- **Cambios B:** dos skills con selección por necesidad real/pedido explícito;
+  Verificación permite reutilizar prueba ejecutada y leída en el mismo trabajo si
+  sigue vigente, exige revalidar lo invalidado y conserva límites del rol. Revisión
+  evita la doble carga y conserva cumplimiento antes de calidad, sin crear handoff
+  por archivos viejos. Ninguna hace opcional la obligación que ya exige el rol.
+- **Roles:** ocho entradas condicionadas en siete archivos Claude, con Read ya
+  disponible. Headers byte-idénticos y cuerpos fuera de esas entradas iguales a la
+  baseline B, incluidas las entradas de A. No se tocaron bindings ni manifest.
+- **Preservación:** los dos checklists de Revisión y su guarda literal de handoff
+  activo/existente son byte-idénticos; se mantiene la regla central de Verificación
+  y la separación entre lint, build, tests y comportamiento. Formatos locales,
+  snapshot, conversación, rereview y storage del review formal conservados.
+- **Scope:** B cambia 15 paths respecto de su propia baseline: seis Core y nueve
+  Claude. No son 15 archivos adicionales a A: el acumulado A+B es **32 paths** en
+  cuatro canónicos (Core 10, Claude 16, Knowledge tres, Ticketing tres). B no cambia
+  Knowledge/Ticketing, agentes Core, guías comunes, runtimes ni productos/overlays.
+- **Pruebas:** 15 tests nuevos de contrato más 31 regresiones focalizadas
+  (metadata, review/helper y coexistencia A): **46 tests pasados**. Diez escenarios
+  B vinculan expectativas a cláusulas; no son decisiones observadas de un modelo.
+  El test del cierre rutinario falló primero contra la skill anterior.
+- **Nativo:** `opencode debug config` antes/después en sandbox para `reviewer` y
+  `dev-test` idéntico; `opencode debug skill` cargó ambas skills B desde las rutas
+  de candidato, con cuerpos/metadata correctos. Dos enlaces de staging confirmaron
+  el acceso Read de Claude al mismo contenido. No se lanzó Claude ni un LLM.
+- **Integridad:** **603 fingerprints** protegidos incluyen el trabajo A, activos,
+  fuentes ajenas, bindings e índices Git; todos iguales. HEAD de cuatro canónicos
+  intacto, diff limitado a B respecto de su baseline y `git diff --check` correcto.
+  Ningún staging/commit/push, instalación, despliegue, indexado o consulta remota.
+
+**Tradeoff estático de B, bytes UTF-8:**
+
+| Texto | Antes | Después | Diferencia |
+|---|---:|---:|---:|
+| Verificación completa | 1.980 | 2.613 | +633 |
+| Su descripción | 123 | 209 | +86 |
+| Su cuerpo on-demand | 1.798 | 2.345 | +547 |
+| Revisión por etapas completa | 1.972 | 2.225 | +253 |
+| Su descripción | 123 | 215 | +92 |
+| Su cuerpo on-demand | 1.799 | 1.960 | +161 |
+| Suma de siete roles Claude | 21.227 | 22.617 | +1.390 |
+
+La suma de roles no representa el incremento por request; el máximo por rol de B
+es +345 bytes. La salida deja de exigir bloques vacíos, pero se incorporan reglas
+de selección, vigencia y acceso: **no hay poda estática neta ni ahorro operativo
+demostrado**. No se ejecutaron modelos ni benchmarks. No atribuir menor cantidad
+de cargas/reruns al hecho de que los tests textuales o la configuración pasen.
+
+**Artefactos:** QA temporal `/tmp/opencode/point6b-qa.py` y
+`/tmp/opencode/point6b-candidate/{baseline,result}.json`. La baseline B incluye A
+como trabajo válido preexistente; no se reejecutó la auditoría A con un scope ya
+obsoleto. El plan registra los resultados durables; `/tmp` no es archivo durable.
+Rollback B restaura solo sus dos skills, ocho entradas, documentación y test,
+preservando A y fixes GitHub; no resetear repos ni reemplazar roles completos.
+
+**Estado:** B cerrada técnicamente en canónicos, añadida al lote pendiente de
+promoción conjunta. Los links Claude siguen apuntando a la versión instalada
+anterior hasta ese despliegue. Al cerrar B, C–E todavía no se habían iniciado.
+No reabrir A/B por microiteraciones cosméticas; una regresión material sí lo ameritaría.
+
+### 6.j. Etapa C — Contratos/datos y Performance/cache/concurrencia
+
+**Estado:** aprobada, implementada y validada solo en canónicos; el usuario respondió
+«Perfecto. avancemos» a ese alcance explícito. Resultado en 6.k, con A/B y activos
+preservados, sin despliegue/publicación. Alcance: **6.7 `contratos-api-y-datos` + 6.8
+`performance-cache-concurrencia`**, sin fusionar ni retirar sus checklists.
+
+#### Diagnóstico y frontera entre las dos skills
+
+- Cada skill tiene 21 líneas en Core. Sus bloques `Que hago` contienen checklists
+  específicos, no solo obligaciones genéricas: compatibilidad/serialización y
+  resiliencia en Contratos; cardinalidad/locks, cache e idempotencia en Performance.
+  El solapamiento SQL no justifica borrar esas capacidades ni repartirlas de modo
+  excluyente entre skills.
+- Los triggers actuales de Contratos incluyen «En APIs, clientes externos, colas
+  o integraciones»; los de Performance abarcan queries, ORM, DB, cache y colas.
+  Deben referirse al cambio/pregunta o a un riesgo plausible, no a que el proyecto
+  contenga esas tecnologías. No hace falta un incidente o benchmark previo para
+  considerar un riesgo real de compatibilidad, costo o consistencia.
+- Hay diez referencias planas en cinco roles Claude: `reviewer`, `code-reviewer`
+  y los tres backends Java/Python/TypeScript. Todos tienen Read y no anuncian Skill.
+  No añadir referencias a frontend, planner u otros roles donde no existen.
+- Las dos contrapartes `base/skills/*/SKILL.md` Claude son copias regulares con el
+  mismo cuerpo Core y sin `compatibility: opencode`. Aplicar el patrón compartido
+  ya usado en A: dos symlinks al asset instalado OpenCode, no un mecanismo nuevo.
+- No hay referencias explícitas en agentes Core ni plantillas Knowledge/Ticketing.
+  En overlays AUNE aparecen ambas en la lista `Skills:` del backend Python de
+  Market Data; fuente/producto coinciden. **Se conservan sin edición:** esa lista
+  no declara carga obligatoria de todas y los triggers globales deben convivir con
+  async, calidad/frescura, idempotencia y compatibilidad exigidas localmente. No
+  usar esta poda para recortar reglas de pipelines, Alembic, APIs o validación local.
+
+**Frontera operativa:** Contratos prioriza qué semántica/interfaz consumen otros y
+qué compatibilidad debe preservarse; Performance prioriza costo, contención,
+orden y consistencia de ejecución/estado. SQL, transacciones e idempotencia pueden
+interesar a ambas: aplicar la que aporte el checklist necesario y ambas si hay dos
+necesidades distintas. No repetir el mismo análisis ni cargarlas como paquete fijo.
+Un workflow o skill de dominio que ya cubra esos riesgos puede ser suficiente;
+eso no elimina la obligación de revisar los riesgos relevantes.
+
+#### Contratos/datos (6.7): contrato candidato
+
+Descripción orientativa:
+
+> Usar al cambiar o revisar contratos de API/integración, datos compartidos o acceso
+> a datos con riesgo relevante, o por pedido explícito; no por la sola presencia
+> de APIs o DB en el proyecto.
+
+- Alinear description y triggers con un impacto de interfaz, representación,
+  consumidor o acceso a datos afectado por el cambio/pregunta. No exigir rotura
+  demostrada para revisar compatibilidad.
+- Preservar **literalmente** el bloque `Que hago`: REST/SOAP, errores, timeouts,
+  idempotencia, trazabilidad, endpoints/payloads/serialización y el análisis de
+  cardinalidad, joins, filtros, índices, locks y costo de acceso a datos.
+- Preservar las cuatro viñetas originales de `Salida esperada`; aclarar que se
+  reportan las aplicables, sin inventar una superficie DB ni bloques vacíos en un
+  cambio que no la afecta. El formato requerido localmente mantiene prioridad.
+- No cargarla por cada edición en backend ni para repetir un checklist local o
+  de Performance ya suficiente. Respetar pedidos explícitos y contratos locales.
+  Un cambio pequeño puede alterar semántica, auth, errores o consumidores.
+
+#### Performance/cache/concurrencia (6.8): contrato candidato
+
+Descripción orientativa:
+
+> Usar cuando el cambio o síntoma pueda afectar costo de consultas, cache,
+> transacciones, orden o concurrencia, o por pedido explícito; no por la sola
+> presencia de backend, DB o cache en el proyecto.
+
+- Seleccionar por superficie afectada o sospecha fundada de costo, bloqueo,
+  inconsistencia, frescura o carrera. La falta de métricas no demuestra ausencia
+  de riesgo y el tamaño del diff no reemplaza el análisis.
+- Preservar **literalmente** `Que hago`: costo/contención/consistencia, cardinalidad,
+  índices, scans, locks, round trips, fuente de verdad, refresh/invalidation,
+  transacciones, idempotencia, orden y concurrencia. No convertirlo en una regla
+  genérica que pierda esas preguntas concretas.
+- Preservar las cuatro viñetas originales de salida y hacerlas proporcionales a
+  lo afectado. Declarar supuestos o evidencia faltante, sin fabricar costos ni
+  garantías de ausencia de carreras.
+- No cargarla por la mera pertenencia al backend ni apilar Contratos por rutina.
+  Tampoco habilita benchmarks, DBs, migraciones, infraestructura o índices: siguen
+  rigiendo autoridad del rol, permisos y aprobaciones locales.
+
+#### Archivos y límites del candidato C
+
+| Dueño | Alcance a aprobar |
+|---|---|
+| Core | Dos `skills/{contratos-api-y-datos,performance-cache-concurrencia}/SKILL.md`: description/triggers y guidance breve de selección/salida; dos bloques `Que hago` y ocho viñetas de salida byte-idénticos. README-AGENTS/CHANGELOG/plan y test focalizado `tests/test_contracts_performance_selection.py`. No cambiar agentes ni guías comunes. |
+| Claude | Solo diez entradas en los cinco `base/agents/` identificados, condicionales y con Read permitido; dos copias de skills a symlinks siguiendo el patrón existente, altas de esos dos bindings en manifest y registro breve en README/CHANGELOG. No alterar headers, entradas A/B ni otros bindings/catálogos. |
+| Knowledge/Ticketing | Cero ediciones; conservar plantillas, autonomía y políticas de memoria/tickets. |
+| Overlays/productos | Cero ediciones, incluido backend Python Market Data y sus dos referencias. Mantener reglas de dominio y fixes GitHub previos; no sincronizar por este candidato. |
+
+No se cambia lógica funcional ni se ejecutan tests/builds de aplicaciones. No
+retirar otras skills, mover dominio al Core ni ampliar permisos/modelos/hooks/MCP.
+Si apareciera un requisito local de carga obligatoria incompatible con el
+candidato, detener ese recorte y volver a discutirlo; no hacer prevalecer el global.
+
+#### Validación compartida y promoción diferida
+
+Congelar baseline C con **A/B como trabajo válido preexistente**. Comparar cinco
+headers y los cuerpos de roles fuera de las diez entradas, ambos checklists y
+ocho viñetas de salida, listas/bindings previos del manifest y todos los overlays.
+No aplicar a C los fingerprints antiguos que aún trataban estos assets como
+inmutables; proteger A/B de forma explícita y delimitar solo el nuevo patch.
+
+| Escenario contractual | Selección/garantía que el texto debe expresar |
+|---|---|
+| Texto puramente presentacional sin cambiar semántica compartida | No cargar ambas por el stack del repo. |
+| Backend tiene SQL/cache pero el cambio no afecta esas superficies | No imponer el paquete; mantener validación normal. |
+| Campo de payload, serialización o error visible para consumidores cambia | Contratos relevante aunque el diff sea pequeño. |
+| Fuente, unidad, timestamp o significado de dato compartido cambia | Revisar compatibilidad y reglas locales; no tratarlo como detalle cosmético. |
+| Query en loop, cardinalidad o filtros cambian costo con salida compatible | Evaluar Performance; el solapamiento SQL no exige repetir el mismo checklist. |
+| TTL, invalidación o refresh cambia frescura/consistencia | Performance relevante; sumar Contratos si afecta una garantía consumida externamente. |
+| Migración/schema compartido puede alterar compatibilidad y locks | Ambas pueden aportar por riesgos distintos; ninguna autoriza ejecutar migraciones. |
+| Orden, duplicación, idempotencia o carrera plausible | Evaluar consistencia sin exigir un bug demostrado ni inventar benchmarks. |
+| No hay métricas ni contexto suficiente para descartar riesgo | Consultar evidencia puntual o declarar incertidumbre; no declarar inocuidad por ausencia de datos. |
+| Review formal o skill local ya cubre el riesgo | No doble carga rutinaria; mantener procedimiento, severidad y formato exigidos. |
+| Market Data invoca su especialización local | Conservar async, deduplicación, frescura, contratos y validación; no imponer Java/JPA u otro dominio global. |
+| Usuario pide una o ambas skills explícitamente | Aplicar lo solicitado sin fusionarlas ni alterar permisos. |
+
+Los escenarios sustentan asserts de texto/metadata y revisión manual del contrato,
+no un clasificador ni una evaluación de decisiones LLM. Validar loader real con
+las dos skills staged y paridad de lectura Claude, headers/configuración pertinente,
+checklists/viñetas literales, manifest aditivo y coexistencia A/B. Reusar solo las
+regresiones que cubran una frontera afectada; sin modelos, red, instalaciones ni
+repetición indiscriminada de auditorías. Medir descripciones, cuerpos y referencias
+por separado; no prometer una poda neta ni ahorro de llamadas por agregar condiciones.
+
+Acumular C para la promoción conjunta. Sus links Claude canónicos al principio
+leerán la versión activa anterior: probar el candidato en staging, no editar el
+activo mediante el enlace. Al promover, Core antes de activar los bindings Claude;
+el overlay Market Data conserva sus referencias, sin cambios de archivos por C.
+Rollback revierte solo C preservando A/B y fixes GitHub, nunca resets de repos o
+reemplazo completo de agentes. D/E siguen pendientes y requieren alcance propio.
+
+**Siguiente decisión:** C queda acumulada para promoción conjunta. Por indicación
+del usuario se podrá especificar D; no implementarla, publicar ni desplegar por
+cerrar esta validación.
+
+### 6.k. Etapa C implementada y validada en canónicos
+
+- **Implementado:** description/triggers por impacto o riesgo plausible y pedido
+  explícito, no por stack; diez entradas condicionadas en cinco roles Claude. No
+  se fusionan skills ni se obliga a cargar ambas. Que una ya cubra un riesgo puede
+  evitar duplicar el análisis, sin eliminar capacidades de SQL o consistencia.
+- **Preservación literal:** los dos bloques `Que hago` y las ocho viñetas de
+  `Salida esperada` son byte-idénticos. Selección/salida proporcional y límites de
+  autoridad se aclaran fuera de esos bloques. Cinco headers y cuerpos de roles
+  fuera de las diez entradas iguales a la baseline, incluidas las entradas A/B.
+- **Bindings:** dos copias Claude convertidas al patrón de symlink del asset
+  instalado OpenCode; manifest validado como baseline más exactamente esas dos
+  altas, sin cambiar listas previas ni otros campos. Los destinos activos siguen
+  con la versión anterior; la coherencia del candidato se comprobó en staging, no
+  editando a través del enlace ni afirmando que Claude ya usa los textos nuevos.
+- **Dominio local:** backend Python Market Data, sus dos referencias y todos los
+  demás overlays/productos intactos; reglas async/calidad/frescura y workflows no
+  recortados. Ninguna edición C en Knowledge/Ticketing ni lógica de aplicación.
+- **Scope:** 16 paths relativos a baseline C: seis Core y diez Claude. A+B+C
+  acumulan **37 paths** (Core 13, Claude 18, Knowledge tres, Ticketing tres); no son
+  16 archivos adicionales. No se amplían tools/modelos/permisos/hooks/MCP ni se
+  instalan runtimes, ejecutan benchmarks/DBs o cambian índices.
+- **Pruebas:** 12 tests nuevos C y 46 regresiones focalizadas A/B/metadata/review:
+  **58 tests pasados**. Doce escenarios documentados son expectativas respaldadas
+  por cláusulas, no decisiones medidas de un LLM. El test del trigger genérico de
+  Contratos falló primero contra el texto anterior.
+- **Nativo:** `opencode debug config` antes/después en sandbox para `reviewer` y
+  `dev-test` idéntico; `opencode debug skill` cargó ambos candidatos desde la ruta
+  staged correcta con metadata y cuerpos esperados. Dos enlaces staged confirmaron
+  paridad de lectura para Claude; no se lanzó ese cliente ni modelos.
+- **Integridad:** 603 fingerprints protegidos incluyen A/B, activos, bindings
+  previos, fuentes fuera de alcance, overlays e índices Git. Todos iguales, HEAD
+  de cuatro canónicos intacto, diff limitado a C y `git diff --check` correcto.
+  Sin staging/commits/push, despliegue, indexado o consultas remotas.
+
+**Tradeoff estático C, bytes UTF-8:**
+
+| Texto | Antes | Después | Diferencia |
+|---|---:|---:|---:|
+| Contratos/datos completa | 926 | 1.475 | +549 |
+| Su descripción | 108 | 174 | +66 |
+| Su cuerpo on-demand | 744 | 1.225 | +481 |
+| Performance/cache/concurrencia completa | 977 | 1.528 | +551 |
+| Su descripción | 108 | 177 | +69 |
+| Su cuerpo on-demand | 786 | 1.266 | +480 |
+| Suma de cinco roles Claude | 17.984 | 19.809 | +1.825 |
+
+El máximo por rol C es +365 bytes; la suma de cinco archivos no es el incremento
+por request. Preservar checklists y añadir condiciones/rutas crece en bytes: **no
+hay poda estática neta ni ahorro operativo demostrado**. Se reduce duplicación de
+mantenimiento y se busca evitar cargas redundantes, sin prometer menos tokens,
+latencia, retrabajo o igual calidad del modelo. No hubo modelos/benchmarks.
+
+**Artefactos y rollback:** `/tmp/opencode/point6c-qa.py` y
+`/tmp/opencode/point6c-candidate/{baseline,result}.json` conservan la corrida,
+baseline y métricas temporales; este plan conserva resultados durables. El QA
+reutiliza helpers temporales A/B parametrizados, sin tocar scripts del stack.
+Rollback C restaura solo sus dos skills, diez entradas, dos copias/bindings,
+altas de manifest, documentación y test, preservando A/B y fixes GitHub; nunca
+resetear repos ni reemplazar agentes enteros. Preparar backup durable/ledger de
+destinos al autorizar el lote de promoción.
+
+**Estado:** C cerrada técnicamente en canónicos, acumulada con A/B para despliegue
+conjunto; no se desplegó ni publicó. Al cerrar C, D/E todavía no se habían iniciado.
+No hay bloqueo técnico para pasar a especificar D por indicación del usuario.
+
+### 6.l. Etapa D — Debugging sistemático
+
+**Estado:** alcance reducido aprobado, implementado y validado solo en canónicos
+(6.m). Skill Core, A/B/C y activos intactos. Sin despliegue/publicación.
+
+#### Decisión: conservar Core, aclarar solo el adaptador Claude
+
+- **Conservar íntegra la skill Core:** sus 42 líneas ya describen bugs, fallos y
+  fixes no resueltos, y aportan un procedimiento específico. No modificar nombre,
+  description, triggers, ocho pasos, reglas ni salida; tampoco agregar otra capa
+  genérica o reformularla para justificar una poda. Conservar es una decisión válida.
+- Mantener leer error completo, reproducir, revisar cambios recientes, recorrer el
+  flujo/fronteras relevantes, separar hechos/hipótesis, una hipótesis a la vez,
+  experimento mínimo y fix sobre causa comprobada. El freno tras el tercer intento
+  fallido sigue literal; no equivale a permiso para dos fixes a ciegas previos.
+- **Ajuste útil y acotado:** cinco roles Claude listan la skill sin condición ni
+  acceso explícito: `dev-test`, `frontend-web-developer` y backends Java, Python y
+  TypeScript. Tienen Read y no Skill; condicionar esas cinco entradas y explicitar
+  lectura permitida del contrato evita depender de una tool ausente o de herencia
+  implícita. No ampliar herramientas, duplicar el procedimiento o tocar otros roles.
+- El binding Claude ya es symlink declarado al asset OpenCode. No cambiarlo, crear
+  otra copia ni modificar manifest. No se encontraron referencias explícitas en
+  agentes Core, plantillas Knowledge/Ticketing ni overlays AUNE: cero cambios allí.
+- Evidencia ya indica no apilar su marco genérico cuando debugging cubre el
+  análisis; no reabrir A/B/C ni agregar otra regla residente para repetirlo.
+
+#### Entrada candidata y fronteras de activación
+
+Para esas cinco entradas, wording orientativo:
+
+> `debugging-sistematico`: solo por pedido explícito o para diagnosticar fallos
+> inesperados/fixes no resueltos; sin `Skill`, leer con `Read`
+> `~/.claude/skills/debugging-sistematico/SKILL.md`.
+
+- Un bug inesperado puede requerir este marco aunque sea pequeño o afecte un solo
+  archivo. No reservarlo solo para incidentes complejos, multicapa o reincidentes.
+- Ejecutar validación normal no activa otra investigación si no aparece un fallo.
+  Un rojo esperado de TDD con causa ya evidenciada no necesita reiniciar el ciclo
+  completo; si la causa es dudosa o el resultado inesperado, sí investigar.
+- Una reproducción/evidencia ya suficiente se aprovecha, no se descarta por venir
+  en el handoff o trabajo actual. No usar esto como excusa para aceptar una causa
+  sin verificar, omitir un repro relevante o declarar corregido sin validación.
+- Pedido explícito de la skill se respeta; diagnosticar no habilita a un rol a
+  implementar, correr infraestructura, leer secretos o eludir permisos. Si no puede
+  obtener evidencia autorizada, pedir contexto o declarar el impedimento.
+- Debugging puede requerir además un checklist específico de contratos, cache o
+  concurrencia por el riesgo real; no imponer A/B/C como set ni eliminar sus deberes.
+
+#### Archivos y validación del candidato D
+
+| Dueño | Alcance a aprobar |
+|---|---|
+| Claude | Cinco entradas en `base/agents/{dev-test,frontend-web-developer,backend-java-developer,backend-python-developer,backend-typescript-developer}.md`; registro breve README/CHANGELOG. No cambiar headers, demás entradas, bindings o manifest. |
+| Core | Test focalizado `tests/test_debugging_activation.py`, registro CHANGELOG y estado del plan. **Cero cambios** a la skill, agentes, README-AGENTS o guías comunes. |
+| Knowledge/Ticketing, overlays/productos | Cero ediciones; A/B/C, dominio y fixes GitHub preservados. |
+
+Congelar baseline D con A/B/C como trabajo válido previo, incluidas sus entradas en
+esos cinco roles. Comparar los cuerpos fuera de la entrada D, headers y skill Core
+completa byte a byte; symlink/manifest idénticos y ningún asset A/B/C modificado.
+
+| Escenario contractual | Criterio a preservar |
+|---|---|
+| Validación normal pasa | No cargar debugging por el solo hecho de correr tests/build. |
+| TDD rojo esperado con causa ya evidenciada | No iniciar una investigación redundante; seguir el cambio y verificarlo. |
+| Bug inesperado pequeño y sin causa confirmada | Aplicar diagnóstico; el tamaño no exime de investigar. |
+| Fix falló o síntoma reaparece | Investigar causa y cambios recientes, no apilar parches. |
+| Tercer fix falla | Frenar y cuestionar entendimiento/arquitectura, no intentar un cuarto por reflejo. |
+| Fallo multicapa | Seguir fronteras relevantes con evidencia, no auditar toda la arquitectura. |
+| Repro/contexto requieren operación no autorizada | Respetar límites, pedir evidencia o declarar impedimento; no bypass. |
+| Pedido explícito de debugging o skill | Leer/aplicar dentro de autoridad, sin obligar a cargar marcos genéricos extras. |
+
+Estas expectativas sustentan tests de texto/metadata y revisión, no un clasificador
+ni prueba de obediencia LLM. Verificar cinco entradas legibles por Read y que el
+contrato resuelto coincida con la fuente esperada; si falta el activo o diverge,
+detenerse para reconciliar el alcance, no copiar sobre la instalación por reflejo.
+Un chequeo puntual de discovery/lectura puede aportar; no repetir auditorías nativas
+de A/B/C ni builds de aplicaciones cuando no cambian configuración o protocolos.
+
+Medir el costo de esas cinco referencias: agregar condición/ruta no implica ahorro
+estático. El archivo Core y su descripción/cuerpo deben tener delta cero. Sin
+modelos/benchmarks, cambios de permisos, instalaciones o despliegue durante D.
+
+Al validar este avance documental, el audit previo de C se detuvo por drift en
+`keycloak/.git/index` respecto de su baseline; el diagnóstico de fingerprints solo
+identificó ese path, sin diferencias en los demás assets protegidos. Origen no
+atribuido; no restaurar ni modificar ese índice, ni afirmar que el audit anterior
+pasó. Antes de implementar D, tomar una baseline actual que preserve trabajo ajeno;
+si aparecen diferencias de agentes/contratos, reconciliarlas antes de editar.
+La validación D de 6.m hizo esa nueva foto y preservó el índice actual; no cambió
+la baseline C ni convirtió su audit histórico fallido en un pass.
+
+La eventual promoción solo añade esos cinco roles Claude al lote consolidado y
+documentación según lifecycle; Core no necesita desplegar una skill idéntica por D.
+Rollback revierte únicamente D, preservando A/B/C, las otras entradas de los roles y
+los fixes GitHub; no restaurar archivos completos desde un commit viejo.
+
+**Siguiente decisión:** acumular D con A/B/C para la promoción conjunta y especificar
+E cuando el usuario indique avanzar. No implementar E ni desplegar/publicar por
+cerrar D.
+
+### 6.m. Etapa D implementada y validada en canónicos
+
+- **Implementado:** cinco entradas Claude condicionadas por pedido explícito o
+  diagnóstico de fallos inesperados/fixes no resueltos, con Read ya disponible.
+  Los cinco headers y cuerpos fuera de esa entrada son iguales a baseline D,
+  incluidas todas las entradas de A/B/C. No se agregan tools ni un loader nuevo.
+- **Conservado:** archivo Core completo de 42 líneas, **2.038 bytes antes/después**,
+  con metadata, ocho pasos, reglas, freno tras tercer fix fallido y salida intactos.
+  Su contenido coincide con el activo existente y el binding resuelve correctamente;
+  no se cambió el symlink, manifest ni README-AGENTS Core. No hay skill que redesplegar
+  por D ni alteración de sus triggers/procedimiento OpenCode.
+- **Pruebas:** ocho tests nuevos D más 58 regresiones focalizadas A/B/C/metadata y
+  review/helper: **66 tests pasados**. Ocho escenarios son expectativas apoyadas
+  en cláusulas, no decisiones medidas de un modelo. El test de activación falló
+  primero contra la referencia genérica anterior.
+- **Chequeo puntual:** loader real cargó `debugging-sistematico` desde staging
+  con metadata/cuerpo correctos y paridad de lectura Claude. No se lanzó Claude ni
+  modelos, ni se repitió debug config de etapas anteriores: no cambian su esquema,
+  agentes Core, configuración o protocolos.
+- **Baseline actual:** preflight solo encontró el drift ya conocido del índice
+  Keycloak respecto de C. Se congeló su estado actual, sin inspeccionar contenido
+  de aplicación, restaurar la versión previa ni atribuir el origen del cambio.
+  **610 fingerprints** de D —incluidos A/B/C, activos, bindings, overlays e índices—
+  permanecen iguales al terminar. El índice Keycloak actual se preservó; el audit
+  C anterior conserva su resultado fallido, no se reescribió la evidencia.
+- **Alcance:** diez paths respecto de baseline D: tres Core (test/CHANGELOG/plan)
+  y siete Claude (cinco roles/README/CHANGELOG), cero Knowledge/Ticketing/productos.
+  A+B+C+D acumulan **38 paths** (Core 14, Claude 18, Knowledge tres, Ticketing tres).
+  HEAD de cuatro canónicos e índices protegidos intactos; `git diff --check` correcto.
+
+**Tradeoff medido:** skill, descripción y cuerpo Core tienen delta cero. Los cinco
+roles pasan de 17.438 a 18.273 bytes (+835 agregados; +167 por rol), por condiciones
+y rutas de lectura. No es un ahorro estático ni una reducción de llamadas/modelo
+demostrada. No se ejecutan benchmarks, instalaciones, indexados o aplicaciones;
+sin staging/commits/push ni despliegue.
+
+**Artefactos y rollback:** `/tmp/opencode/point6d-qa.py` y
+`/tmp/opencode/point6d-candidate/{baseline,result}.json` registran la foto actual y
+validación temporales; el plan guarda resultados durables. Rollback D revierte solo
+sus cinco entradas, test y documentación, preservando A/B/C y el índice Keycloak
+actual; no restaurar roles enteros ni snapshots antiguos de productos. Los helpers
+de QA temporales se parametrizaron, sin tocar scripts runtime del stack.
+
+**Estado:** D cerrada técnicamente y acumulada para despliegue conjunto. Al cerrar
+D, E todavía no estaba especificada; no hay bloqueo técnico para avanzar por
+pedido del usuario. Activos no modificados y no hace falta reiniciarlos todavía.
+
+### 6.n. Etapa E — SDD/TDD/BDD pragmático
+
+**Estado:** alcance aprobado, implementado y validado solo en canónicos (6.o), con
+A/B/C/D y activos preservados. La revisión/promoción conjunta sigue diferida (6.p).
+
+#### Diagnóstico y decisión de conservación
+
+- La skill Core tiene 58 líneas y ya expresa spec liviana, escenarios de alto
+  valor, no forzar Gherkin, test/repro-first cuando aporta y alternativas honestas
+  de characterization, regresión o validación manual/integración para legacy.
+  No reescribir ese procedimiento ni reemplazarlo por un principio genérico.
+- **Conservar metadata completa, incluida la descripción:** ya anuncia conexión
+  spec-comportamiento-validación sin ceremonias rígidas. Delta de catálogo cero;
+  no modificarla solo para uniformar el estilo con las etapas anteriores.
+- Conservar literalmente `Que hago`, `Heurística operativa` (con SDD/BDD/TDD y sus
+  alternativas), `Trazabilidad mínima por rol`, `Reglas` y `Salida esperada`.
+- El primer trigger sí es demasiado literal: «Cuando el usuario menciona SDD,
+  TDD, BDD, criterios de aceptación, Given/When/Then, escenarios o pruebas de
+  regresión». Una mención incidental no equivale a pedir un nuevo marco cuando
+  intención y validación ya están resueltas. Esto es una posibilidad del contrato,
+  no un fallo de comportamiento medido con modelos.
+- Los otros tres triggers ya están condicionados a ambigüedad, necesidad de
+  trazabilidad o decisión de estrategia: **preservarlos**. No quitar criterios ni
+  pruebas por ser un microcambio si usuario/proyecto los exige expresamente.
+- Hay ocho entradas genéricas Claude: `planner`, `reviewer`, `code-reviewer`,
+  `dev-test`, `frontend-web-developer` y los tres backends Java/Python/TypeScript.
+  Tienen Read y no Skill; condicionar solo esas ocho y explicitar lectura permitida.
+- Binding Claude ya compartido y declarado: no tocar symlink/manifest ni crear
+  copias. No hay referencias por nombre en agentes Core o plantillas addon, pero
+  los roles y Higyrus sí contienen obligaciones explícitas de SDD/BDD y test-first.
+  Esas reglas locales y de rol permanecen; no interpretar ausencia del nombre como
+  ausencia del contrato. No modificar overlays ni `workflow-ticket-handoff`.
+
+#### Selección candidata y límites
+
+Cambiar únicamente el primer trigger por una formulación como:
+
+> Cuando el usuario pide aplicar o explicar SDD/TDD/BDD, diseñar criterios/escenarios
+> o definir estrategia de pruebas; no por citar un test o una regresión con intención
+> y validación ya resueltas.
+
+Añadir guidance breve fuera de los bloques conservados, sin nuevos formularios:
+
+- No cargar el marco por cada mención de tests/escenarios/regresión ni duplicar
+  una estrategia ya suficiente. Si el pedido es ambiguo o falta definir cómo se
+  prueba el comportamiento, sigue siendo pertinente sin requerir palabras clave.
+- Pedidos explícitos de metodología, criterios, escenarios o regresión y requisitos
+  del proyecto se respetan, incluso en cambios pequeños. Si el costo/harness exige
+  apartarse de lo pedido, explicitarlo y acordar una alternativa; no degradar
+  silenciosamente TDD requerido a una validación que el usuario no aceptó.
+  Cumplir un pedido de test concreto con estrategia ya fijada no exige agregar
+  otra spec formal por reflejo.
+- **Aplicar esta skill no activa handoff**, no inventa tickets ni exige archivos.
+  Ad-hoc sin workflow habilitado se resuelve en la respuesta; proyectos que sí
+  requieren handoff mantienen su contrato completo. SDD/BDD no convierte code
+  review en implementación ni habilita comandos/escritura fuera del rol.
+- Mantener trazabilidad proporcional: comportamiento/criterio, cambio y evidencia
+  pertinente, sin apartados vacíos. Los formatos y lecturas locales obligatorias
+  conservan prioridad. No crear plugins, agentes o documentos para cada microtarea.
+
+Entrada orientativa para cada uno de los ocho roles Claude:
+
+> `sdd-tdd-bdd-pragmatico`: solo por pedido explícito o si falta definir
+> criterios/escenarios o estrategia de pruebas; sin `Skill`, leer con `Read`
+> `~/.claude/skills/sdd-tdd-bdd-pragmatico/SKILL.md`.
+
+Esto no exige cargar Debugging, Evidencia o Revisión como paquete. Un rojo esperado
+de TDD no es por sí solo un fallo inesperado; una anomalía real sigue requiriendo
+investigación y un cambio probado sigue necesitando evidencia de verificación.
+
+#### Archivos, pruebas y preparación del cierre de punto 6
+
+| Dueño | Alcance a aprobar |
+|---|---|
+| Core | `skills/sdd-tdd-bdd-pragmatico/SKILL.md`: solo primer trigger y guidance breve de selección/alcance; metadata, otros tres triggers y bloques operativos literales intactos. Test focalizado `tests/test_sdd_activation.py`, CHANGELOG/plan. No cambiar agentes, README-AGENTS, guías comunes o manifests. |
+| Claude | Ocho entradas en los roles existentes, README/CHANGELOG. Headers, otras entradas A/B/C/D, binding y manifest intactos. |
+| Knowledge/Ticketing, overlays/productos | Cero ediciones: activación de handoff, helpers, roles locales, artefactos y cierres por ticket preservados. |
+
+Baseline E debe congelar A/B/C/D como trabajo válido y preservar el estado actual
+de índices/productos, incluido Keycloak. No restaurar la baseline vieja C ni
+reutilizar fingerprints con scope obsoleto para bloquear cambios E autorizados.
+
+| Escenario contractual | Criterio que debe expresar el candidato |
+|---|---|
+| Microcambio con intención y prueba ya claras | No generar spec/Gherkin/archivos ni cargar el marco por rutina. |
+| Conversación menciona un test o regresión existente | No equivale a pedir otra metodología. |
+| Requerimiento ambiguo sin criterio de aceptación | Usar criterios/escenarios cuando cierren ambigüedad, sin depender de palabras clave. |
+| Hay que decidir test-first, repro-first o evidencia alternativa | Aplicar el marco preservando los límites del harness/rol. |
+| Usuario pide TDD o escenarios explícitamente, aunque sea un cambio pequeño | Respetar pedido; no descartarlo por el filtro de rutina. |
+| Legacy con harness costoso o inaccesible | Characterization/regresión/manual con evidencia cuando sea compatible; informar y acordar cualquier desvío del pedido explícito. |
+| Rojo esperado de test-first | No activar automáticamente una investigación redundante; sí investigar resultados inesperados. |
+| Tarea ad-hoc con un ticket aislado o archivos viejos | No habilitar handoff por cargar SDD/BDD. |
+| Higyrus con workflow activo o requisito local de test-first | Mantener handoff y reglas locales, sin universalizarlas a los otros repos. |
+| Review formal con criterios ya dados | Contrastar cumplimiento; no crear implementación/handoff ni duplicar el procedimiento de revisión. |
+| Formatter u otro cambio invalida prueba previa | Revalidar lo afectado según B, sin quitar evidencia por no cargar esta skill. |
+
+Validar metadata sin cambios, literalidad de los bloques/otros triggers y ocho
+headers/cuerpos fuera de su entrada. Probar lectura staged y discovery puntual con
+el contenido candidato; sin nueva tool Skill, configuraciones o hooks. Reusar las
+regresiones de A–D, metadata, review y handoff que cubran estas fronteras; escenarios
+textuales no prueban comportamiento de un LLM. Sin modelos/benchmarks, builds de
+aplicación, instalaciones ni indexado. Medir cuerpos y referencias, con descripción
+de catálogo invariable; no prometer ahorro por añadir condiciones/rutas.
+
+La promoción E se acumula con A–D: actualizar primero el asset Core antes de usarlo
+por sus bindings Claude existentes; copiar solo roles efectivamente cambiados y
+documentación del dueño, sin sync amplio ni settings/permisos. Rollback solo E,
+preservando etapas previas e índices actuales. No publicar productos AUNE.
+
+**Siguiente decisión:** revisar el inventario consolidado, backups y autoridad del
+despliegue conjunto antes de promover (6.p). E está validada; terminarla no ejecuta
+puntos 7–10 ni publica o despliega automáticamente. No toda skill revisada cambió.
+
+### 6.o. Etapa E implementada y validada en canónicos
+
+- **Implementado:** solo el primer trigger distingue pedido/necesidad de una mera
+  mención, más guidance breve de selección/alcance. Ocho entradas Claude quedan
+  condicionadas y legibles con Read existente; los ocho headers y cuerpos fuera
+  de esa entrada —incluido A–D— permanecen iguales a baseline E.
+- **Preservado literalmente:** metadata completa y descripción; los otros tres
+  triggers; `Que hago`, `Heurística operativa` (SDD/BDD/TDD), `Trazabilidad mínima
+  por rol`, `Reglas` y `Salida esperada`. Se conserva el binding/manifest existente,
+  sin copias ni tool Skill nuevas. No hay delta en agentes o README-AGENTS Core.
+- **Contrato:** pedidos explícitos/requisitos locales prevalecen, incluso en
+  microcambios; cualquier desvío por costo/harness se explicita y acuerda. La carga
+  no activa handoff, tickets o archivos ni convierte review en implementación.
+  Se conserva el workflow completo donde sí es requerido, sin universalizarlo.
+- **Pruebas:** once tests nuevos E y 66 regresiones A–D/metadata/review/helper:
+  **77 tests pasados**. Los escenarios contractuales no prueban selección real de
+  un LLM; el test de mera mención falló primero con el trigger anterior.
+- **Chequeo puntual:** loader real cargó el candidato desde staging con metadata
+  y cuerpo esperados, más paridad de lectura staged Claude. No se lanzó Claude ni
+  modelos, se instalaron dependencias o se repitieron configuraciones nativas sin
+  campos alterados. No hubo builds/tests de aplicaciones ni indexados.
+- **Integridad:** 607 fingerprints congelan A–D, activos, bindings, overlays e
+  índices actuales. Todos iguales; preflight E no detectó drift adicional respecto
+  de D y preservó el índice actual Keycloak, sin restaurar snapshots C. HEAD de
+  cuatro canónicos intacto, diff limitado a E y `git diff --check` correcto.
+- **Scope:** 14 paths relativos a baseline E (cuatro Core y diez Claude), cero
+  Knowledge/Ticketing/productos. El acumulado A–E es **40 paths**: Core 16, Claude
+  18, Knowledge tres y Ticketing tres. No son 14 archivos adicionales a D.
+
+**Tradeoff E, bytes UTF-8:** skill 3.058 → 3.818 (+760), cuerpo 2.772 → 3.532
+(+760); descripción 211 → 211 y metadata completas sin cambios. Los ocho roles
+pasan de 32.706 a 34.098 bytes (+1.392 agregados, +174 por rol). Se explicita
+selección/autoridad, no se demuestra ahorro de tokens, llamadas o latencia.
+
+**Artefactos:** `/tmp/opencode/point6e-qa.py` y
+`/tmp/opencode/point6e-candidate/{baseline,result,lot-review}.json` son temporales;
+este plan conserva los resultados durables. Rollback E revierte solo su primer
+trigger/guidance, ocho entradas, test y documentación, preservando A–D e índices
+actuales; sin resets ni sustitución de agentes enteros.
+
+**Estado:** E cerrada técnicamente y acumulada con A–D, sin despliegue, staging,
+commit o push. No hace falta reiniciar todavía. El siguiente trabajo es revisar
+y preparar el lote de promoción, no empezar el punto 7.
+
+### 6.p. Revisión consolidada de promoción — ejecutada después según 6.u
+
+Las ocho heurísticas se revisaron y A–E están implementadas/validadas en fuentes.
+Siete skills Core cambian; Debugging se conserva íntegra. Se condicionan 52 entradas
+Claude en once roles y cuatro entradas de plantillas opcionales addon (56 en 15
+archivos), sin cambiar modelos, variantes, tools, permisos, hooks o workflows.
+
+**Balance estático total frente a las baselines anteriores a cada etapa:**
+
+| Medida | Antes / delta | Después |
+|---|---:|---:|
+| Suma de las ocho skills completas | 12.634 bytes | 16.587 bytes (+3.953) |
+| Suma de sus descripciones de catálogo | +572 bytes | No son tokens medidos |
+| Suma de los 15 archivos de roles/plantillas | +9.778 bytes | Máximo +1.244 por un rol |
+
+El agregado de 15 archivos no es el incremento por request ni todo ese texto es
+residente a la vez. Sin embargo, **sí hay crecimiento estático**, también en las
+descripciones que pueden anunciarse. La intención es selección más explícita,
+menos duplicación de mantenimiento y evitar cargas/reruns rituales, **no una poda
+neta ni una mejora operativa demostrada**. Tests y discovery prueban contratos,
+metadata y preservación, no obediencia/calidad o ahorro del modelo. Revisar este
+tradeoff antes de promover; no aprobarlo por el solo conteo de tests verdes.
+
+**Inventario de fuentes preparado:** 40 paths en cuatro canónicos. Incluye cinco
+módulos de tests nuevos y un fixture, el plan y documentación; **no son 40 destinos
+de instalación**. Plan/tests no se instalan como instrucciones. Los fixes GitHub
+anteriores de overlays siguen separados de este lote y sin publicar por arrastre.
+
+**Destinos candidatos definidos antes del preflight; resultado real en 6.u:**
+
+1. Siete skills globales Core efectivamente cambiadas; no redesplegar Debugging
+   idéntica. Documentación administrada solo según su lifecycle; no regenerar
+   opencode.json, catálogos de herramientas o plugins por este cambio textual.
+2. Once definiciones Claude afectadas y hasta cuatro bindings nuevos de A/C según
+   estado real del destino. Verificar antes presencia, headers/Read, composición y
+   delta exacto respecto de las baselines; preservar guardrails/overrides locales.
+   Un rol opcional ausente no se crea/habilita silenciosamente. No sync amplio que
+   mergee settings/hooks/permisos. B/D/E ya comparten fuente: no relink por rutina.
+3. Si los activos opcionales plan/build contienen la entrada genérica de Evidencia
+   reconocida, actualizar solo esa entrada. No copiarlos desde templates ni activar,
+   recrear o cambiar su visibilidad; preservar bloques Knowledge/Ticketing del 5.
+4. Cero destinos producto AUNE por punto 6. Sus referencias locales y los fixes
+   GitHub ya desplegados se conservan; nunca staging/commit/push en productos.
+
+**Cobertura estructural global/local comprobada antes de promover:** ante la consulta del
+usuario se auditaron los nueve canónicos de overlays y sus nueve productos
+instalados (Higyrus, VB, Market Data, Keycloak, Gateway, Aggregator, Documento API,
+Perfil Inversor y OMS API). En esa baseline, los 59 agentes locales por lado
+coincidían fuente/producto; tras 6.r, VB tiene un delta canónico intencional pendiente
+de sync. No usar la paridad histórica como comprobación del estado instalado actual.
+No se encontraron overrides locales de las ocho skills genéricas, agentes Claude
+locales que tapen los globales ni fuentes extra de skills declaradas en configs
+locales; se siguieron también aliases de directorios sin recorrer ciclos.
+Market Data conserva sus dos referencias explícitas en backend Python, sin exigir
+un set obligatorio ni perder dominio. Punto 6 modifica la capa global y plantillas
+opcionales globales de addons: **ningún overlay específico fue editado por A–E**.
+No hace falta replicar archivos globales dentro de los nueve proyectos. **Esta
+auditoría no demuestra alineación semántica de sus prompts/skills locales** (6.q).
+Esto no
+supone herencia de prompts OpenCode homónimos: sus roles/workflows locales se
+preservan y comparten las skills globales, no se reemplazan por prompts Claude.
+Si una adaptación transversal futura sí requiere overlay, revisar los nueve y
+aplicarla donde corresponda sin copiar stacks o reglas de negocio entre proyectos.
+Auditoría read-only: `/tmp/opencode/point6-overlay-coverage.py`; no prueba selección
+conductual del LLM ni constituye un despliegue. Los fixes GitHub previos sí fueron
+locales y ya cubren los nueve (ocho ajustados, VB ya compatible), fuera de este lote.
+
+Preparar inventario final origen→destino y backup durable pinneado/ledger de los
+assets existentes, incluyendo tipo archivo/link y permisos. Ante drift relevante
+parar y reconciliar sin restaurar índices o descartar trabajo ajeno. Promover Core
+antes de los bindings/roles Claude; comprobar paridad administrada, metadata,
+configuración efectiva pertinente y guardrails sin modelos ni instalaciones.
+Definir rollback de solo el lote y reinicio de clientes únicamente tras promover.
+
+La implementación A–E no autorizaba por sí sola escrituras activas ni publicación.
+La aprobación de la promoción/publicación se obtuvo después y se registra en 6.u,
+con el lote real delimitado. No ejecutar modelos/benchmarks ni empezar 7–10 por
+cerrar este candidato técnico.
+
+### 6.q. Cobertura semántica de overlays — pendiente antes de promover
+
+El usuario señaló correctamente que el overlay OpenCode de Virtual Broker puede
+contener instrucciones propias equivalentes a las heurísticas revisadas. La
+ausencia de skills locales homónimas o de referencias a sus nombres **no basta**
+para concluir que sus prompts reciben todos los criterios de A–E. La auditoría
+6.p confirmó resolución/paridad estructural, no esta equivalencia de comportamiento.
+Se pausa la promoción hasta delimitar la alineación local necesaria.
+
+**Inspección VB previa a su patch:** AGENTS.md, CLAUDE.md, siete agentes locales
+y las skills de validación/build y code review. No hay planner local: ese rol usa
+la base global. Los siete overrides restantes no heredan automáticamente cuerpos
+de prompts globales, y una skill local de validación no recibe el texto de la
+skill global Verificación por el solo hecho de tener un propósito similar.
+
+Hallazgos previos a los ajustes VB implementados en 6.r:
+
+- `virtual-broker-validacion-y-build/SKILL.md:16–17` se dispara «Antes de cerrar
+  una implementación» o cuando valida dev-test. Es un trigger local amplio que
+  la nueva Verificación global no reemplaza; evaluar selección por necesidad de
+  decidir validación/evidencia y evitar recargas rutinarias.
+- `agents/dev-test.md:32–38` ya limita el alcance a la validación mínima del cambio;
+  no obliga a una suite completa. Conviene explicitar reutilización de prueba
+  ejecutada/leída aún vigente y revalidación tras cambios invalidantes, sin omitir
+  checks obligatorios ni ampliar ejecución de comandos pesados.
+- `agents/reviewer.md:41` dice usar handoff «si existe». Hacer explícita su
+  aplicabilidad al trabajo actual, sin convertir archivos viejos en intención
+  vigente ni activar handoff por su mera presencia.
+- AGENTS.md ya prohíbe set fijo y mantiene handoff opcional; backend/frontend ya
+  condicionan test/repro-first al cambio y harness. **Conservar esas partes**.
+  No reescribir por uniformidad ni introducir ocho listas nuevas de skills.
+
+**Trabajo solicitado y completado en 6.s:** revisión semántica de los otros ocho canónicos,
+con matriz por repo/rol/skill local: hereda global, ya compatible o requiere patch
+local mínimo. Revisar selección, reutilización de evidencia, proporcionalidad,
+handoff aplicable y no duplicación, no solo nombres de skills. Un problema
+transversal se contrasta en todos; no corregir solo VB por ser el primer ejemplo.
+Preservar cada stack, permisos, validaciones obligatorias, handoff/reader locales,
+reglas de dominio y el procedimiento formal de review. Los cambios de política de
+memoria o estrategia CodeGraph siguen fuera del punto 6, salvo alcance nuevo aprobado.
+
+Los ajustes de acceso Read específicos de Claude permanecen globales mientras no
+haya agentes Claude locales. No copiarlos mecánicamente a overlays OpenCode, ni
+copiar skills globales para resolver un problema de wording local. Registrar
+archivos/cambios concretos y pedir aprobación del alcance local antes de editar;
+productos solo se sincronizan cuando ese despliegue se autorice, sin Git writes.
+
+**Estado:** VB tiene su patch canónico validado en 6.r; los otros ocho y las tres
+bases compartidas se validaron en 6.t sobre el alcance aprobado de 6.s. Todos sin
+sync. A–E previas, activos y productos se preservan. La cobertura es de contrato,
+metadata y composición, no prueba de conducta LLM. Publicación/despliegue pendientes.
+
+### 6.r. Virtual Broker — alineación semántica local validada, sin sync
+
+El usuario autorizó avanzar directamente con VB tras identificar los tres ajustes
+locales. Se implementó en su fuente canónica, no en el producto instalado.
+
+- **Skill local de validación:** seleccionada por pedido o necesidad de decidir
+  comando/evidencia, cobertura, vigencia o restricciones; no por cada cierre o por
+  el rol. Se reutiliza prueba ejecutada/leída en este trabajo solo si cubre lo
+  requerido y sigue vigente; se revalida lo invalidado sin omitir checks exigidos.
+- **dev-test:** conserva validación mínima por cambio; ejecuta lo faltante en el
+  orden de checks obligatorios y pruebas relevantes. Se explicitan reutilización y
+  cambios invalidantes (código, formatter, config, dependencias, entorno).
+- **reviewer:** ticket/Jira debe ser aplicable al trabajo actual; handoff exige
+  workflow de implementación aplicable/activo y archivo existente. ID/archivo viejo
+  no activa handoff ni crea artefactos. Sigue read-only y sin validación final propia.
+- **Conservado:** AGENTS/CLAUDE y guías anidadas, handoff opcional por defecto,
+  test-first condicional existente, stack/datasources/seguridad, reglas de memoria y
+  CodeGraph, code review formal, helpers, permisos, modelos y variantes. No se copian
+  las ocho skills ni instrucciones de acceso Claude a prompts OpenCode.
+- **Cinco paths VB:** `.opencode/agents/{dev-test,reviewer}.md`,
+  `.opencode/skills/virtual-broker-validacion-y-build/SKILL.md`, `README.md` y
+  `tools/test_workflow_contract.py`. El test queda fuera del manifest de despliegue.
+  Core solo registra este estado en el plan; no se modifica el candidato global A–E.
+- **Pruebas:** diez tests locales de contrato pasados; el de reutilización falló
+  primero con el texto anterior. Los ejemplos son cláusulas verificadas, no
+  decisiones medidas de un LLM. No se ejecutó Maven, npm, Cypress o una aplicación.
+- **Nativo:** `opencode debug config` antes/después en sandbox conserva default
+  agent y configuración efectiva de los siete agentes salvo prompts autorizados;
+  los dos headers cambiados son byte-idénticos. Loader real carga el candidato
+  local y los ocho globales A–E desde sus rutas staged, verificando sus cuerpos,
+  no solo presencia de nombres. El alias Claude local resuelve al mismo candidato.
+- **Guardas:** cinco bloques completos de la skill (Backend, Frontend,
+  confirmaciones, evidencia mínima y salida) literalmente intactos. 663 fingerprints
+  preservan los globales, assets fuera de alcance, productos, aliases e índices.
+  HEAD de los cuatro globales y VB intacto; `git diff --check` correcto. No cambios
+  globales activos, sync, Git staging/commits/push, permisos o llamadas remotas/modelos.
+
+**Texto, bytes UTF-8:** skill local 2.257 → 3.126 (+869); dev-test 2.467 → 2.705
+(+238), reviewer 3.020 → 3.205 (+185). Son aclaraciones de alcance/vigencia, no
+poda estática ni ahorro de ejecución demostrado. No se recortan comandos, evidencia
+o validaciones obligatorias para aparentar ahorro.
+
+**Cross-stack y despliegue:** el symlink canónico `.claude/skills/` comparte la
+skill local actualizada; el alias instalado del producto sigue apuntando a su
+propia copia anterior. No hay sincronización implícita. Una futura promoción VB
+alcanza solo tres assets runtime, con backups y autorización; no instalar tests o
+README en la aplicación ni hacer Git writes allí. El producto no cambió en esta fase.
+
+**Artefactos:** `/tmp/opencode/point6-vb-qa.py` y
+`/tmp/opencode/point6-vb-candidate/{baseline,result}.json`, temporales. El plan y
+README/test canónicos conservan el contrato/resultados durables. Rollback VB revierte
+solo estos patches preservando A–E, fixes GitHub previos y trabajo ajeno; no resets.
+
+**Cobertura al cerrar VB:** primer overlay alineado en canónico; los otros ocho
+seguían pendientes y se revisaron después en 6.s. No extrapolar el patch VB ni
+reescribir partes ya compatibles por simetría.
+
+### 6.s. Ocho overlays restantes — especificación del lote aprobado
+
+El usuario pidió revisarlos juntos, no ocho ciclos de aprobación ni ocho parches
+a ciegas. Se completó una pasada de los ocho canónicos: **52 definiciones locales**
+(los ocho code-reviewer son byte-idénticos, revisados una vez como contrato común),
+guías de ambos clientes, siete skills locales de validación y los contratos de
+handoff/memoria Higyrus relevantes. Aggregator no tiene skill de validación local:
+sus comandos se gobiernan desde AGENTS/CLAUDE. Se contrastaron productos sin escribir.
+
+**Baseline previa a implementar:** los ocho mantenían paridad fuente/producto en
+agentes, guías/config y skills locales inventariadas. Sus cambios canónicos preexistentes
+son `code-reviewer.md` y README del fix GitHub previo, ya sincronizados; no son
+patches nuevos de esta revisión ni deben descartarse. No se ejecutaron tests/builds
+de aplicaciones, Jira/GitHub, modelos, instalaciones o indexados. Solo se edita el
+plan; inventario/fingerprints temporales en `/tmp/opencode/point6-remaining-sweep.json`
+y script read-only `/tmp/opencode/point6-remaining-sweep.py`.
+
+#### Matriz por repo: qué falta y qué conservar
+
+| Repo | Ajuste mínimo propuesto | Preservación / particularidad |
+|---|---|---|
+| Higyrus | `dev-test` + skill `higyrus-validacion-y-build`: selección/reutilización de evidencia vigente; `reviewer`: verdict aplicable al trabajo y workflow activo, no cualquier archivo existente. | Mantener secuencia mínima spotlessApply/build/tests, spotless obligatorio antes del build final, cobertura multi-cliente y memoria por ticket resuelto. Master-dev/planner ya guardan workflow activo y test-first proporcional: no reescribirlos. |
+| Market Data | `dev-test`: validar lo faltante/reutilizar lo vigente; `reviewer`: contraste breve de intención/criterios antes de riesgo; `master-dev`: handoff vigente solo en workflow habilitado. | Mantener pytest por componente, pnpm según frontend afectado, frescura/timestamps/async/idempotencia y APIs v1/v2. Skill de validación ya acotada; lista de skills del backend no obliga a cargar seis, se conserva. |
+| Keycloak | `reviewer`: ticket/handoff aplicable, activo y existente; `master-dev`: un hilo con ticket no basta para habilitar handoff. La validación reutilizable debe llegar por el dev-test global, no crear uno local. | Solo cuatro agentes locales; dev-test se hereda del Core y está habilitado como target. Conservar reader local obligatorio, permisos/certs, revisión por tipo de cambio y confirmación de Maven/Docker. Skill de validación ya proporcionada al riesgo. |
+| Higyrus Gateway | `dev-test`: evidencia vigente y validación faltante; `reviewer`: intención antes de riesgos; `master-dev`: handoff solo habilitado/aplicable/actual. | Mantener Maven, rutas/filtros/auth/orden reactivo/cache y Jib opt-in. Catálogo de validación ya específico, no copiar el formulario VB. |
+| Aggregator | Mismos tres roles (dev-test/reviewer/master-dev), más alinear el texto de ejecución con el requisito local de usar `mise`. | Conservar exactitud financiera, módulo afectado, ampliar solo por riesgo y comandos gobernados en AGENTS. Hay una discrepancia de comandos/permisos detallada abajo; no resolverla ampliando Bash ni creando una skill nueva. |
+| Documento API | `dev-test`: reutilizar prueba válida y ejecutar faltante; `reviewer`: primero alcance/criterios aplicables; `master-dev`: handoff habilitado y actual. | Mantener Gradle acotado, integridad DB/filesystem/OMS, autorización, PII y confirms de dependency-check/Jib/deploy. Skill de validación ya específica. |
+| Perfil Inversor | Mismos tres roles: validación vigente, intención antes de calidad y handoff no activado por presencia. | Mantener invariantes de evaluación, historia, activación concurrente, auth y Maven/Spotless check; no convertir la poda en permiso para Flyway destructivo o autofix. |
+| OMS API | Mismos tres roles: evidencia reutilizable, revisar primero objetivo y handoff actual solo con flujo habilitado. | Mantener modos FIX/OMS, state machine/outbox/idempotencia, alcance de Jest/build/e2e y opt-in de infraestructura, migraciones y autofixes. Skill de validación ya acotada. |
+
+**Partes ya compatibles, sin patch por simetría:** separación de hechos/riesgos y
+cambio mínimo, checklists técnicos/domain-specific, SDD/TDD condicional cuando se
+declara, guards de aplicaciones/secretos y formato breve de los roles cortos. Las
+skills de validación de seis repos distintos de Higyrus ya son catálogos por capa/
+tipo de cambio y no imponen carga por cada cierre; no reescribirlas solo para añadir
+la misma explicación en todas. Code-reviewer conserva íntegro el procedimiento
+formal, ticket, Jira una vez, snapshot, conversación/rereview e informe incremental.
+La ausencia de un hallazgo no prueba conducta LLM; la decisión es de contrato textual.
+
+#### Brecha compartida detectada — corregir donde se define la base
+
+La revisión de Keycloak mostró una brecha que el patch de skills A–E no reescribía:
+Core `agents/dev-test.md:30–36` todavía ordena formateo/build/tests en secuencia sin
+explicitar reutilización. Claude `base/agents/dev-test.md:18–24` conserva lo mismo.
+Core `agents/reviewer.md:36` aún toma `verdict.md` por existencia, como los reviewers
+Higyrus/Keycloak. No crear un clone Keycloak para esconder un problema heredado.
+
+Se amplió explícitamente el alcance aprobado a **tres definiciones base**:
+
+1. Core `agents/dev-test.md`: evidencia ejecutada/leída aún vigente, ejecutar solo
+   lo faltante/revalidar lo invalidado; mantener checks requeridos y autoridad.
+2. Claude `base/agents/dev-test.md`: criterio semántico equivalente, sin cambiar
+   tools, modelo, hooks ni entradas A–E ya aprobadas.
+3. Core `agents/reviewer.md`: contrato/criterios aplicables al trabajo actual y
+   handoff solo con flujo activo y archivo existente; mantener read-only.
+
+Este complemento fue aprobado e implementado en 6.t; no estaba cubierto por la
+inyección de skills ni está desplegado todavía. El reviewer Claude ya contrasta intención
+antes de calidad y no nombra verdict/handoff en ese paso: no cambiarlo por simetría.
+Políticas de memoria, reader y estrategia CodeGraph quedan fuera de este lote.
+
+#### Excepción Aggregator: `mise` frente a instrucciones antiguas
+
+AGENTS/CLAUDE:41–42 exige tareas `mise` y prohíbe invocar `./gradlew` directamente.
+El cuerpo de `agents/dev-test.md:24` aún recomienda `classes`, `testUnit`,
+`testIntegration` o `scripts/build.sh`; los headers de master-dev/backend/dev-test
+conservan allows Gradle antiguos. Son hechos del overlay, no comprobación de que
+los comandos reales fallen: no se ejecutó ninguno.
+
+El patch textual propuesto debe remitir a las tareas `mise` que define el contrato
+local, sin inventar equivalencias ni introducir un helper nuevo. **Este alcance
+preserva headers/permisos**: no añadir allows Mise, cambiar Bash general ni retirar
+permisos por arrastre. La allowlist legacy se registra como hallazgo separado; no
+prometer que cambiar wording implementa un bloqueo técnico de Gradle. Un recorte o
+enforcement adicional requiere autorización explícita y diseño acotado propios.
+
+#### Lote candidato único para aprobar y validar
+
+- **23 archivos runtime locales:** siete dev-test (todos salvo Keycloak), ocho
+  reviewer, siete master-dev (todos salvo Higyrus) y una skill de validación Higyrus.
+  Más documentación/tests focalizados de cada dueño, sin instalar esos tests en
+  productos. No cambiar backends/frontend ni roles de soporte ya compatibles.
+- **Tres archivos runtime compartidos** listados arriba, con documentación/test
+  focalizados según Core/Claude. No modificar las otras skills A–E ni crear roles.
+- Headers y guardrails íntegros, salvo cualquier excepción futura autorizada por
+  separado. Preservar bloques obligatorios de Higyrus y reader local Keycloak; no
+  opcionalizar memoria/handoff ni habilitarlo en los seis repos review-only.
+- Congelar una baseline consolidada que preserve A–E globales, VB, fixes GitHub
+  preexistentes, índices y cambios ajenos. No usar las fotos antiguas para resetear
+  árboles. Comparar equivalencia semántica, no igualdad de stacks o comandos.
+- Validaciones: reutilización vs cambio invalidante, checks faltantes, evidencia no
+  inspeccionada, handoff viejo/ID aislado, flujo Higyrus activo obligatorio, cierres
+  con memoria, herencia global Keycloak y no reactivación de handoff en review-only.
+  Tests contractuales, headers/config nativa en sandbox y paridad de skills/aliases;
+  no modelos, builds de aplicación, migraciones, servicios o índices.
+
+**Estado:** lote aprobado, implementado y validado solo en canónicos (6.t), sin
+cambios de permisos ni despliegue. La baseline consolidada preserva A–E, VB y fixes
+previos. Los resultados se revisaron juntos, no en ocho rondas por proyecto.
+
+### 6.t. Lote complementario de ocho overlays y tres bases — validado sin sync
+
+- **Implementado:** 23 archivos runtime locales y tres compartidos, exactamente el
+  alcance de 6.s. Siete dev-test locales reutilizan prueba ejecutada/leída vigente
+  y validan faltantes/invalidaciones; ocho reviewers contrastan intención aplicable
+  antes de riesgos y handoff requiere workflow activo/archivo existente; siete
+  master-dev no activan handoff por ticket o presencia de archivos.
+- **Higyrus:** selección de su skill por necesidad de secuencia/cobertura, sin
+  recarga solo por cerrar. Secuencia mínima, comandos, spotless obligatorio antes
+  del build final, reglas y salida se preservan literalmente en cinco bloques.
+  Las líneas de cierre con memoria del ticket se mantienen: reutilizar una prueba
+  no exime de verdict/result ni de persistir/actualizar memoria cuando el flujo cierra.
+- **Keycloak:** no se creó dev-test local; sigue resuelto desde Core. El sandbox
+  incorporó la base candidata como fallback para comprobar composición, no un
+  override canónico nuevo. Reader obligatorio y restricciones de seguridad siguen.
+- **Aggregator:** cuerpos de master-dev/dev-test remiten exclusivamente a las tareas
+  `mise` de AGENTS; no se inventan tareas ni se ejecutó ninguna. Los allows Gradle
+  legacy se conservaron literalmente con los headers: no hay permisos nuevos ni
+  enforcement de shell añadido, y la discrepancia de allowlist sigue registrada.
+- **Bases compartidas:** secuencia de dev-test Core y Claude con mismo criterio de
+  evidencia vigente/faltante/revalidación; reviewer Core exige contrato aplicable
+  y handoff activo/existente. Memoria, hooks, tools y demás entradas A–E intactos.
+- **Regresiones de cada dueño:** ocho helpers locales `tools/test_workflow_contract.py`
+  (25 tests en total), tres tests compartidos nuevos Core y las regresiones previas.
+  Resultado conjunto: **115 tests pasados** = 80 Core + 25 locales de los ocho +
+  10 VB. Son contratos de texto/metadata, no respuestas observadas de un modelo.
+- **Nativo:** nueve perfiles sandbox antes/después (ocho proyectos y una base), con
+  sus configuraciones efectivas iguales fuera de prompts. Se validaron las 52
+  definiciones locales, el fallback candidato Keycloak y las dos definiciones base
+  OpenCode; Claude se verifica por header, contrato y secuencia equivalente, no se
+  lanzó ese cliente. Dependencias existentes, sin installs, modelos ni apps.
+- **Integridad:** 26 frontmatters runtime byte-idénticos. Se verificó preservación
+  de líneas de dominio, reader, CodeGraph y guardas fuera de las cláusulas editadas.
+  949 fingerprints mantienen A–E/VB, productos, activos, aliases, fuentes fuera de
+  alcance e índices actuales. HEAD de 13 canónicos intacto, `git diff --check` correcto.
+  Ningún sync, staging/commit/push, Jira/GitHub, build de aplicación, migración o índice.
+
+**Scope de fuente:** 47 paths respecto de la baseline nueva: cinco Core, tres Claude
+y 39 en los ocho overlays (runtime + README + test de cada dueño). Knowledge,
+Ticketing y VB no cambian en este lote. Se preservan los patches GitHub preexistentes,
+incluidos README ya sucios; no se restauró a HEAD ni se descartó trabajo ajeno.
+En los 13 canónicos hay 95 paths Git sucios acumulados: 87 corresponden al punto 6
+y ocho code-reviewer previos al fix GitHub, que siguen fuera de sus nuevos parches.
+Estos conteos no son destinos de despliegue: tests/plan/README de overlays no se
+copian a aplicaciones por la promoción runtime.
+
+**Tradeoff:** los 26 textos runtime pasan de 47.736 a 54.016 bytes (+6.280 sumados),
+no un incremento por cada request. Headers/descripciones se mantienen, se agregan
+condiciones de alcance y evidencia. No se afirma poda estática neta ni ahorro real
+de modelos, latencia o retrabajo. No se ejecutaron benchmarks ni corridas LLM.
+
+**Artefactos y rollback:** `/tmp/opencode/point6-batch-qa.py` y
+`/tmp/opencode/point6-batch-candidate/{baseline,result}.json` son temporales; el plan,
+READMEs y tests fuente conservan el resultado/contrato durable. La baseline incluye
+todo el trabajo previo y estado actual de índices, no la foto vieja C de Keycloak.
+Rollback solo del lote complementario, sin roles enteros desde commits antiguos,
+resets de repos ni restauración de productos. Backups durables de destinos se
+preparan al autorizar la promoción conjunta.
+
+**Estado:** cobertura global/local del punto 6 validada en canónicos para los nueve
+repos; ninguno se sincronizó en esta etapa. Antes de darlo por desplegado falta
+inventario exacto origen→destino, preflight de composición/drift, backup/rollback y
+promoción conjunta global + local autorizada. No avanzar automáticamente al punto 7.
+
+### 6.u. Promoción conjunta global + nueve overlays y publicación autorizada
+
+El usuario pidió continuar con sincronización, commits y pushes. Se revisaron
+status/diff/log, archivos exactos, composición activa y remotos de 13 canónicos.
+GitHub se verificó como `juanma91m`, por cuenta explícita sin cambiar la activa;
+SSH usa `github-juanma91m-v2`. GitLab confirmó `juanma.91m`; el Core conserva su
+mirror habitual. Todos los main remotos coincidían con el HEAD local del preflight.
+
+- **54 destinos:** 48 archivos, cuatro nuevos enlaces compartidos y dos parches de
+  una entrada en agentes opcionales existentes. Siete skills Core, dos agentes
+  Core y documentación administrada, once agentes Claude, cuatro bindings A/C y
+  los assets runtime locales de los nueve proyectos. No se copiaron plan/tests ni
+  README de overlays a aplicaciones; no se regeneró opencode.json ni settings/hooks.
+- **Composición:** Core dev-test/reviewer y roles Claude coincidían con sus bases
+  previas reconocidas antes de sustituir texto. En plan/build solo cambió la entrada
+  de Evidencia; headers, bloques Knowledge/Ticketing del 5 y extras preexistentes
+  permanecieron. No se crearon roles ausentes ni se activaron builtins deshabilitados.
+- **Backups:** snapshot durable pinneado
+  `~/.config/opencode/.stack-sync-backups/point6-20261027T015258Z/` con ledger,
+  antes/después por destino y tipo archivo/link/modos. Promoción atómica de cada
+  archivo, Core antes de enlaces Claude. Rollback disponible solo para ese ledger,
+  comprobando ausencia de ediciones posteriores, nunca reset de un repo o índice.
+- **Paridad:** los 54 destinos coinciden con su artefacto aprobado. Loader real
+  global encuentra las ocho skills actuales y las ocho referencias Claude globales
+  resuelven al mismo asset; aliases locales de validación Higyrus/VB comparten el
+  contenido ya actualizado del producto. No son solo nombres presentes.
+- **Validación:** configuración efectiva global sin cambios fuera de prompts;
+  nueve perfiles de proyecto construidos desde los assets instalados en sandboxes
+  con dependencias existentes, todos válidos, sin instalaciones en productos.
+  115 tests focalizados pasados tras la sincronización (80 Core + 25 locales del
+  lote de ocho + 10 VB). No se lanzó Claude, una aplicación ni modelos/benchmarks.
+- **Integridad:** 947 assets protegidos preservados en despliegue, incluidos índices
+  de canónicos/productos y configuración sensible solo por fingerprint; ningún
+  cambio a settings, hooks, providers, permisos, Corpus/DB/Engram/binario o índices.
+  Las únicas escrituras de producto son los assets de agentes explícitamente
+  autorizados; no Git staging/commit/push allí. El estado actual Keycloak se conservó.
+
+**Publicación autorizada:** 95 archivos revisados, un commit por cada canónico:
+Core, Claude, Knowledge, Ticketing y los nueve overlays. Incluye los ocho
+code-reviewer del fix GitHub que ya estaban sincronizados pero pendientes de
+publicación; no son lógica de aplicación ni cambios ajenos. Stage solo del
+inventario exacto, escaneo de secretos/private, hooks normales, sin amend/force.
+Core se publica a GitHub y GitLab; los demás al remoto canónico previsto. Verificar
+árboles limpios y main remoto igual, conservar hashes/resultados finales en
+`publication.json` del backup y memoria sin otro commit circular solo de hashes.
+
+**Reinicio requerido:** configuración se carga al iniciar. Cerrar/reabrir los
+OpenCode y Claude afectados después de esta promoción; una sesión abierta puede
+conservar instrucciones/catálogos anteriores. Publicar no exige otro reinicio
+adicional. La evidencia es de contratos/configuración/paridad, no demuestra ahorro
+operativo o conducta LLM. Se conserva el balance estático y sus límites de 6.p.
+
+### 6.1. `analisis-tecnico-evidencia`
+
+**Estado:** implementado y validado en canónicos dentro de la etapa A; sin
+despliegue/publicación. Contrato en 6.a–6.f y resultado/tradeoff en 6.g.
+
+- **Objetivo:** evitar su carga rutinaria antes de cualquier solución técnica;
+  reservarla para análisis de evidencia material o pedido explícito.
+- **Revisión:** description, triggers, formato proporcional, quince referencias
+  y fuente compartida OpenCode/Claude, con ownership de Core y addons preservado.
+- **No perder:** distinción entre hechos e inferencias, incertidumbre relevante,
+  trazabilidad y validación, incluso cuando no se cargue la skill.
+- **Cierre:** compartir pruebas con 6.2 según 6.d, registrar decisión propia y
+  decidir después sobre despliegue; no avanzar automáticamente a la etapa B.
+
+### 6.2. `cambio-seguro-enterprise`
+
+**Estado:** implementado y validado en canónicos dentro de la etapa A; sin
+despliegue/publicación. Contrato en 6.a–6.f y resultado/tradeoff en 6.g.
+
+- **Objetivo de revisión:** distinguir el aporte específico de compatibilidad y
+  riesgo legacy de las obligaciones generales de cambio mínimo ya presentes en
+  roles y guías. No cargarla solo porque un repo sea enterprise.
+- **Revisión propuesta:** estrechar triggers y salida; condicionar sus diez
+  referencias Claude y compartir la fuente por symlink, sin agregar referencias
+  a agentes donde no existe ni tocar checklists específicos.
+- **No perder:** análisis del flujo previo, compatibilidad, alcance acotado,
+  separación entre fix y cleanup y preservación de trabajo ajeno.
+- **Validación:** casos compartidos de 6.d, distinguiendo microcambio con alcance
+  resuelto de cambio con compatibilidad no trivial, incluso si el diff es pequeño.
+  Registrar resultado propio sin fusionarla con Evidencia ni cargar ambas por rutina.
+
+### 6.3. `verificacion-antes-de-cerrar`
+
+**Estado:** implementada y validada en canónicos dentro de B (6.i). Despliegue
+conjunto pendiente; contrato activo todavía sin cambios.
+
+- **Objetivo de revisión:** evaluar si cargar el marco completo en todo cierre
+  agrega algo frente al deber permanente de respaldar afirmaciones con evidencia.
+  No convertir una eventual carga selectiva en verificación opcional.
+- **Revisión propuesta:** seleccionar por evaluación de evidencia material, no por
+  cualquier respuesta final; aclarar pertinencia, vigencia, reutilización legítima
+  y límites del rol, sin debilitar el deber permanente de verificar.
+- **No perder:** no declarar éxito sin evidencia comprobada; vincularla con el
+  comportamiento esperado y distinguir lint, build, tests y validación funcional.
+- **Validación:** escenarios de 6.h, incluidos cierre sin novedades, prueba ya
+  vigente, cambio invalidante y comando verde que no demuestra lo solicitado.
+
+### 6.4. `debugging-sistematico`
+
+**Estado:** D implementada y validada en canónicos (6.m). Skill Core conservada
+íntegra; cinco referencias Claude aclaradas, sin despliegue.
+
+- **Objetivo de revisión:** comprobar si su selección es proporcional al problema,
+  sin degradar investigación de causa raíz ni permitir fixes por intuición.
+- **Revisión propuesta:** entrada condicional y Read explícito en los cinco roles
+  existentes, sin tool nueva, binding ni cambio del procedimiento. No apilar
+  Evidencia cuando el diagnóstico ya cubre ese análisis.
+- **No perder:** lectura del error, reproducción, hipótesis explícita, prueba
+  mínima, análisis de fronteras relevantes y freno ante fixes fallidos reiterados.
+- **Validación:** escenarios de 6.l, incluyendo rojo esperado, bug pequeño,
+  reincidencia, freno al tercer fix y operación de reproducción no autorizada.
+
+### 6.5. `revision-por-etapas`
+
+**Estado:** implementada y validada en canónicos dentro de B (6.i). Checklists y
+guarda de handoff conservados; despliegue conjunto pendiente.
+
+- **Objetivo de revisión:** determinar cuándo aporta una estructura adicional de
+  revisión y cuándo el rol o el workflow formal ya cubren ese procedimiento.
+- **Revisión propuesta:** acotar triggers y dos referencias Claude a una revisión
+  real no cubierta; mantener los dos checklists y evitar doble carga con el
+  procedimiento formal, sin reabrir el contrato del punto 3.
+- **No perder:** primero contrastar alcance/intención y luego calidad/riesgo;
+  separar bloqueantes de mejoras opcionales y sostener hallazgos con evidencia.
+- **Validación:** escenarios de 6.h: review ad-hoc sin handoff, implementación contra
+  spec existente y PR formal con snapshot/rereview. No exigir ni crear verdicts
+  en repos o tareas sin handoff de implementación activo.
+
+### 6.6. `sdd-tdd-bdd-pragmatico`
+
+**Estado:** implementada y validada en canónicos dentro de E (6.o). Metadata,
+bloques y otros triggers literales intactos; promoción conjunta pendiente (6.p).
+
+- **Objetivo de revisión:** evitar que cada microcambio dispare especificación,
+  Gherkin o ceremonia test-first, manteniendo trazabilidad cuando reduce riesgo.
+- **Revisión propuesta:** distinguir pedido/necesidad real de una mención incidental
+  de tests; conservar los otros tres triggers y la práctica actual. Añadir selección
+  y Read en los ocho roles sin activar handoffs ni alterar pedidos explícitos.
+- **No perder:** criterios/escenarios útiles, conexión spec-cambio-evidencia,
+  regresión y alternativas honestas para harness legacy costoso. Respetar pedidos
+  explícitos de TDD/BDD y requisitos locales, aunque la tarea sea pequeña.
+- **Validación:** casos de 6.n, incluidos microcambio claro, requerimiento ambiguo,
+  pedido explícito, harness costoso y convivencia con handoff/review locales.
+
+### 6.7. `contratos-api-y-datos`
+
+**Estado:** implementada y validada en canónicos dentro de C (6.k), con checklist
+y salida literales intactos. Despliegue conjunto pendiente.
+
+- **Objetivo de revisión:** comprobar que se selecciona por un contrato o acceso
+  a datos realmente afectado, no solo porque el proyecto tenga APIs o una DB.
+- **Revisión propuesta:** description/triggers selectivos, preservación literal de
+  checklist/salida, cinco referencias Claude y fuente compartida por symlink. No
+  borrar el solapamiento SQL ni las referencias/reglas locales de Market Data.
+- **No perder:** compatibilidad de endpoints/payloads, errores, timeouts,
+  idempotencia, trazabilidad y costo de consultas. Las reglas locales de JDO,
+  JPA, SQL u otras tecnologías permanecen en sus overlays.
+- **Validación:** escenarios y checks de 6.j, desde cambio sin superficie afectada
+  a payload compartido, cliente externo o consulta con riesgo de costo/bloqueo.
+
+### 6.8. `performance-cache-concurrencia`
+
+**Estado:** implementada y validada en canónicos dentro de C (6.k), con checklist
+y salida literales intactos. Despliegue conjunto pendiente.
+
+- **Objetivo de revisión:** evaluar carga por superficies sensibles o evidencia
+  de riesgo, sin imponerla por el mero uso de backend, persistencia o cache.
+- **Revisión propuesta:** selección por riesgo plausible/superficie afectada, cinco
+  referencias Claude y fuente compartida, preservando checklist/salida. No
+  convertir la falta de bug o métricas en ausencia de riesgo ni recortar dominio.
+- **No perder:** cardinalidad, índices, scans, locks, I/O, transacciones,
+  idempotencia, orden, consistencia e invalidación/frescura de cache.
+- **Validación:** escenarios de 6.j, incluido cambio ajeno a esas superficies,
+  query en loop, carrera y cache con fuente de verdad/refresh ambiguos.
+
+**Regla de avance de 6.1–6.8:** completar relevamiento y alcance exacto por etapa
+acordada, compartir propuesta y pruebas, pedir aprobación e implementar/validar
+solo lo autorizado. Registrar una decisión por heurística; separar del grupo
+los cambios que requieran otro alcance. Conservar una skill sin cambios es válido.
+Despliegue, publicación y cualquier ensayo real con modelos necesitan autorización
+propia; no repetir suites amplias ni benchmarks por cada subsección por reflejo.
 
 ## 7. Catálogos por responsabilidad
 
@@ -1908,10 +3449,27 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 | 2026-10-25 | Punto 2, alcance cross-stack | Usuario pidió equivalencia entre clientes, fuente única por symlinks y auditoría de todos los canónicos. Relevados nueve overlays y capas globales; hallazgos y propuesta en 2.a–2.c. Solo diagnóstico/documentación; implementación pendiente de aprobación. |
 | 2026-10-25 | Punto 2, aprobación y preflight | Usuario autorizó canónicos → capas de agentes en productos. Preflight detuvo antes de editar por drift previo VB/Gateway y links ausentes en Aggregator; composición Core distinguida de drift. Resolver reconciliación, no sobrescribir. Detalle en 2.d. |
 | 2026-10-25 | Punto 2, cierre | Usuario autorizó reconciliar; 79 assets desplegados, nueve manifests pass, 259 assets contrastados, 81 headers/134 archivos protegidos intactos, 30 tests pasados. Reconciliadas guías anidadas VB, Gateway y links Aggregator. Resultado/rollback en 2.e–2.g. Punto 3 no iniciado. |
+| 2026-10-26 | Punto 6, especificación | Usuario pidió planificar. Relevados trigger amplio, quince referencias y copia Claude separada; candidato limitado a `analisis-tecnico-evidencia`, fuente compartida y referencias condicionales (6.a–6.f). Solo documento; implementación, despliegue, publicación y corridas de modelos pendientes de autorización. |
+| 2026-10-26 | Punto 6, desglose | Usuario pidió subsecciones por heurística. Se agregan 6.1–6.8 con objetivo, relevamiento, guardrails y escenarios de validación. 6.1 remite al candidato 6.a–6.f; 6.2–6.8 requieren especificación/aprobación individual y pueden concluir sin cambios. No se implementa ninguna heurística por este desglose. |
+| 2026-10-26 | Punto 6, etapa A | Usuario aceptó agrupar revisiones y pidió avanzar con A. Se completa especificación conjunta de Evidencia + Cambio seguro: dos fuentes compartidas, 25 entradas en 15 archivos y pruebas conjuntas con decisiones distintas. Etapas B/C/D/E registradas sin ejecutarlas. Solo plan; alcance combinado pendiente de aprobación antes de implementar/validar canónicos. |
+| 2026-10-26 | Punto 6, implementación A | Usuario autorizó implementar/validar canónicos. Dos skills, 25 entradas y dos bindings compartidos implementados; 31 tests pasados, loader/config nativos y 588 fingerprints protegidos. Se registra crecimiento estático, no ahorro demostrado (6.g). Sin despliegue, publicación ni modelos; B–E pendientes. |
+| 2026-10-26 | Punto 6, avance a B | Usuario pidió desplegar todo junto y pasar a B si A estaba lista. Se cierra A técnicamente sin microiteraciones cosméticas, se difiere promoción para el lote consolidado (interpretación operativa comunicada) y se especifica B en 6.h: dos skills, ocho entradas en siete roles Claude, sin bindings nuevos ni cambios en addons/productos. Solo plan; implementación B pendiente de aprobación. |
+| 2026-10-26 | Punto 6, implementación B | Usuario autorizó B solo canónicos. Se implementan dos skills y ocho entradas preservando A/checklists/handoff; 46 tests pasados, loader/config nativos y 603 fingerprints intactos (6.i). Se registra crecimiento estático, no ahorro demostrado. A+B preparados para promoción conjunta; sin deploy/publicación/modelos, C–E pendientes. |
+| 2026-10-26 | Punto 6, especificación C | Usuario pidió avanzar tras cerrar B. Relevadas dos skills con checklist propio, diez referencias Claude y dos copias no compartidas; se especifica C en 6.j preservando checklists/viñetas y referencias locales Market Data sin editar overlays. Solo plan; implementación/validación C pendiente de aprobación, promoción conjunta diferida. |
+| 2026-10-26 | Punto 6, implementación C | Usuario autorizó C solo canónicos. Dos skills, diez entradas y dos bindings compartidos; checklists/salidas y A/B intactos. 58 tests, loader/config nativos, manifest aditivo y 603 fingerprints protegidos (6.k). A+B+C acumulados, sin deploy/publicación/modelos; D/E pendientes. |
+| 2026-10-26 | Punto 6, especificación D | Usuario pidió avanzar tras C. Se decide conservar íntegra la skill Core de debugging y proponer solo cinco entradas Claude condicionales con Read, más regresiones/documentación (6.l). Binding ya compartido, sin cambios de manifest, addons/overlays ni A/B/C. Solo plan; implementación pendiente de aprobación, promoción conjunta diferida. |
+| 2026-10-26 | Punto 6, implementación D | Usuario autorizó alcance reducido D. Cinco referencias aclaradas, skill Core y A/B/C intactos; 66 tests, lectura/loader puntual y 610 fingerprints preservados con baseline actual, incluido índice Keycloak sin restaurarlo (6.m). A/B/C/D acumulados, sin deploy/publicación/modelos; E pendiente. |
+| 2026-10-26 | Punto 6, especificación E | Usuario pidió avanzar tras D. Se especifica E (6.n): conservar metadata, bloques operativos y otros triggers; distinguir pedido real de mera mención, aclarar no activación de handoff y condicionar ocho entradas Claude con Read. Binding existente y workflows locales intactos. Solo plan; implementación pendiente de aprobación y despliegue conjunto diferido. |
+| 2026-10-26 | Punto 6, implementación E y revisión de fuentes | Usuario autorizó E solo canónicos. Primer trigger/guidance y ocho entradas actualizados, metadata/bloques literales intactos; 77 tests, loader/Read y 607 fingerprints preservados (6.o). A–E acumulan 40 paths; revisión estática muestra crecimiento, no ahorro demostrado (6.p). Sin despliegue/publicación/modelos; siguiente paso preparar promoción focalizada consolidada. |
 
 ## Próxima acción
 
-Reiniciar clientes y usar sesiones nuevas tras el addendum 2.i. Esperar indicación
-para explicar/pulir punto 3; no ejecutarlo automáticamente. Nunca publicar productos
-AUNE: solo canónicos. Usar ejemplos de desvío como regresión, sin atribuir causalidad
-por adelantado ni confundir carga de skills con cumplimiento conductual.
+Promoción global + nueve overlays ejecutada y validada (6.u); completar la
+publicación ya autorizada y registrar sus hashes/resultados en el ledger y memoria.
+Reiniciar clientes afectados para usar la configuración nueva. Luego esperar
+indicación para planificar punto 7; no ejecutarlo ni correr modelos por cerrar 6.
+Delimitar el lote final de destinos/backups antes de desplegarlo.
+Los puntos 1–5 ya están cerrados/publicados; los fixes locales GitHub posteriores
+son independientes y siguen sin publicar. Nunca publicar productos AUNE: solo
+canónicos con autorización. No confundir fixtures textuales o carga de skills con
+cumplimiento conductual demostrado.

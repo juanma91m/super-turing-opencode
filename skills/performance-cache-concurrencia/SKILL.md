@@ -1,6 +1,6 @@
 ---
 name: performance-cache-concurrencia
-description: Revisa impacto tecnico en performance, cache, transacciones y concurrencia con foco en costo y consistencia.
+description: "Usar si el cambio o síntoma puede afectar costo de consultas, cache, transacciones, orden o concurrencia, o por pedido explícito; no por la sola presencia de backend/DB/cache."
 compatibility: opencode
 ---
 ## Que hago
@@ -10,9 +10,12 @@ compatibility: opencode
 - Pido considerar transacciones, idempotencia, orden de ejecucion y riesgos de concurrencia.
 
 ## Cuando usarme
-- En cambios que tocan queries, ORM, transacciones o base de datos.
-- En cache, colas, procesos concurrentes o flujos de alta carga.
-- Cuando hay sospecha de degradacion de performance o condiciones de carrera.
+- Por pedido explícito o si el cambio/síntoma puede afectar queries, ORM, transacciones, cache, colas, orden, idempotencia o concurrencia.
+- Por superficie afectada o riesgo plausible, no por la sola presencia de backend/DB/cache. No exigir un incidente o benchmark para considerar costo, bloqueo, frescura o carrera.
+
+## Seleccion y alcance
+- Priorizar costo, contención y consistencia; si Contratos o una skill local ya cubre ese riesgo, no duplicar el mismo análisis. No cargarlas como paquete fijo.
+- Reportar solo ítems aplicables y preservar formatos y reglas locales. Sin métricas, declarar supuestos: no inferir inocuidad. No autoriza benchmarks, DBs, migraciones ni indexado.
 
 ## Salida esperada
 - Impacto potencial en performance.

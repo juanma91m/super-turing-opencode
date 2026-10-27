@@ -4,6 +4,22 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+- Punto 6, complemento de bases: dev-test reutiliza evidencia vigente y ejecuta/revalida lo faltante; reviewer usa contrato aplicable y handoff solo con flujo activo y archivo existente. Headers/permisos y políticas de memoria se preservan; regresiones de secuencia y paridad semántica con Claude.
+
+- Punto 6, etapa E: se distingue pedido/necesidad de estrategia de una mención incidental de tests; metadata, tres triggers restantes y bloques operativos de SDD/TDD/BDD se conservan literalmente. Guidance de selección respeta pedidos explícitos y no activa handoffs ni artefactos por cargar la skill.
+- Regresiones focalizadas sin modelos ni despliegue; las ocho entradas Claude se actualizan en su adaptador sin nuevas tools/bindings. E se acumula con A–D para revisión final del lote.
+
+- Punto 6, etapa D: se conserva íntegra la skill Core `debugging-sistematico`, incluidos metadata, ocho pasos, reglas y freno al tercer fix fallido. Regresiones de activación/lectura Claude y documentación, sin cambiar el procedimiento ni desplegarlo otra vez.
+
+- Punto 6, etapa C: Contratos/datos y Performance/cache/concurrencia seleccionan por superficie afectada, riesgo plausible o pedido explícito, no por el stack del proyecto ni como paquete fijo. Checklists y ocho viñetas de salida preservados literalmente; sin recortar el solapamiento SQL ni reglas locales.
+- Regresiones de contrato y selección proporcional sin clasificador, benchmarks ni llamadas a modelos. Candidato solo canónico, acumulado con A/B para promoción conjunta.
+
+- Punto 6, etapa B: Verificación se selecciona por evaluación de evidencia material, no por cada respuesta final; reutiliza evidencia ejecutada/leída aún vigente y exige revalidar cambios invalidantes, sin omitir requisitos locales ni ampliar autoridad.
+- Revisión por etapas conserva literalmente checklists y guarda de handoff activo/existente; evita duplicar procedimientos y formularios vacíos. Ambas skills siguen separadas. Se agregan regresiones de contrato; candidato solo canónico, acumulado para promoción conjunta.
+
+- Punto 6, etapa A: se acotan descripción/triggers de `analisis-tecnico-evidencia` y `cambio-seguro-enterprise`, manteniendo evidencia y cambio seguro obligatorios sin cargas rutinarias ni pareja fija. Salida proporcional y pedidos explícitos preservados; no se modifican otras skills, roles, permisos o herramientas.
+- Regresiones contractuales y doce escenarios documentados, sin clasificador ni corridas de modelos. Candidato canónico: no implica despliegue ni ahorro operativo demostrado.
+
 - Punto 3: `code-reviewer` conserva identidad, límites y storage; la skill compartida concentra el procedimiento y los comandos solo aportan entradas/routing. El storage y workflow locales prevalecen sin ampliar permisos, modelos o tools; la descripción de `/code-review` deja de imponer storage global.
 - Se agregan regresiones contractuales y fixtures del helper de informes, sin afirmar obediencia del modelo ni desplegar los cambios por este registro.
 

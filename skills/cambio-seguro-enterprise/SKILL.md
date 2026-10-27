@@ -1,21 +1,17 @@
 ---
 name: cambio-seguro-enterprise
-description: Prioriza cambios minimos, seguros y auditables en sistemas enterprise y legacy.
+description: "Usar para delimitar cambios con riesgo de regresión o compatibilidad no trivial, cuando haya que decidir alcance, comportamiento a preservar y validación, o por pedido explícito; no por la sola etiqueta enterprise/legacy ni por toda edición."
 compatibility: opencode
 ---
-## Que hago
-- Refuerzo cambios pequenos, trazables y compatibles con el diseño existente.
-- Priorizo entender entry points, flujo actual y patron ya usado antes de editar.
-- Evito refactors amplios cuando no son necesarios para resolver el objetivo.
-- Separo claramente fix funcional de cleanup cosmetico o mejoras deseables no requeridas.
-
 ## Cuando usarme
-- En sistemas legacy o enterprise con riesgo de regresion.
-- Cuando el cambio debe preservar comportamiento fuera del scope.
-- Cuando hay que decidir la solucion mas simple pero suficiente.
+- Por pedido explícito de esta skill o ante decisiones no triviales de alcance, compatibilidad o comportamiento a preservar al planificar o revisar un cambio.
+- Considerar riesgos plausibles, sin exigir una regresión demostrada. El tamaño del diff no determina el riesgo: una línea puede afectar auth o datos.
 
-## Salida esperada
-- Objetivo y alcance real.
-- Cambio minimo propuesto.
-- Riesgos y compatibilidad.
-- Validacion realizada y pendiente.
+## Cuando no cargarla por rutina
+- No por la etiqueta enterprise/legacy, por cualquier edición ni si alcance y estrategia ya están suficientemente resueltos.
+- Si el workflow o una skill específica ya cubre la estrategia, no duplicarla. No cargarla como pareja fija con Evidencia; ambas pueden aportar si sus necesidades son distintas.
+
+## Contrato y salida
+- Cargues o no esta skill: comprender entry points, flujo y patrón previo; elegir el cambio mínimo compatible, preservar trabajo ajeno y separar fix de cleanup o mejoras no requeridas.
+- Explicitar alcance, comportamiento que se preserva, riesgos y compatibilidad; respaldar el cambio con validación pertinente y declarar lo pendiente.
+- Salida proporcional, no cuatro secciones vacías; sin formularios, archivos ni aprobaciones adicionales. Respetar los contratos y permisos del proyecto.
