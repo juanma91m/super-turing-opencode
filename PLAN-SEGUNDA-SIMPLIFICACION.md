@@ -2,25 +2,22 @@
 
 Fecha de apertura: 2026-10-25.
 
-Estado: puntos 1 y 2 implementados, validados y sincronizados. El punto 2 incluye
-reconciliación de las divergencias previas autorizada por el usuario. Reiniciar
-clientes y usar sesiones nuevas. Segundo repaso y addendum del punto 2 cerrados:
-activación determinista, shell restringido y estilo local prioritario (2.h–2.i).
-El punto 3 está implementado, validado, sincronizado y publicado (3.b–3.d).
-Los puntos 1–5 están cerrados y publicados (4.a–4.f y 5.a–5.f; hashes finales en
-el backup de publicación y memoria). Punto 6 conserva ocho subsecciones (6.1–6.8),
-agrupadas en cinco etapas de revisión. Etapa A (6.1 + 6.2) cerrada técnicamente en
-canónicos (6.g), sin despliegue ni publicación. Etapa B (6.3 + 6.5) también cerrada
-técnicamente en canónicos (6.i), igual que C (6.7 + 6.8; resultado en 6.k).
-D (6.4) también cerrada técnicamente en canónicos (6.m), igual que E (6.o).
-Candidato global A–E validado en canónicos y VB alineado solo en su canónico (6.r).
-Los otros ocho overlays y los tres ajustes compartidos adicionales ya están
-implementados/validados en canónicos como lote consolidado (6.t). La cobertura local
-incluye los nueve repos; promoción conjunta ejecutada y verificada (6.u). Publicación
-autorizada al preparar este cierre; hashes finales en su backup/ledger y memoria,
-sin edición circular posterior del plan. Puntos 7–10 pendientes.
-Se acumulan candidatos
-para una promoción conjunta, sin ejecutarla durante esta revisión.
+Estado: puntos 1–6 implementados, validados, sincronizados y publicados. El punto 2
+incluye reconciliación autorizada y addendum de activación, shell restringido y
+estilo local prioritario (2.h–2.i). Punto 6 conserva ocho subsecciones agrupadas en
+cinco etapas A–E, más alineación semántica de los nueve overlays y tres ajustes
+compartidos adicionales (6.g–6.u). Su promoción alcanzó 54 destinos; publicación
+completada en trece canónicos mediante trece commits y catorce pushes, incluido
+Core a GitHub y GitLab. Ledger, hashes y rollback en
+`~/.config/opencode/.stack-sync-backups/point6-20261027T015258Z/`; los fixes locales
+del wrapper GitHub también quedaron publicados. Nunca se publicaron productos AUNE.
+El reinicio de clientes afectados sigue sin confirmación del usuario; no asumir
+hot-reload. Punto 7.A implementado/validado (7.f) y promovido selectivamente con
+verificación global y de los nueve perfiles instalados (7.g). Publicación canónica
+autorizada; resultado final y hashes en el ledger durable indicado en 7.g, sin
+edición circular del plan tras publicar. Reiniciar OpenCode. 7.B requiere
+diseño/aprobación propios y 7.C no propone otra poda
+editorial. Puntos 8–10 pendientes. No hay una promoción de 6 todavía por ejecutar.
 
 ## Objetivo
 
@@ -3357,6 +3354,364 @@ de las válidas; requests mixtos de código/documentos sin callejones sin salida
 
 **Rollback:** restaurar visibilidad previa sin ampliar permisos por accidente.
 
+### 7.a. Diagnóstico y matriz inicial
+
+**Estado del relevamiento inicial:** solo planificación y documento; ese pedido
+no autorizaba implementación. Aprobación posterior y resultado de 7.A en 7.f.
+
+Se contrastaron fuentes de Core/Knowledge/Background/Documents y la adaptación
+Claude. `opencode debug agent` sin `--tool` aportó metadata global de nueve roles
+en OpenCode `1.19.4--202610232249`. Los nombres MCP se tomaron del filtro configurado
+de once herramientas, sin iniciar ni invocar el servidor. La evaluación offline
+usó las funciones puras reales V1 `evaluate`/`disabled`, no una aproximación por
+nombres. Evidencia temporal: `/tmp/opencode/point7-audit/matrix.json`; las
+conclusiones relevantes se conservan aquí, no dependen de que sobreviva `/tmp`.
+
+| Roles globales revisados | Engram: permiso/visibilidad calculados | Cuatro tools aisladas: catálogo | Ocho tools editoriales: catálogo |
+|---|---|---|---|
+| `knowledge-reader` | 11 allow/visibles, incluidos 5 mutadores | Visibles; runtime restringe a `master-dev` | Ocultas |
+| `master-dev` | 11 allow/visibles | Visibles; caller autorizado, sujeto a las demás guardas | Ocultas |
+| `planner`, `agent-design` | 11 allow/visibles por rol | Visibles; runtime restringe a `master-dev` | Ocultas |
+| `code-inspector`, `reviewer`, `code-reviewer`, `dev-test` | 11 allow/visibles por rol | Visibles; runtime restringe a `master-dev` | Ocultas |
+| `documenter` | 11 allow/visibles | Visibles; runtime restringe a `master-dev` | Visibles |
+
+Esta matriz **no prueba llamadas MCP ni requests reales**, ni convierte permisos
+técnicos amplios en autoridad del rol. Las restricciones del prompt, sesiones,
+guardas internas y herramientas de lanzamiento se evalúan por separado. El caso
+del reader sí tiene una brecha concreta: su contrato prohíbe escribir, pero no hay
+deny MCP que materialice esa prohibición. No presentar el caso Background como
+la misma brecha: allí ya existen guardas de caller/targets/profundidad en runtime.
+Tampoco afirmar que se corrigió el contrato de todos los demás roles read-only
+por corregir únicamente el reader.
+
+**Clasificación Engram actual:**
+
+- Mutadores presentes: `mem_save`, `mem_session_summary`, `mem_update`,
+  `mem_judge`, `mem_review`. Este último combina `list` y `mark_reviewed`: no
+  habilitarlo entero como lectura por el nombre ni por su primera operación.
+- Lecturas/utilidades restantes: `mem_search`, `mem_context`,
+  `mem_get_observation`, `mem_suggest_topic_key`, `mem_current_project`,
+  `mem_doctor`. El doctor ejecuta diagnósticos, sin modo de reparación en su
+  handler. No se necesita modificar Engram para separarlos en este cliente.
+- `mem_delete` no está en el filtro OpenCode de once; no contarlo entre los cinco
+  esquemas retirables. El filtro Claude es distinto y no se normaliza.
+
+**Cobertura local de fuentes, no certificación de configuración instalada:** se
+revisaron nombres y cláusulas pertinentes de herramientas, permisos, delegación,
+memoria y routing en los 59 agentes de los nueve canónicos y sus `opencode.json`.
+Ninguno define un `knowledge-reader` homónimo ni declara las cinco restricciones
+MCP o las cuatro de lifecycle. Las configuraciones locales no agregan reglas para
+esas familias. No hace falta copiar el reader global en nueve overlays.
+
+| Overlay | Agentes revisados | Contrato relevante que preservar |
+|---|---:|---|
+| Higyrus | 11 | Lectura directa del coordinador; curator local separado; `planner`, `master-dev` y `dev-test` conservan sus obligaciones de memoria y cierre de ticket |
+| Virtual Broker | 7 | `master-dev` permite `task → knowledge-reader` y lo exige para cambio no trivial o antecedente probable; handoff opcional |
+| Market Data | 7 | Reader permitido desde `master-dev`; especialistas Python y frontend, sin agregar targets aislados |
+| Keycloak | 4 | Reader permitido y requerido en cambios no triviales/antecedentes; `dev-test` global, sin crear clon local |
+| Higyrus Gateway | 6 | Reader permitido; contratos y permisos locales sin recortes |
+| Aggregator | 6 | Reader permitido; tareas `mise`, dominio y allowlists existentes intactos |
+| Documento API | 6 | Reader permitido; no confundir este dominio de documentos con Addon Documents |
+| Perfil Inversor | 6 | Reader permitido; contratos locales y review formal intactos |
+| OMS API | 6 | Reader permitido; especialista TypeScript sin ampliar targets aislados |
+
+En ocho `master-dev` locales está explícito el target reader; Higyrus conserva
+su ruta especializada con lectura directa y curator. Eso no permite inferir
+delegación Background a reader: la matriz de `delegate` es otro control y no lo
+incluye. La instalación opcional de Knowledge puede componer targets adicionales;
+las verificaciones posteriores deben examinar el resultado efectivo, no asumir
+herencia automática ni equiparar `task` con `delegate`.
+
+### 7.b. Alcance recomendado: tres decisiones separadas
+
+**7.A — reader MCP, implementado/validado solo en canónicos y sandbox (7.f).**
+
+- Agregar en `Knowledge/agents/knowledge-reader.md`, bajo `permission`, cinco
+  denegaciones por nombre real OpenCode: `engram_mem_save`,
+  `engram_mem_session_summary`, `engram_mem_update`, `engram_mem_judge`,
+  `engram_mem_review`, cada una `deny` para cualquier argumento.
+- Usar permisos explícitos, no solo wording ni un flag cosmético: en V1 la
+  denegación completa retira el schema y el ejecutor MCP consulta ese permiso
+  antes de llamar al servidor (`session/tools.ts`, `ctx.ask`). Verificar ambas
+  propiedades; ocultar un schema por sí solo no alcanza como prueba de rechazo.
+- No agregar allows de lectura: conservar el acceso heredado y cualquier
+  restricción existente, sin reemplazar el ruleset completo. Mantener modelo,
+  variant, Bash deny-default con dos wrappers de consulta/estado, edit/task deny,
+  cuerpo, lectura Qdrant y las políticas proporcionales del punto 5.
+- Retirar también `mem_review(action=list)` del reader: el permiso V1 aquí se
+  resuelve por nombre de herramienta y patrón `*`, no discrimina ese argumento.
+  Es una renuncia deliberada a una operación opcional mixta, no a búsqueda/contexto.
+  No crear endpoint, wrapper ni bifurcación de Engram para recuperarla en este lote.
+- La adaptación Claude ya enumera cuatro tools MCP de lectura/utilidad; conservarla
+  sin ampliar su catálogo ni copiar seis herramientas de otro filtro. Contrastar
+  la equivalencia de no mutación y la recuperación disponible, no igualdad de nombres.
+- No modificar globalmente el filtro MCP ni las instrucciones de registro del
+  servidor. Estas seguirán describiendo las once herramientas registradas; la
+  autorización y los schemas del reader serán un subconjunto. No prometer que
+  desaparecen todas las menciones textuales a mutadores del contexto.
+- Tradeoff explícito: deny de cinco herramientas actuales es menor y no introduce
+  allows; no es una política fail-closed para cualquier herramienta futura.
+  Un test debe fallar ante cambios del inventario curado sin reclasificarlo.
+  Una allowlist de namespace exigiría resolver precedencia y restricciones
+  heredadas; no introducirla de forma encubierta en este alcance.
+
+**7.B — lifecycle aislado, diseño/aprobación posterior independiente.**
+
+Objetivo: ocultar `delegate_isolated`, `delegation_accept`, `delegation_apply` y
+`delegation_discard` fuera de `master-dev`, sin tocar matriz read-only, lectura de
+resultados, navegación, cancelación, continuación o tareas same-session. Ownership
+Background, no distribuir una lista mantenida manualmente entre Core y 59 overrides.
+
+Antes de implementar hay que especificar y probar un mecanismo de composición
+propio del addon que alcance roles globales/locales y nativos, preserve denies
+explícitos de usuario/proyecto/sesión y no habilite a `master-dev` donde ya estaba
+restringido. Las guardas existentes, targets Java/frontend/master, profundidad,
+sesión raíz, estado accepted, checks de patch/workspace y revisión manual quedan.
+No ampliar a Python/TypeScript por existir esos especialistas en overlays.
+
+El relevamiento demuestra que hay catálogo redundante; **no cierra todavía el
+diseño de composición**. Si resolverlo requiere ensanchar permisos, reescribir
+overlays o intervenir el runtime base, volver a propuesta en vez de aceptar el
+atajo. Aprobar 7.A no autoriza cambios en Background.
+
+**7.C — no añadir poda editorial en este lote.**
+
+Documents ya instala `tools: false` global para sus ocho herramientas mediante
+`scripts/configure_tool_visibility.py`; `documenter` las habilita explícitamente.
+La matriz inicial no muestra ocho schemas editoriales sobrantes en roles de
+código. El comando `publicar-documento` no fija agente y usa otro workflow de
+skill/wrappers; `master-dev` no tiene un target `documenter` explícito en Core ni
+en los nueve headers locales revisados. No retirar esos wrappers ni habilitar
+targets por inferencia. Conservar el flujo actual; si se desea rediseñar routing
+de requests mixtos, especificarlo con Documents y punto 9 antes de recortar.
+No atribuir ahorros nuevos a una ocultación que ya estaba aplicada.
+
+### 7.c. Archivos y ownership del primer candidato
+
+Solo después de aprobar 7.A:
+
+- Knowledge: `agents/knowledge-reader.md` (cinco permisos),
+  `tests/test_opencode_integration.py` (clasificación, reglas y regresiones),
+  `README.md` (contrato efectivo y limitación de `mem_review`).
+- Core: este plan, para registrar ejecución/evidencia. Sin editar agentes Core,
+  manifests ni scripts globales de política de tools para un contrato de Knowledge.
+- Contrastar sin editar: reader Claude, `scripts/manage_agent_autonomy.py`,
+  filtros MCP y nueve overlays. Un hallazgo que exija cambiar un flujo local o
+  añadir un archivo runtime sale del lote y vuelve a aprobación.
+
+Fuera: binario/patch de Engram, DB/memoria activa, indexación Qdrant/CodeGraph,
+plugins/hooks, herramientas editoriales, Background, modelos, políticas del
+curator y permisos de otros roles. No crear agentes, skills ni comandos.
+
+### 7.d. Validaciones exigidas; resultados y fronteras comprobadas en 7.f
+
+Una pasada consolidada al implementar, sin modelos ni intentos mutadores contra
+la memoria activa:
+
+1. Tests del inventario de once herramientas y partición 5 mutadoras/6 restantes;
+   `mem_review` se clasifica completa como mixta. Detectar nuevos nombres, no
+   aprobar automáticamente el drift. Claude mantiene su allowlist de cuatro.
+2. Cargar el candidato en sandbox mediante loader nativo y `opencode debug config`;
+   inspeccionar metadata efectiva de reader con `debug agent` sin `--tool`.
+   Aplicar `evaluate`/`disabled` reales: cinco deny/ocultas; otras seis sin cambio
+   respecto del baseline, sin convertir restricciones previas en allow.
+3. Rechazo de cada mutador con argumentos válidos, incluido summary y
+   `mark_reviewed`, usando ruta de permisos real y servidor/contador de prueba
+   aislado: ninguna llamada debe alcanzar el backend. No confundir un rechazo
+   por payload inválido o herramienta inexistente con enforcement de permisos.
+4. Pruebas positivas de búsqueda/contexto/original y de recuperación por wrappers
+   existentes, con fixtures/stubs de datos aislados. Confirmar que ni inventar un
+   summary ni editar archivos ni llamar storage/seed son fallbacks del reader.
+   Capturar qué frontera prueba cada fixture; no afirmar obediencia LLM.
+5. Nueve perfiles sandbox con assets locales canónicos, dependencias existentes y
+   referencias absolutas: reader global sin shadow, rutas permitidas de `task`
+   conservadas (incluidas VB/Keycloak), memoria local Higyrus y curator intactos.
+   Contrastar assets instalados antes de una eventual promoción autorizada;
+   no ejecutar instaladores ni crear paquetes/índices en productos para auditar.
+6. Diff de configuración: solo esas cinco reglas del reader pueden cambiar;
+   headers restantes, filtros de servidor, políticas de los otros roles, Claude,
+   Background/Documents, nueve canónicos/productos e índices sin cambios.
+   Regresiones focalizadas Knowledge; no repetir suites de todo el stack por reflejo.
+
+Resultado estático candidato: reader pasa de once a seis schemas Engram, **si la
+composición final lo confirma**. Medir nombres/cantidad y bytes serializados de
+schemas con metadata aislada; tokens solo con tokenizer apropiado. No extrapolar
+a contexto total, costo, latencia ni calidad. No hace falta una corrida real de
+modelo para demostrar permisos; cualquier ensayo conductual requiere otro diseño
+y autorización. El resultado medido de 7.A y sus limitaciones se registran en 7.f.
+
+### 7.e. Promoción, rollback y puerta de aprobación
+
+El usuario autorizó **implementar/validar 7.A solo en canónicos y sandbox**, con
+cobertura de todos los overlays específicos. 7.B sigue pendiente de especificación
+y 7.C sin poda. La aprobación no
+incluye sincronización, commits/pushes, cambios en productos o ensayos con modelos.
+
+Si luego se autoriza desplegar: usar instalación selectiva del dueño Knowledge,
+backup y ledger del reader activo; verificar configuración global y los nueve
+perfiles antes/después, sin copiar nueve readers ni regenerar otros addons.
+Reiniciar OpenCode y usar sesión nueva. Claude no requiere reinicio por 7.A si no
+cambia ningún asset suyo; el reinicio pendiente de 6 es una cuestión independiente.
+
+Rollback de 7.A: revertir solo el patch aprobado del reader/tests/docs y, si fue
+promovido, restaurar solo su copia previa según ledger, comprobando drift antes
+de sobrescribir. Sin reset general ni cambios de DB. Restaurar el baseline
+también reintroduce la brecha conocida de mutadores en reader: no presentarlo como
+una vuelta a un estado técnicamente read-only ni compensarlo ampliando permisos.
+
+### 7.f. Implementación y validación de 7.A — 2026-10-27, canónicos y nueve overlays
+
+**Aprobación:** el usuario aceptó 7.A y recordó aplicar el alcance en todos los
+overlays específicos. Se comunicó antes de editar la interpretación operativa:
+fuente compartida de Knowledge y comprobación efectiva de los nueve perfiles,
+sin nueve copias locales innecesarias, sin despliegue/publicación. No se autorizó
+7.B, recortes editoriales, ensayos con modelos ni cambios funcionales de productos.
+
+**Implementado:** exactamente cinco líneas `engram_mem_*: deny` en el header de
+`Knowledge/agents/knowledge-reader.md`. La comparación contra baseline prueba que
+al quitar esas cinco líneas el archivo es idéntico, incluido cuerpo, modelo,
+variant, wrappers, edit/task y reglas Playwright/Stitch. Se amplió
+`tests/test_opencode_integration.py` y se documentó el contrato en `README.md`.
+Core solo cambia este plan; ningún archivo runtime de los nueve overlays cambia.
+
+**Cobertura efectiva, no solo búsqueda de nombres:**
+
+- Preflight con `opencode debug config` y `debug agent knowledge-reader` en nueve
+  sandboxes compuestos con los 59 agentes locales canónicos, configuración y
+  referencias absolutas de cada repo, definición reader compartida y dependencias
+  ya existentes. Se repitió sobre el candidato: Higyrus, Virtual Broker, Market
+  Data, Keycloak, Gateway, Aggregator, Documento API, Perfil Inversor y OMS API.
+- En **cada uno de los nueve**: cinco mutadores deny/ocultos y las otras seis
+  herramientas Engram allow/visibles, calculado con funciones reales V1 sobre
+  las reglas nativas obtenidas. Una restricción adicional de sesión de lectura
+  sigue ganando; no se agregó ningún allow. Ningún reader local homónimo en
+  canónicos ni productos. Las reglas de los demás roles y los cuerpos de todos
+  los agentes del perfil permanecen iguales al baseline.
+- Targets `task` y rutas especializadas intactos: VB/Keycloak conservan reader,
+  Higyrus conserva lectura directa/curator y memoria obligatoria del cierre;
+  Keycloak no recibe clon de `dev-test`. No se amplían targets aislados de Python
+  o TypeScript ni se mezclan las matrices `task`/Background.
+- La comparación nativa detectó orden variable de descubrimiento de skills en
+  los allows `external_directory`. Se normalizaron **solo tramos contiguos de
+  reglas con el mismo permiso y la misma acción**, conservando patrones,
+  multiplicidad y límites de precedencia allow/ask/deny. No se ordenó el ruleset
+  completo ni se descartaron permisos para hacer pasar el diff.
+
+**Pruebas ejecutadas:**
+
+- Integración Knowledge: **11 pasadas, una omitida**. Incluye inventario 5/6,
+  cinco denies exactos sin nuevos allows, límites previos, allowlist distinta
+  Claude, metadata MCP con nueve filtros aislados y wrappers reales con backend
+  Python de fixture. La omitida requiere binario baseline explícito para contrastar
+  un cambio de binario; no se cambió Engram y no se inventó un baseline equivalente.
+- Política de memoria: **12 pasadas**; autonomía, lectores read-only, autoridad,
+  persistencia proporcional y cierres locales siguen vigentes. Total final:
+  **23 pasadas + una omitida**, no acumular reruns como tests adicionales.
+- El binario nativo ejecutó una tool de prueba temporal que usa `ctx.ask` y un
+  contador/backend en memoria, con HOME/XDG/config/DB aislados y sin credenciales:
+  seis rechazos por `PermissionDeniedError` (cinco tools; `mem_review` se prueba
+  con ambas acciones), seis lecturas/utilidades que alcanzan el fixture y control
+  positivo de doce payloads que sí alcanzan el fixture al quitar los cinco denies.
+  No se cuenta un error de schema o herramienta inexistente como rechazo válido.
+- Siete checks nativos adicionales: consulta/estado Bash permitidos; storage,
+  seed, CLI alternativo, edición y delegación a curator rechazados. Los wrappers
+  reales de consulta/estado también preservan sus argumentos en un entorno
+  aislado con backend de fixture, sin embeddings ni conexión Qdrant.
+- **1.504 fingerprints protegidos** sin cambios: otros assets canónicos/globales,
+  overlays/productos y sus índices. HEAD canónicos intactos; `git diff --check`
+  correcto. Solo tres archivos Knowledge y este plan editados; instalación
+  activa todavía conserva el reader anterior, sin promoción implícita.
+
+**Medición estática:** registro MCP sigue en once, catálogo reader queda en seis.
+La metadata real se consultó en proceso Engram aislado con `initialize/tools/list`,
+sin invocar tools. JSON compacto UTF-8 de definiciones completas: **14.260 → 4.482
+bytes**; mapa de input schemas: **7.128 → 2.261 bytes**. Son subconjuntos de metadata,
+no captura de un request a proveedor, tokens medidos ni ahorro total de contexto.
+Las instrucciones globales del servidor siguen describiendo sus once tools.
+
+**Límites de evidencia:** `debug agent --tool` prueba el `ctx.ask` del contexto debug
+nativo; el fixture no es el adaptador MCP completo de una sesión LLM. La relación
+con el ejecutor MCP se verificó en fuente (`ctx.ask` antes de `execute`), y la
+ocultación con el evaluador V1 real. No se ejecutaron llamadas mutadoras contra
+Engram, lectura Qdrant real ni flujos de modelos. Por tanto no declarar probado
+un recorrido MCP end-to-end, ausencia conductual de bypass/fallbacks, latencia,
+calidad o ahorro operativo. Esto no bloquea el cambio declarativo comprobado.
+
+Artefactos temporales: `/tmp/opencode/point7a-qa.py` y
+`/tmp/opencode/point7a-candidate/{baseline,probed,profiles,matrix,result}.json`.
+Contienen metadata seleccionada/hashes, no dumps de providers/credenciales. La
+evidencia durable útil es esta sección y los tests canónicos, no la permanencia
+de `/tmp`. El QA no instala paquetes, no ejecuta comandos funcionales de productos
+ni altera los índices. Los tests de contrato/nativos son reproducibles mediante
+`python3 -m unittest discover -s tests -p test_opencode_integration.py -v`, con
+opt-ins `ENGRAM_CANDIDATE_BIN`, `OPENCODE_READER_NATIVE`,
+`OPENCODE_TEST_DEPENDENCIES`, `OPENCODE_TEST_TMP` y `CLAUDE_READER_SOURCE` definidos
+según el entorno; sin opt-in los checks nativos/de metadata se omiten explícitamente.
+
+**Pendiente:** aprobación de promoción selectiva de Knowledge y, separadamente,
+publicación canónica si se desea. Al promover el reader global, volver a comprobar
+los nueve destinos/perfiles sin crear overrides nuevos. Rollback acotado en 7.e;
+reinstalar/rebuild de Engram no es parte de este cambio. 7.B aún necesita propuesta.
+
+### 7.g. Promoción selectiva y publicación autorizada de 7.A — 2026-10-27
+
+**Aprobación posterior:** el usuario autorizó la secuencia propuesta de respaldo,
+promoción del reader, verificación de los nueve perfiles y commit/push únicamente
+de Knowledge y Core. 7.B queda para después; nunca se publica un producto AUNE.
+Esta sección actualiza el pendiente histórico de 7.f, sin ampliar su implementación.
+
+**Destino único promovido:** `~/.config/opencode/agents/knowledge-reader.md`,
+idéntico a la fuente canónica; exactamente cinco reglas nuevas. No se ejecutó el
+instalador completo, no se cambió el marker del addon ni `opencode.json`, no se
+reconstruyó Engram ni se tocaron MCP, plugins, modelos, Claude o bases/corpus.
+No se copiaron este plan, tests ni README a la instalación ni a productos.
+
+**Backup durable pinneado:**
+`~/.config/opencode/.stack-sync-backups/point7a-20261027T032508Z/`.
+Contiene `before.md`, `after.md`, `ledger.json` con hashes/modo/alcance,
+`profiles-before.json`, `profiles-after.json`, `matrix.json`, `verification.json`
+y `rollback.py` autónomo. Su dry-run verificó integridad y destino, sin restaurarlo.
+Para una restauración expresamente autorizada: `python3 <backup>/rollback.py
+--apply`; rechaza drift y solo repone el reader anterior. La advertencia es
+importante: ese baseline reintroduce la brecha MCP del reader. Reiniciar después
+de restaurar; no modificar DB, fuentes o índices para volver atrás.
+
+**Verificación post-promoción:**
+
+- `opencode debug config` y metadata `debug agent` válidos en global y nueve
+  sandboxes de perfiles construidos **desde los assets instalados de productos**,
+  sin inyectar un reader candidato. El loader tuvo que consumir el global activo.
+- Nueve inventarios de agentes/configuración/guías contrastados con sus canónicos:
+  **59 agentes locales**, sin reader homónimo ni drift en esos assets. En todos
+  los perfiles reader mantiene cinco deny/ocultas y seis allow/visibles; el resto
+  de metadata, cuerpos, targets y controles queda igual al baseline instalado.
+  Se conserva la normalización acotada de orden de skills explicada en 7.f.
+- **1.503 fingerprints protegidos** durante la promoción, excluyendo únicamente
+  el reader autorizado; incluyen productos, índices y otros assets globales y
+  canónicos. **Cero escrituras de producto.** Verificar los productos no requirió
+  instalar dependencias ni ejecutar `debug config` dentro de sus worktrees.
+- Regresiones post-sync: **23 pasadas + una omitida**, con el mismo motivo y
+  fronteras que 7.f. El test nativo sigue aislando contexto, DB y backend de fixture.
+  No se cuentan estas repeticiones como tests distintos ni se ejecutaron modelos.
+- Fuente/instalación en paridad. Catálogo del rol once→seis; las mediciones de
+  metadata y límites de evidencia siguen siendo los de 7.f, sin alegar un request
+  MCP end-to-end o ahorro operativo demostrado.
+
+**Publicación autorizada:** tres archivos de Knowledge y este plan en Core,
+mediante dos commits en `main`; Knowledge a GitHub y Core a GitHub y GitLab.
+Owner/cuenta GitHub `juanma91m`, alias SSH `github-juanma91m-v2`; Core GitLab
+conserva `juanma.91m`. Identidad de commit existente preservada, sin `auth switch`,
+tokens persistidos ni cambios de Git config. Los tres HEAD remotos estaban iguales
+a sus bases locales antes de publicar. Preparar ledger de publicación en el mismo
+backup y registrar allí hashes, resultados y árboles limpios al concluir; no
+editar/commitear otra vez este plan solo para insertar su propio hash final.
+
+**Activación y siguiente paso:** cerrar/reiniciar OpenCode global y proyectos y
+usar sesiones nuevas; la sesión que estaba abierta no se actualiza por editar el
+archivo. Claude no cambia por 7.A. Confirmar publicación mediante su ledger y
+memoria de cierre; después, solo planificar 7.B cuando el usuario lo pida, sin
+implementar ni correr ensayos por el mero cierre de 7.A.
+
 ## 8. CodeGraph por tipo de tarea
 
 **Hipótesis:** el beneficio depende del tipo de pregunta y del contexto disponible.
@@ -3461,15 +3816,20 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 | 2026-10-26 | Punto 6, implementación D | Usuario autorizó alcance reducido D. Cinco referencias aclaradas, skill Core y A/B/C intactos; 66 tests, lectura/loader puntual y 610 fingerprints preservados con baseline actual, incluido índice Keycloak sin restaurarlo (6.m). A/B/C/D acumulados, sin deploy/publicación/modelos; E pendiente. |
 | 2026-10-26 | Punto 6, especificación E | Usuario pidió avanzar tras D. Se especifica E (6.n): conservar metadata, bloques operativos y otros triggers; distinguir pedido real de mera mención, aclarar no activación de handoff y condicionar ocho entradas Claude con Read. Binding existente y workflows locales intactos. Solo plan; implementación pendiente de aprobación y despliegue conjunto diferido. |
 | 2026-10-26 | Punto 6, implementación E y revisión de fuentes | Usuario autorizó E solo canónicos. Primer trigger/guidance y ocho entradas actualizados, metadata/bloques literales intactos; 77 tests, loader/Read y 607 fingerprints preservados (6.o). A–E acumulan 40 paths; revisión estática muestra crecimiento, no ahorro demostrado (6.p). Sin despliegue/publicación/modelos; siguiente paso preparar promoción focalizada consolidada. |
+| 2026-10-26 | Punto 6, publicación completada | Tras autorización, 54 destinos promovidos y 115 tests post-sync; 95 archivos publicados en trece canónicos con trece commits y catorce pushes. Core publicado en GitHub y GitLab, incluidos fixes locales GitHub pendientes. Árboles canónicos limpios y HEAD remotos iguales al cierre. Ledger/hashes/rollback en backup `point6-20261027T015258Z`; ningún producto publicado. Reinicio de clientes solicitado, no confirmado. |
+| 2026-10-26 | Punto 7, planificación | Usuario pidió planificar y continuar. Metadata de nueve roles, evaluador V1 offline y revisión focalizada de 59 agentes en nueve overlays distinguen brecha MCP reader, catálogo aislado redundante con guardas runtime y ocultación editorial ya aplicada. Candidato 7.A: cinco denies solo en reader Knowledge; 7.B requiere diseño/aprobación aparte y 7.C no propone otra poda. Solo documento; implementación, pruebas del candidato y despliegue pendientes. |
+| 2026-10-27 | Punto 7.A, implementación | Usuario aprobó y exigió cobertura de todos los overlays específicos. Cinco denies en reader Knowledge, tests/README y plan; 23 tests pasados + uno omitido, nueve perfiles nativos con 59 agentes locales contrastados, evaluador V1 y contador de permisos aislado. 1.504 fingerprints protegidos e índices intactos. Once→seis schemas en reader, sin copias locales ni promoción. Detalle/fronteras en 7.f; despliegue/publicación pendientes, 7.B no aprobado. |
+| 2026-10-27 | Punto 7.A, promoción y publicación autorizada | Usuario autorizó avanzar con promoción y commits/pushes canónicos. Reader global promovido; global+nueve perfiles desde assets instalados verificados, 59 agentes y 1.503 fingerprints protegidos, cero escrituras de producto, 23 tests pasados + una omisión. Backup/rollback y ledger final de publicación en `point7a-20261027T032508Z`; alcance dos canónicos/tres remotos, sin cambios en 7.B. Reinicio de OpenCode requerido. |
 
 ## Próxima acción
 
-Promoción global + nueve overlays ejecutada y validada (6.u); completar la
-publicación ya autorizada y registrar sus hashes/resultados en el ledger y memoria.
-Reiniciar clientes afectados para usar la configuración nueva. Luego esperar
-indicación para planificar punto 7; no ejecutarlo ni correr modelos por cerrar 6.
-Delimitar el lote final de destinos/backups antes de desplegarlo.
-Los puntos 1–5 ya están cerrados/publicados; los fixes locales GitHub posteriores
-son independientes y siguen sin publicar. Nunca publicar productos AUNE: solo
-canónicos con autorización. No confundir fixtures textuales o carga de skills con
-cumplimiento conductual demostrado.
+**7.A implementado, validado y promovido** con global+nueve perfiles instalados
+verificados (7.f–7.g). Completar la publicación ya autorizada y registrar hashes,
+resultado remoto y árboles limpios en el ledger durable y memoria; no crear un
+commit circular del plan. Reiniciar OpenCode y usar sesiones nuevas.
+7.B conserva su puerta de especificación/aprobación; 7.C no añade poda editorial.
+No tocar memoria activa en ensayos ni correr modelos por arrastre.
+Los puntos 1–6 y fixes GitHub ya están publicados; no repetir promoción/publicación.
+El reinicio post-6 sigue pendiente de confirmación. Nunca publicar productos AUNE.
+No confundir relevamiento de fuentes, configuración o fixtures con llamadas
+efectivas probadas, obediencia de modelos o ahorro operativo demostrado.
