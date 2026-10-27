@@ -12,12 +12,15 @@ Core a GitHub y GitLab. Ledger, hashes y rollback en
 `~/.config/opencode/.stack-sync-backups/point6-20261027T015258Z/`; los fixes locales
 del wrapper GitHub también quedaron publicados. Nunca se publicaron productos AUNE.
 El reinicio de clientes afectados sigue sin confirmación del usuario; no asumir
-hot-reload. Punto 7.A implementado/validado (7.f) y promovido selectivamente con
-verificación global y de los nueve perfiles instalados (7.g). Publicación canónica
-autorizada; resultado final y hashes en el ledger durable indicado en 7.g, sin
-edición circular del plan tras publicar. Reiniciar OpenCode. 7.B requiere
-diseño/aprobación propios y 7.C no propone otra poda
-editorial. Puntos 8–10 pendientes. No hay una promoción de 6 todavía por ejecutar.
+hot-reload. Punto 7.A cerrado, promovido y publicado (7.f–7.g): Knowledge
+`0362aef`, Core `452ca97`, dos commits/tres pushes; hashes completos y verificación
+en el ledger durable de 7.g. Reiniciar OpenCode; aún sin confirmación del usuario.
+7.B implementado/validado (7.l) y promovido selectivamente con verificación del
+stack activo completo y los nueve perfiles instalados (7.m). Publicación de
+Background y Core autorizada; hashes/resultados finales en el ledger durable de
+7.m, sin commit circular del plan. La delegación background válida se conserva.
+7.C no propone otra poda editorial. Puntos 8–10 pendientes. No hay promociones
+ni publicaciones de 6/7.A todavía por ejecutar.
 
 ## Objetivo
 
@@ -3455,7 +3458,7 @@ herencia automática ni equiparar `task` con `delegate`.
   Una allowlist de namespace exigiría resolver precedencia y restricciones
   heredadas; no introducirla de forma encubierta en este alcance.
 
-**7.B — lifecycle aislado, diseño/aprobación posterior independiente.**
+**7.B — lifecycle aislado, implementado/validado y promovido (7.l–7.m).**
 
 Objetivo: ocultar `delegate_isolated`, `delegation_accept`, `delegation_apply` y
 `delegation_discard` fuera de `master-dev`, sin tocar matriz read-only, lectura de
@@ -3469,10 +3472,11 @@ restringido. Las guardas existentes, targets Java/frontend/master, profundidad,
 sesión raíz, estado accepted, checks de patch/workspace y revisión manual quedan.
 No ampliar a Python/TypeScript por existir esos especialistas en overlays.
 
-El relevamiento demuestra que hay catálogo redundante; **no cierra todavía el
-diseño de composición**. Si resolverlo requiere ensanchar permisos, reescribir
-overlays o intervenir el runtime base, volver a propuesta en vez de aceptar el
-atajo. Aprobar 7.A no autoriza cambios en Background.
+El relevamiento inicial mostró catálogo redundante. La especificación está en
+7.h–7.k y los resultados aprobados en 7.l–7.m. No se ensancharon permisos,
+reescribieron overlays ni intervino el runtime base. Si un cambio posterior lo
+requiere, volver a propuesta en vez de aceptar el atajo. La autorización de
+promoción/publicación posterior está registrada en 7.m.
 
 **7.C — no añadir poda editorial en este lote.**
 
@@ -3712,6 +3716,392 @@ archivo. Claude no cambia por 7.A. Confirmar publicación mediante su ledger y
 memoria de cierre; después, solo planificar 7.B cuando el usuario lo pida, sin
 implementar ni correr ensayos por el mero cierre de 7.A.
 
+### 7.h. Diagnóstico específico de 7.B — 2026-10-27
+
+**Estado del relevamiento inicial:** el usuario pidió solo planificar; ese pedido
+no autorizaba implementar, desplegar, publicar o lanzar delegaciones. La aprobación
+posterior y sus resultados están en 7.l.
+Core y Background estaban limpios al abrir esta planificación. 7.A ya publicado;
+su ledger confirma dos árboles limpios y los tres HEAD remotos de cierre iguales.
+
+Alcance: cuatro herramientas de Background, exactamente `delegate_isolated`,
+`delegation_accept`, `delegation_apply` y `delegation_discard`. El plugin fuente y
+el instalado coinciden; la superficie sigue registrada globalmente y sus guardas
+ya impiden el caller no autorizado. Es una poda de catálogo con defensa en capas,
+no un reemplazo del enforcement por instrucciones o por ocultar schemas.
+
+Relevamiento fresco, sin modelos ni ejecución de herramientas: metadata de trece
+nombres de rol y evaluación pura V1 real sobre sus reglas. `plan` no está
+disponible en la configuración efectiva de esta inspección; no se lo reactivó
+para obtener un resultado. Evidencia temporal:
+`/tmp/opencode/point7b-audit/report.json`.
+
+| Baseline global revisado | Cuatro herramientas aisladas |
+|---|---|
+| `master-dev` | Allow/visibles; conservar exactamente sus restricciones y guardas existentes |
+| `planner`, `agent-design`, `knowledge-reader`, `reviewer`, `code-inspector` | Allow/visibles, aunque los handlers/validator restringen el caller |
+| `build` (hidden pero existente), `general` | Allow/visibles; hidden no equivale a disabled ni a permisos read-only |
+| `explore`, `compaction`, `title`, `summary` | Ya deny/ocultas por sus reglas; no atribuir cuatro schemas ahorrados de nuevo |
+| `plan` | No disponible en este baseline; preservar disable y probar el nativo habilitado solo en fixture |
+
+Se contrastaron **1.501 fingerprints** con el ledger de publicación de 7.A, sin
+divergencias. Los nueve canónicos/productos conservan sus **59 agentes** en
+paridad, todos tienen `master-dev` local y ninguno declara estas cuatro tools
+en el header. La revisión semántica de 7.a sigue vigente: las reglas de dominio,
+handoff, memoria y delegación no se reemplazan por una nueva base genérica.
+Higyrus 11, VB 7, Market Data 7, Keycloak 4 y Gateway/Aggregator/Documento API/
+Perfil Inversor/OMS API 6 cada uno. Implementar debe volver a contrastar los
+nueve perfiles efectivos; paridad actual no prueba un candidato futuro.
+
+**Frontera de composición confirmada en fuente del runtime instalado:**
+
+- `config/config.ts` carga global, Markdown y overlays/overrides antes del hook.
+  `project/bootstrap.ts` inicializa plugins antes de consumidores derivados.
+  `plugin/index.ts` ejecuta los callbacks `config(cfg)` sobre esa configuración
+  resuelta. No hace falta tocar archivos locales para una política transversal
+  del addon ni consultar `client.app.agents()` desde ese callback (evitar recursión).
+- `ConfigAgentV1` ya normaliza `tools` a permisos durante el parseo. El hook debe
+  cambiar **`permission`**, no confiar en añadir `tools: false` después del parseo.
+  `Agent.state` aplica permisos del agente después de los globales.
+- `Permission.evaluate/disabled` toman la última regla coincidente. Reemplazar
+  una propiedad existente con spread/assign **no la mueve al final**: un `*` o
+  `delegation_*: allow` posterior puede ganar. Hay que reinsertar las cuatro
+  reglas concretas después de las demás, conservando el orden ajeno.
+- Los siete nativos se crean en `agent/agent.ts`, no todos existen en `cfg.agent`.
+  Recorrer solo los archivos declarados deja fuera `general` y otros nativos.
+  La lista actual es `build`, `plan`, `general`, `explore`, `compaction`, `title`,
+  `summary`; ese pequeño contrato con el host requiere prueba de inventario.
+
+Context7 se consultó como referencia, pero devolvió también diseño de plugins V2;
+no se toma como prueba de este flujo V1. La fuente `1.19.4--202610232249` es la
+evidencia aplicable. No inferir compatibilidad universal ni hot-reload.
+
+### 7.i. Candidato mínimo: una política aditiva del addon, sin nuevos allows
+
+En `Background/plugin/background-agents.ts`, agregar un helper puro **no exportado**
+y un callback `config` que únicamente compongan los permisos de esas cuatro tools:
+
+1. Formar el conjunto de nombres de `cfg.agent` más los siete nativos conocidos.
+   Es una enumeración dinámica de roles configurados, no una lista de proyectos
+   o especialidades dentro del plugin global. Así un agente futuro declarado
+   recibe la política sin agregarlo manualmente a 59 overrides.
+2. **No tocar `master-dev`**, ni crearlo si no existe. Su definición, `tools`,
+   permisos globales/locales/de sesión, modelo y prompt quedan iguales. No hay
+   deny global con excepción allow ni se clona un master para rescatarlo.
+3. Saltar roles con `disable: true`, sin activarlos, cambiarles hidden o añadir
+   primarios. Para un nativo existente en el host pero sin configuración propia,
+   crear solo su override mínimo de permisos; hereda su identidad nativa, no un
+   prompt copiado. Los demás campos/configuraciones de roles se conservan.
+4. Para cada otro rol, mantener en orden todas las entradas actuales de
+   `permission` salvo las cuatro claves exactas afectadas; volver a anexar esas
+   cuatro como `deny` completo. No ordenar el mapa completo, no cambiar `*`,
+   `delegation_*`, Bash, edit, task o permisos MCP. Las cuatro excepciones
+   allow/ask previas dejan de aplicar en un caller que runtime ya no autoriza.
+5. Hacer la transformación idempotente y local al `cfg` de esa instancia. No
+   escribir Markdown/JSON ni acceder a FS, sesiones o SDK desde el helper/hook.
+   No exportar otra función desde el módulo plugin legacy: su loader interpreta
+   los exports función como factories de plugins, no como helpers de tests.
+
+**Resultado candidato:** cuatro schemas fuera de los roles no autorizados que
+hoy los ven; `master-dev` conserva su situación previa, incluida una posible
+restricción del usuario. Los roles que ya los tenían ocultos no aportan otro
+recorte. No se garantiza cubrir futuros nativos no declarados: un cambio del
+inventario del host debe fallar en pruebas y exigir reclasificación, no ampliar
+la lista ni conceder autoridad silenciosamente.
+
+**Controles que permanecen literalmente intactos:**
+
+- Validator de launch: caller `master-dev`, target existente y uno de
+  Java/frontend/master, profundidad raíz y API worktree; no fallback `git worktree`.
+- Guards de caller de accept/apply/discard y validaciones de sesión/ownership,
+  `review_pending`/`accepted`, workspace limpio, patch check, artifacts/cleanup;
+  nada de auto-apply/merge/commit. No añadir Python/TypeScript a targets.
+- Máscaras `tools: false` de las sesiones hijas, incluso una hija `master-dev`,
+  y restricciones adicionales de sesión/mensaje. La excepción del rol no
+  rehabilita trabajo aislado anidado ni restaura una tool deshabilitada.
+- Las otras nueve tools Background: `delegate`, `delegation_open/read/tail/list`,
+  `delegation_cancel/continue`, `same_session_task_list/read`; sus matrices,
+  concurrencia, notificaciones, cola y TUI no cambian. No usar `delegation_*: deny`.
+- Los cinco denies MCP de reader (7.A) y todos los workflows de memoria/handoff,
+  guías, skills, modelos y permisos locales. No se necesita ningún override nuevo.
+
+Los handlers custom no piden necesariamente `ctx.ask` como el adaptador MCP de
+7.A. Por eso estos denies prueban visibilidad/filtro de solicitud, **no sustituyen
+las comprobaciones de caller dentro de las tools**. Una exposición forzada por
+otro override no debe convertir una invocación no autorizada en una mutación.
+El hook tampoco es una política inmutable frente a otro plugin que cambie luego
+la configuración o a un override explícito de sesión: comprobar la composición
+final del stack actual y conservar el rechazo runtime aun si reaparece el schema.
+
+**Wording y clientes:** no se cambia `DELEGATION_RULES`, la skill ni su trigger en
+este lote. Hallazgo adyacente: el hook actual espera `input.agent`, pero el emisor
+V1 inspeccionado de `experimental.chat.system.transform` pasa solo sessionID/model;
+su guarda puede omitir la inyección. No reparar eso agregando consultas por turno
+o un patch del host en 7.B, ni prometer que este cambio poda todo anuncio textual.
+Las descripciones de las tools registradas siguen existiendo. Si se quiere
+reparar esa inyección, requiere otro alcance con evidencia y aprobación.
+
+Claude no porta este plugin ni el rol primario `master-dev`; usa capacidades
+nativas de su runtime. Contrastar README/allowlists para no introducir esas cuatro
+tools en Claude, pero no crear un addon Background equivalente ni tocar settings,
+hooks o prompts Claude por simetría nominal. No se cambia su autoridad.
+
+### 7.j. Archivos y pruebas propuestos
+
+**Cinco archivos Background y este plan Core**, solo después de aprobar:
+
+- `plugin/background-agents.ts`: constante acotada/helper privado/hook `config`;
+  mantener registro y handlers, validator, lifecycle y hooks existentes.
+- `test/catalog-visibility.test.mjs` nuevo: transformación real, precedencia,
+  idempotencia, inventario de tools/nativos y regresiones positivas/negativas.
+  Sin exportar helpers como plugins para hacerlos testeables ni copiar la lógica
+  de decisión en el test. Lo recoge `node --test test/*.test.mjs` existente.
+- `README.md` y `docs/validation.md`: visibilidad versus autoridad, contrato y
+  comandos/opt-ins de pruebas. Playbook/skill actuales y TUI permanecen intactos.
+- `manifest/addon.json`: únicamente agregar el hash del plugin server stock
+  previo, `bdf92ff644d4636a114f85cfd23d783266523ad8834c91d4270ba18485ded839`, a
+  `compatibleInstalledHashes` de `background-agents`. El lifecycle del dueño
+  rechaza `modified` desconocido y exige backup para sustituir ese hash conocido;
+  no permitir cualquier plugin modificado, no cambiar TUI, versiones o patches.
+- Core: este plan para resultados. Ningún agente/manifest de los nueve overlays,
+  Knowledge, Documents o Claude se edita; si aparece un shadow/drift material o
+  hace falta otro archivo runtime, volver a alcance en vez de copiar todo.
+
+**Validación en un lote consolidado, sin modelos/delegaciones reales:**
+
+1. Unit tests del helper/hook real con permisos ausentes y normalizados desde
+   allow/ask/deny, reglas exactas/objetos, `*`/`delegation_*` en ambos órdenes,
+   entradas existentes antes del wildcard y configuración aditiva. Cuatro deny
+   finales; entradas ajenas y su orden intactos; segunda aplicación idéntica.
+   `master-dev` con permisos ausentes/allow/ask/deny o `tools[tool] = false` queda igual;
+   si falta, no se inventa. Roles deshabilitados, nativos e internos conservan
+   native/mode/hidden/disable; un rol configurado nuevo no es una excepción.
+2. Prueba del inventario de siete nativos y las trece tools registradas (cuatro
+   afectadas/nueve intactas). Si cambia el host o el registro, falla explícitamente.
+   Test de sustitución managed: hash stock conocido se puede respaldar/sustituir
+   en fixture y hash desconocido sigue rechazado. Regresiones existentes del addon.
+3. Sandbox con el plugin candidato **completo** y dependencias ya disponibles:
+   `opencode debug config` más `debug agent` deben demostrar que el callback real
+   se ejecuta después de los overrides y antes de derivar permisos. No sustituirlo
+   por inyección manual de los cuatro denies mediante config/fixtures.
+   Contrastar el filtro V1 real de tools y sus reglas; probar cambio de rol
+   master→planner→master y proyectos sin que se mezclen políticas.
+4. Global + **nueve perfiles locales** desde canónicos y, antes de cualquier futura
+   promoción, desde assets instalados; cubrir los 59 agentes y masters locales.
+   Cuatro deny/ocultas en cada rol no autorizado efectivo, master sin delta,
+   nativos habilitados y deshabilitados, excepciones más restrictivas heredadas,
+   sesión deny y mensaje/tools false. Solo las cuatro reglas por rol pueden
+   variar; targets `task`/read-only, 7.A y contratos locales intactos.
+5. Llamadas directas a los handlers/validator reales con managers/clientes de
+   fixture: no-master falla aunque se lo fuerce por fuera del catálogo; **ninguna
+   mutación de worktree, Git, sesión o estado** debe ejecutarse. El validator puede
+   consultar agentes antes del rechazo: no confundir lectura SDK con mutación.
+   Master autorizado alcanza el manager de fixture; targets no admitidos,
+   launch anidado y estados inválidos siguen rechazados. Comprobar las guardas
+   existentes de apply/cleanup con datos aislados, no aplicar patches reales.
+6. Diff y fingerprints de 7.A, TUI, configuración global persistida, once tools
+   Engram, archivos/índices de productos y restantes canónicos sin cambios.
+   Sin instalar paquetes, rebuild de host, API worktree real, reindex o benchmarks.
+
+Ninguna prueba del candidato se ejecutó durante la planificación; ver resultados
+posteriores en 7.l. La matriz inicial no prueba un lifecycle end-to-end. Los fixtures deben
+declarar su frontera; no presentar source matching como obediencia de modelos.
+Medir schemas realmente retirados y bytes serializados por rol solo después;
+no multiplicar cuatro por todos los roles ni extrapolar costo/latencia/calidad.
+
+### 7.k. Aprobación, promoción y rollback de 7.B
+
+**Alcance aprobado posteriormente:** implementar y validar 7.i–7.j solo en
+canónicos/sandbox, manteniendo las guardas y cubriendo los nueve overlays, sin
+quitar delegaciones background válidas. No incluye promoción, commits/pushes o
+ensayos con modelos. Un fallo de orden/composición que exija
+nuevos allows, host patch o editar 59 agentes vuelve a aprobación, no a un atajo.
+
+Si después se autoriza promover: backup pinneado y ledger del plugin server,
+promoción selectiva mediante el contrato managed de Background, comprobar paridad
+y salud/state del dueño sin correr `enable`/reapply completos por reflejo. No
+rehacer la adopción del runtime o regenerar sus backups/DB. Si el estado managed
+requiere metadata de actualización, delimitar sus campos en ese preflight.
+Verificar global y los nueve perfiles instalados sin inyectar un candidato y
+reiniciar OpenCode con sesiones nuevas; Claude no cambia por 7.B.
+
+Rollback: retirar únicamente el patch canónico aprobado y, si se promovió,
+restaurar el plugin server y metadata managed afectados según el ledger, rechazando
+drift antes de sobrescribir. Las denegaciones del hook son una composición en
+memoria: no hay 59 Markdown ni una excepción global allow que deshacer. Al volver
+al plugin anterior reaparecerán los cuatro schemas donde estaban visibles;
+sus guards runtime deben seguir protegiendo igual que antes. No tocar artifacts,
+delegaciones/worktrees existentes, productos, 7.A ni índices; no reset general.
+Reiniciar también después de restaurar para descartar la composición en memoria.
+
+### 7.l. Implementación y validación de 7.B — 2026-10-27, sin promoción
+
+**Aprobación:** tras aclarar que `master-dev`, `planner` y los demás callers
+autorizados siguen pudiendo delegar a background según su matriz, el usuario
+autorizó avanzar. Se anunció alcance solo canónicos/sandbox, sin deploy/publish.
+
+**Archivos exactos:** los cinco Background previstos en 7.j y este plan Core.
+Plugin: **24 líneas añadidas**, helper privado de composición y hook `config`.
+El resto de su código es **literalmente igual** al baseline al quitar esos dos
+fragmentos: guards, launch/accept/apply/discard, matrices, colas, notificaciones,
+sesiones hijas, TUI e inyección de instrucciones no se editaron. Manifest: solo
+el hash stock previo acordado. README/validation y test nuevo completan el lote.
+No se modificó ningún agente local, Knowledge, Claude o instalación activa.
+
+**Regresiones ejecutadas:**
+
+- `OPENCODE_BACKGROUND_NATIVE=1`, dependencias existentes y source host explícitos
+  con `node --test test/*.test.mjs`: **18 tests pasados, cero omitidos**. Incluyen
+  seis anteriores y doce nuevos; no sumar reruns como tests extra.
+- Helper real sobre reglas ausentes/escalars/objetos, orden de wildcards y claves
+  concretas, roles configurados futuros e idempotencia. Master y disabled mantienen
+  sus objetos/valores; master ausente no se inventa, nativos reciben solo permisos.
+- Plugin completo evaluado con imports/I/O de fixture: trece tools registradas,
+  cuatro afectadas y nueve intactas. Matriz read-only completa contrastada con
+  todos sus pares permitidos; planner conserva inspector/reviewer/UI designer.
+- Handlers/validator reales con managers/clientes de fixture: exposición forzada
+  desde no-master rechazada antes de mutaciones; master sigue alcanzando managers.
+  Targets Python/TypeScript, launch anidado, estados inválidos, workspace sucio y
+  patch inválido siguen rechazados. Control positivo de aceptación revisada.
+  Sin lanzar una delegación, crear worktree ni aplicar un patch real.
+- Sustitución managed en fixture: backup obligatorio para hash conocido y hash
+  desconocido rechazado. Hash manifest ligado al stock real comprobado en preflight.
+- Native fixture aislado carga el **plugin candidato completo**, ejecuta `debug
+  config` y `debug agent`, verifica los siete nativos y el caso adversarial de
+  planner con allows amplios previos. Master conserva sus ask/denies y flags false.
+  Source host confirma inventario nativo. No hay nuevos exports del plugin para tests.
+
+**Global + los nueve overlays específicos, en una pasada consolidada:**
+
+1. Baseline y candidato en diez perfiles nativos aislados: global y Higyrus, VB,
+   Market Data, Keycloak, Gateway, Aggregator, Documento API, Perfil Inversor y OMS.
+   Se usan configuración global efectiva seleccionada y los 59 agentes locales
+   canónicos, contrastados con instalados. El plugin se carga completo; no se
+   inyectaron los cuatro denies manualmente para hacer pasar la prueba.
+2. `opencode debug config` más servidores nativos efímeros en loopback con solo
+   `GET /agent` obtuvieron **todos** los permisos/identidades de cada perfil, no
+   solo un master y un planner. Tras remover las cuatro reglas del resultado de
+   no-master, la metadata efectiva y cuerpos quedan iguales al baseline. Los diez
+   masters son idénticos y los disable/defaults/native/hidden se preservan.
+   No se ejecutaron estos comandos dentro de los worktrees de productos.
+3. Filtro **V1 real** `session/llm/request.ts:resolveTools`, junto a
+   `Permission.disabled/merge`, aplicado a esa metadata nativa: **253 registros
+   perfil×rol**, 203 retiran exactamente cuatro schemas y 50 no pierden ninguno
+   (masters o roles que ya los tenían ocultos). Son registros repetidos por perfil,
+   **no 203 agentes únicos ni una medida de llamadas ahorradas**. Las otras nueve
+   tools mantienen su visibilidad previa en cada registro.
+4. Las restricciones adicionales de sesión y las máscaras de mensaje/hija para
+   master se conservan. Seleccionar master→planner→master con el filtro real sobre
+   el catálogo del mismo perfil no mezcla permisos. Es una prueba de selección
+   determinista, no una sesión conversacional ejecutada con un modelo.
+5. **1.503 fingerprints protegidos** intactos, incluidos 7.A, TUI, configuraciones,
+   guías/skills/scripts de productos y sus índices, además de HEAD canónicos.
+   `git diff --check` correcto. Ningún allow nuevo ni archivo runtime local clonado.
+
+**Medición estática acotada:** el registro conserva trece tools Background. En
+los roles afectados, el subconjunto filtrado pasa de **13 → 9**, y en master
+permanece **13 → 13**. Metadata JSON del mapa de definiciones (ID, descripción,
+parameters), obtenida por `GET /experimental/tool` del servidor aislado:
+**7.448 → 5.041 bytes** en el caso afectado. No son tokens, request de proveedor,
+contexto total ni ahorro operativo; no volver a contabilizar roles que ya tenían
+cero schemas Background. Ninguna métrica de latencia/calidad está demostrada.
+
+**Fronteras y límites:** los sandboxes clonan solo configuración de roles/controles
+sin providers, credenciales ni MCPs activos, y cargan únicamente el plugin server
+Background candidato. La configuración global seleccionada ya estaba compuesta;
+no se afirma haber ejercitado todas las interacciones futuras entre plugins.
+El binario real carga/transpila el TS y sirve metadata; no es un typecheck de todo
+el host ni un lifecycle end-to-end. Los fixtures sustituyen SDK/I/O; no prueban
+obediencia LLM, una transición TUI real ni worktrees reales. El desajuste del hook
+`system.transform` registrado en 7.i quedó intacto y fuera del cambio.
+
+Evidencia temporal: `/tmp/opencode/point7b-qa.py` y
+`/tmp/opencode/point7b-candidate/{baseline,profiles-after,request-matrix,result}.json`,
+`before-plugin.ts`, catálogo y fixtures aislados. Las conclusiones durables son
+esta sección y los tests canónicos; no depender de `/tmp` para retomar el trabajo.
+
+**Pendiente:** autorización para promoción selectiva y, por separado, publicación
+canónica. La instalación activa conserva el plugin stock anterior; no hay motivo
+de reinicio nuevo por estos cambios aún no desplegados. La comprobación futura
+debe usar el stack activo completo y los nueve perfiles instalados, sin inyección
+de candidato, además de backup/ledger y salud managed según 7.k. El reinicio de
+7.A sigue sin confirmación; no repetir su deploy. Nadie pierde background válido.
+
+### 7.m. Promoción selectiva y publicación autorizada de 7.B — 2026-10-27
+
+**Aprobación posterior:** usuario autorizó la promoción selectiva y el posterior
+commit/push únicamente de Background y Core, con nueva comprobación de los nueve
+perfiles instalados y sin publicar productos AUNE. Actualiza el pendiente histórico
+de 7.l; no agrega capacidades ni amplía permisos del runtime.
+
+**Dos archivos máquina, un solo plugin:**
+
+- `~/.config/opencode/plugins/background-agents.ts`, idéntico al candidato.
+- `~/.local/state/opencode-addons/opencode-background-tasks/state.json`, solo
+  cuatro campos de `plugins[id=background-agents]`: `sourceHash`, `installedHash`,
+  `state` y `backupPath`. El resto del JSON conserva exactamente sus valores.
+
+Se usó `installManagedFile` del dueño con su allowlist de hashes y backup
+obligatorio; resultado `replaced_compatible`, y `loadState/saveState` para actualizar
+esa entrada del servidor. No se ejecutó `enable`, reapply o adopción completos.
+No se tocó marker, launcher, runtime binario, versión/patch del host, TUI,
+playbook/skill, metadata de adopción, storage, binarios auxiliares, DB o corpus.
+Tests, documentación y este plan no se copiaron a la instalación ni a productos.
+
+**Backup durable pinneado:**
+`~/.config/opencode/.stack-sync-backups/point7b-20261027T144600Z/`.
+Incluye `before-plugin.ts`, `after-plugin.ts`, `before-state.json`, `after-state.json`,
+`ledger.json` con hashes/modos/alcance, `profiles-before/after.json`, catálogo,
+`request-matrix.json`, `verification.json` y `rollback.py` autónomo. El dry-run
+validó integridad y los dos destinos, sin restaurar nada. Para restauración
+expresamente autorizada: `python3 <backup>/rollback.py --apply`. Rechaza drift
+de cualquiera de ambos archivos **antes** de sobrescribir; no restaurar metadata
+completa si hubo cambios ajenos posteriores. Reiniciar tras una restauración.
+
+**Verificación post-sync, no solo del candidato aislado:**
+
+- `opencode debug config` y servidores nativos efímeros con metadata `GET /agent`
+  cargaron el **stack global activo completo**, más los nueve perfiles desde assets
+  instalados de productos. No hubo inyección del plugin candidato ni composición
+  manual de sus denies. Los procesos se cerraron al concluir las lecturas.
+- Los 59 agentes locales, configuraciones y guías se contrastaron con sus
+  canónicos antes de armar cada sandbox; **cero escrituras de producto** y sin
+  ejecutar validaciones dentro de sus worktrees. Se mantuvo la normalización
+  acotada de orden de reglas equivalentes explicada en 7.f.
+- En los diez perfiles, masters idénticos y solo cuatro denies nuevos en los
+  demás roles activos; native/hidden/disable/defaults, cuerpos y controles iguales.
+  Filtro V1 real: 253 registros perfil×rol, 203 pierden exclusivamente los cuatro
+  schemas indebidos y 50 no pierden ninguno. Las otras nueve tools conservan
+  visibilidad previa; restricciones de sesión/mensaje y selección de roles intactas.
+- Regresiones post-sync: **18 tests pasados, cero omitidos**. Matriz read-only,
+  callers/targets, roles nativos, idempotencia, guardas directas, lifecycle con
+  fixtures y sustitución managed verificados con las mismas fronteras de 7.l.
+  No contar las repeticiones como pruebas adicionales.
+- Salud managed antes/después idéntica: **adopted, sin drift/problemas**, launcher
+  correcto, restore disponible y Engram/Semgrep preservados. No reinstalar ni
+  reconstruir el runtime para aplicar esta política del plugin.
+- **1.507 fingerprints protegidos** sin cambios durante la promoción; incluyen
+  7.A, productos/índices y los binarios/marker/launcher managed. Los dos destinos
+  autorizados se validan aparte por sus hashes esperados. No hubo modelos,
+  delegaciones, worktrees o aplicación de patches reales de ensayo.
+
+**Publicación autorizada y registro final:** cinco archivos Background y este
+plan Core, mediante dos commits en `main` y tres pushes: Background a GitHub,
+Core a GitHub y GitLab. GitHub owner/cuenta `juanma91m`, alias SSH
+`github-juanma91m-v2`; GitLab Core conserva `juanma.91m`. Identidad de commit
+existente preservada; sin modificar remotes/config ni usar `auth switch`.
+Las tres ramas remotas coincidían con sus bases locales en el preflight.
+Guardar en este backup `publication-plan.json` y `publication.json` con hashes,
+resultado remoto y árboles limpios al concluir, sin otro commit solo para insertar
+el hash propio de este plan. Las escrituras Git autorizadas son solo canónicas;
+la verificación de publicación debe preservar los demás índices.
+
+**Activación:** cerrar/reiniciar OpenCode global y proyectos y abrir sesiones
+nuevas. Con `serve/attach`, reiniciar también el servidor que conserva las instancias
+del plugin. Las sesiones/procesos anteriores no se actualizan por publicar o
+copiar el archivo. Claude no cambió por 7.B. Nadie pierde una delegación background
+válida; el próximo punto no se implementa automáticamente al cerrar este.
+
 ## 8. CodeGraph por tipo de tarea
 
 **Hipótesis:** el beneficio depende del tipo de pregunta y del contexto disponible.
@@ -3820,16 +4210,20 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 | 2026-10-26 | Punto 7, planificación | Usuario pidió planificar y continuar. Metadata de nueve roles, evaluador V1 offline y revisión focalizada de 59 agentes en nueve overlays distinguen brecha MCP reader, catálogo aislado redundante con guardas runtime y ocultación editorial ya aplicada. Candidato 7.A: cinco denies solo en reader Knowledge; 7.B requiere diseño/aprobación aparte y 7.C no propone otra poda. Solo documento; implementación, pruebas del candidato y despliegue pendientes. |
 | 2026-10-27 | Punto 7.A, implementación | Usuario aprobó y exigió cobertura de todos los overlays específicos. Cinco denies en reader Knowledge, tests/README y plan; 23 tests pasados + uno omitido, nueve perfiles nativos con 59 agentes locales contrastados, evaluador V1 y contador de permisos aislado. 1.504 fingerprints protegidos e índices intactos. Once→seis schemas en reader, sin copias locales ni promoción. Detalle/fronteras en 7.f; despliegue/publicación pendientes, 7.B no aprobado. |
 | 2026-10-27 | Punto 7.A, promoción y publicación autorizada | Usuario autorizó avanzar con promoción y commits/pushes canónicos. Reader global promovido; global+nueve perfiles desde assets instalados verificados, 59 agentes y 1.503 fingerprints protegidos, cero escrituras de producto, 23 tests pasados + una omisión. Backup/rollback y ledger final de publicación en `point7a-20261027T032508Z`; alcance dos canónicos/tres remotos, sin cambios en 7.B. Reinicio de OpenCode requerido. |
+| 2026-10-27 | Punto 7.A, publicación verificada | Knowledge `0362aef` y Core `452ca97` publicados en sus tres remotos, dos árboles limpios y HEAD remotos iguales. Ledger final durable `point7a-20261027T032508Z/publication.json`. No repetir promoción/publicación; reinicio sigue sin confirmación del usuario. |
+| 2026-10-27 | Punto 7.B, especificación | Usuario pidió planificar. Fuentes V1 y metadata de trece nombres de rol distinguen roles visibles, ocultos y plan no disponible; nueve overlays/59 agentes en paridad y 1.501 fingerprints sin drift desde 7.A. Se propone hook `config` aditivo del dueño Background: cuatro denies finales por rol excepto master, sin allows globales/excepciones, nativos cubiertos y guards intactos. Cinco archivos Background + plan, pruebas en 7.j y puerta de aprobación 7.k. Solo documento; sin candidato, deploy, Git writes o modelos. |
+| 2026-10-27 | Punto 7.B, implementación | Usuario autorizó tras aclarar que nadie pierde background válido. Cinco archivos Background + plan implementados/validados: 18 tests sin omisiones, plugin completo en global+nueve perfiles sandbox, 59 agentes locales y 253 registros perfil×rol; 203 retiran solo cuatro schemas, 50 sin pérdida. Masters/matriz read-only/otras nueve tools/7.A intactos, 1.503 fingerprints protegidos, guards/lifecycle literal. Sin deploy/publicación/modelos; detalle y límites en 7.l. |
+| 2026-10-27 | Punto 7.B, promoción y publicación autorizada | Usuario autorizó promover y publicar los dos canónicos. Plugin server y cuatro campos de su entrada managed actualizados con API del dueño y backup. Stack activo completo + nueve perfiles instalados verificados, 59 agentes y 1.507 fingerprints protegidos, cero escrituras de producto, 18 tests sin omisiones; salud managed idéntica adopted/sin drift. Backup/ledger final en `point7b-20261027T144600Z`, publicación dos commits/tres remotos; detalle en 7.m. Reiniciar OpenCode/servidor si aplica. |
 
 ## Próxima acción
 
-**7.A implementado, validado y promovido** con global+nueve perfiles instalados
-verificados (7.f–7.g). Completar la publicación ya autorizada y registrar hashes,
-resultado remoto y árboles limpios en el ledger durable y memoria; no crear un
-commit circular del plan. Reiniciar OpenCode y usar sesiones nuevas.
-7.B conserva su puerta de especificación/aprobación; 7.C no añade poda editorial.
-No tocar memoria activa en ensayos ni correr modelos por arrastre.
-Los puntos 1–6 y fixes GitHub ya están publicados; no repetir promoción/publicación.
-El reinicio post-6 sigue pendiente de confirmación. Nunca publicar productos AUNE.
+**7.B implementado, validado y promovido** con stack global completo+nueve perfiles
+instalados (7.l–7.m). Completar la publicación ya autorizada y registrar hashes,
+estado remoto y árboles limpios en ledger durable y memoria, sin commit circular.
+Reiniciar OpenCode y el servidor `serve` si aplica; sesiones nuevas.
+Los puntos 1–6, fixes GitHub y 7.A están publicados; no repetir esas operaciones.
+Reiniciar OpenCode y usar sesiones nuevas para activar 7.A; aún sin confirmación.
+7.C no añade poda editorial. No tocar memoria activa en ensayos ni correr modelos
+por arrastre. Nunca publicar productos AUNE.
 No confundir relevamiento de fuentes, configuración o fixtures con llamadas
 efectivas probadas, obediencia de modelos o ahorro operativo demostrado.
