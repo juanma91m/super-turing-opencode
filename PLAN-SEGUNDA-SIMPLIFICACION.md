@@ -18,10 +18,13 @@ promovido y publicado (7.f–7.g): Knowledge
 en el ledger durable de 7.g. 7.B también cerrado/desplegado/publicado (7.l–7.m):
 Background `93cb55d`, Core `acb28a7`, dos commits/tres pushes; ledger final en 7.m.
 La delegación background válida se conserva. 7.C no propone otra poda editorial.
-8.A implementado/validado y promovido selectivamente, con carga real global y
-nueve perfiles instalados comprobada (8.g–8.i). Bloqueo VB resuelto sin tocar el
-índice del usuario. Publicación de CodeGraph/Claude/Core autorizada; resultado y
-hashes finales en el ledger durable de 8.i, sin commit circular. 8.B sigue diferido.
+8.A cerrado/desplegado/publicado (8.g–8.i): CodeGraph `15309e9`, Claude `8a9189a`,
+Core `3062371`, tres commits/cuatro pushes verificados en el ledger de 8.i.
+Bloqueo VB resuelto sin tocar el índice del usuario. El usuario confirmó después
+otro reinicio de OpenCode; no se infiere confirmación de Claude. 8.B experimental
+sigue diferido/no ejecutado. Sus precisiones de diseño y presentación fueron
+implementadas/validadas y promovidas selectivamente (8.k–8.l). Publicación de
+CodeGraph/Core autorizada; hashes/resultados finales en el ledger durable de 8.l.
 9–10 pendientes. No hay promociones/publicaciones de 6/7.A/7.B todavía por ejecutar.
 
 ## Objetivo
@@ -4295,9 +4298,11 @@ diagnóstico seguro del pin; presencia de DB/registro/daemon no alcanza. No usar
 esa necesidad para permitir más tools a `agent-design` o lanzar delegaciones
 desde este rol que las tiene prohibidas. No auto-init/sync/reindex como preparación.
 
-Si se quiere medir, empezar con dos casos estructurales contrastantes elegidos
-por el usuario (por ejemplo un impacto acotado Java de Higyrus y un flujo de
-filtros de Gateway), **dos pares / cuatro sesiones**, no nueve suites por defecto.
+Si una decisión concreta justifica medir, empezar con **un par exploratorio / dos
+sesiones** de un caso estructural elegido por el usuario, con presupuesto propio.
+El diseño inicial de dos casos (por ejemplo Higyrus y Gateway), dos pares/cuatro
+sesiones, queda como ampliación opcional si el primer par deja una decisión sin
+resolver; no es una cuota ni una validación de los nueve proyectos. Ver 8.j.
 Cada par debe tener el mismo proyecto, snapshot, pregunta, modelo/variant,
 política declarada y criterio de aceptación; no comparar Higyrus contra Gateway
 como si fueran dos variantes equivalentes. Presupuesto y sesiones a aprobar
@@ -4590,6 +4595,200 @@ después de 7 no carga automáticamente estas nuevas instrucciones de 8.A.
 8.B sigue diferido, sin presupuesto/modelos autorizados; no ejecutarlo por cerrar
 la promoción. Los siguientes puntos requieren pedido y especificación propios.
 
+### 8.j. Revisión de pertinencia de 8.B — 2026-10-27, sin experimento
+
+**Pedido:** revisar si vale la pena ajustar 8.B o seguir de largo. Solo lectura
+del diseño, playbook e instrumentación existente y este registro; no se aprobó
+lanzar sesiones, consultar grafos o retocar métricas/runtime por ese pedido.
+La ruta managed estándar de benchmarks no existe en esta inspección; no se
+buscaron otras ubicaciones ni se infiere ausencia universal de capturas.
+
+**Diagnóstico:** 8.A ya resolvió una precisión de contrato y conservó CodeGraph
+en los nueve proyectos. No se aportó en este pedido un caso reproducible de
+regresión, exceso de costo, salida inutilizable o calidad insuficiente que exija
+decidir otro routing. Esto **no prueba** que CodeGraph ahorre ni que la política
+nueva se obedezca; significa que no hay una decisión concreta que obligue ahora
+a pagar el ensayo. La instrumentación v2 ya contempla alcance, pares comparables,
+datos desconocidos, aceptación/utilidad/correcciones y resultados excluidos;
+no necesita una reescritura por cerrar este punto.
+
+**Ajustes de diseño e interpretación que sí aportan:**
+
+1. Separar preguntas: **con/sin grafo** estima el valor de disponer/usarlo en esa
+   tarea; **política anterior vs. 8.A** pregunta por otro efecto. El comparador
+   actual exige `policy_version` idéntica, además de proyecto/modelo/tipo/tarea/
+   alcance compatibles (`compatible_pair`). No etiquetar dos políticas distintas
+   como iguales, ni cambiar el helper por reflejo para forzar el porcentaje.
+   Un ensayo antes/después requeriría diseño e instrumentación aplicables propios.
+2. `capture_record` fija `recommended_max_output_bytes = 10 * 1024` y el reporte
+   agrupa ese flag con el de llamadas bajo “Cumplimiento de presupuesto”. Es una
+   **referencia heurística fija de medición**, no un cap del motor, una regla
+   extraída de `policy_version` o un límite de salida declarado por 8.A. No tomar
+   un flag negativo como incumplimiento de la política ni retirar CodeGraph por
+   superar ese umbral. Antes de usar esa columna para decidir, aclarar su rótulo/
+   interpretación en el ensayo; no se modifica hoy la herramienta ni el umbral.
+3. `manual_calls` cubre `glob/grep/read`, no toda búsqueda posible mediante Bash,
+   wrappers u otras tools. Tokens totales, aceptación y correcciones siguen
+   importando; no reducir la evaluación a “menos grep/read”. Revisar la cobertura
+   del campo para el rol y tarea elegidos, sin inventar observaciones faltantes.
+4. Un par —o dos— es un **piloto descriptivo**, no evidencia estadística ni permiso
+   para cambiar nueve repos o extrapolar ahorro. Empezar con un solo caso si se
+   reabre, mismo contexto inicial/snapshot/modelo y aceptación definida antes;
+   sesiones nuevas sin pasar la respuesta de una variante a la otra. No relajar
+   lecturas/memoria locales para fabricar un control ni contaminarlo con hallazgos
+   persistidos por la primera variante.
+5. Verificar primero que el caso puede medirse de manera segura: índice/root/
+   cobertura adecuados y presupuesto/autorización. Mantener 8.e: operador/rol
+   habilitado, no delegaciones desde `agent-design`, no init/sync/reindex de
+   preparación ni consultas innecesarias para un caso literal.
+
+**Criterio para reabrir:** una tarea estructural real y reproducible con una
+señal material, más una decisión explícita que el resultado podría cambiar
+(por ejemplo acotar la primera consulta en un root concreto o preferir evidencia
+directa en ese tipo de tarea sin perder cobertura). Definir calidad mínima y
+criterio de parada antes. Si falla calidad, reportarlo aunque el porcentaje de
+tokens parezca favorable; mostrar todos los outcomes/exclusiones y no solo los
+pares accepted del porcentaje principal. Si no hay decisión pendiente, no crear
+una sesión de benchmark por completar una casilla.
+
+**Recomendación:** **seguir de largo hacia la planificación de 9**, manteniendo
+8.B opcional/diferido, no bloqueante y reactivable con el criterio anterior.
+No darlo por ejecutado o por una validación de ahorro. No editar agentes locales,
+permisos, índices, comandos, métricas o configuración global por esta revisión.
+Solo se actualizó el plan; `git diff --check` es la validación pertinente.
+Pasar a planificar 9 requiere la indicación del usuario; no se inició aquí.
+
+### 8.k. Precisiones de diseño y reporte implementadas — 2026-10-27
+
+**Aprobación:** el usuario pidió ejecutar los ajustes útiles de diseño detectados
+en 8.j. Se anunció su aplicación al reporte y documentos, conservando claves y
+cálculos, sin ejecutar el experimento ni cambiar routing/índices/permisos, y solo
+en canónicos/sandbox, sin despliegue/publicación. No confundir esta implementación
+con haber ejecutado **8.B**, que sigue opcional y diferido.
+
+**Cinco archivos, scope acotado:**
+
+- CodeGraph `scripts/codegraph_metrics.py`: únicamente `report_markdown` cambia.
+  Distingue con/sin grafo de antes/después de políticas, explica carácter de piloto
+  descriptivo, cambia la columna a “Referencia heurística (llamadas/salida)” y
+  aclara 1/3 llamadas y 10 KiB como referencia del capturador actual, no límite
+  del motor o política. Los flags guardados no se recalculan ni se infieren de la
+  política vigente. Las etiquetas de lectura/suma nombran lo observado:
+  `glob/grep/read` y su combinación con CodeGraph, no toda búsqueda posible.
+- `PLAYBOOK-CODEGRAPH.md` y `commands/codegraph-benchmark.md`: pregunta decisoria,
+  autorización/presupuesto/calidad/parada previos, piloto de un par/dos sesiones,
+  no extrapolar ni falsear `policy-version`, cobertura parcial y prioridad de
+  calidad/correcciones/outcomes/exclusiones. Sin ampliar rol del comando para
+  resolver acceso al wrapper: pedir operador compatible, no bypass.
+- `tests/test_codegraph_metrics.py`: tres regresiones nuevas de presentación,
+  JSON/cálculos inalterados, cobertura Bash explícita y consistencia documental.
+- Core: este plan. Sin nuevos archivos runtime, opciones CLI, clasificadores,
+  loaders, adaptación Claude o cambios en los nueve overlays.
+
+**Compatibilidad verificada, no solo intención:** al excluir `report_markdown`,
+el script es **literalmente idéntico** al baseline. Captura/serialización JSON v2,
+fórmulas, clases de tools, elegibilidad/`policy_version`, agregados, valores legacy
+y CLI se conservan; no se renombraron claves ni cambió el umbral de 10 KiB.
+La presentación Markdown cambia deliberadamente, no se promete identidad de sus
+rótulos. El nombre legacy `budget_compliance_rate_pct` sigue en JSON y los docs
+explican cómo interpretarlo, sin convertirlo en guardrail o en una regla nueva.
+Header/agent del comando idénticos, sin nuevos permisos por ese ajuste.
+
+**Validación:**
+
+- Red/green focalizado: las nuevas aserciones de presentación/documentación
+  fallaron con la versión anterior; después **42 tests pasados, cero omitidos**
+  (39 previos + tres nuevos), con la adaptación Claude instalada como fixture de
+  equivalencia. Reejecuciones no se cuentan como pruebas diferentes.
+- Regresión de formatter no muta el objeto report; claves JSON v2, rate legacy y
+  mejora numérica esperada del fixture iguales. El caso Bash conserva la
+  clasificación existente y comprueba que no se lo cuente silenciosamente como
+  `glob/grep/read`. Son datos sintéticos, no un resultado de performance real.
+- **1.564 fingerprints protegidos** intactos, incluidos activos instalados,
+  runtime/configuración, Claude, guías/índices de productos, guía VB restaurada y
+  estado Git del usuario, más contratos globales 8.A no alcanzados. Metadata de
+  filesystem de los índices CodeGraph igual al preflight, sin abrir sus DB.
+- HEAD canónicos sin cambios; `git diff --check` correcto. No hizo falta repetir
+  matrices nativas ni suites de otros addons: no se tocó configuración de roles,
+  skills de routing o modelos y el cambio ejecutable se limita al formatter.
+
+Los tests de proyecto/métricas usan fixtures/DB temporales; no se operaron
+`history/capture/report` sobre sesiones reales ni se lanzaron modelos, grafos,
+benchmarks, daemons o worktrees. No se demuestra ahorro, latencia, calidad ni
+conducta de agentes por estas regresiones.
+
+Trazabilidad temporal: `/tmp/opencode/point8b-design-qa.py` y
+`point8b-design-candidate/{baseline,result}.json`; registro durable en este plan
+y tests. Fuera de los cinco archivos aprobados no se editó nada. Los tres
+assets instalados alcanzados (metrics script, playbook y comando) siguen con la
+versión anterior, sin actualización implícita por symlink.
+
+**Pendiente:** autorización de promoción selectiva y publicación de estas
+precisiones de CodeGraph/Core si se desea. No requieren otro reinicio por ahora,
+porque aún no se desplegaron. El experimento 8.B y la planificación/ejecución de
+9 no quedan autorizados por esta implementación.
+
+### 8.l. Promoción de precisiones de medición y publicación autorizada — 2026-10-27
+
+**Autorización posterior:** usuario aprobó promover/publicar estas precisiones
+solo en CodeGraph y Core, **sin ejecutar el experimento**. Actualiza el pendiente
+histórico de 8.k. Tres assets instalados, en paridad con sus fuentes:
+
+- `~/.config/opencode/scripts/codegraph_metrics.py`.
+- `~/.config/opencode/commands/codegraph-benchmark.md`.
+- `~/.config/opencode/PLAYBOOK-CODEGRAPH.md`.
+
+Se copiaron selectivamente tras comprobar hashes/modos y drift. No se ejecutó
+instalador completo/metrics-only, no se tocó marker, runtime CodeGraph, MCP,
+permisos, modelos, settings, datos de proyectos, registro, métricas históricas,
+índices ni watchers. Claude y las skills de routing de 8.A no cambian.
+
+**Backup durable pinneado:**
+`~/.config/opencode/.stack-sync-backups/point8b-design-20261027T203813Z/`.
+Conserva `000–002-before/after`, `ledger.json`, `json-before/after.json`, fixture
+sintético aislado y `verification.json`, más `rollback.py` autónomo. Dry-run
+verificó integridad de los tres assets, sin restaurar. `--apply` solo con
+autorización explícita; comprueba todos los destinos y rechaza drift antes de
+sobrescribir. No revierte código fuente, guías de productos, Git o bases de datos.
+
+**Verificación post-sync:**
+
+- CLI del **script instalado** con `report --state-dir <fixture> --json` antes y
+  después: objetos JSON iguales, salvo `generated_at` que naturalmente cambia por
+  ejecución. Claves, valores, fórmulas y schema v2 se conservaron. Se verificó
+  también Markdown instalado con rótulos/aclaraciones nuevos.
+- Son registros **sintéticos**, marcados como fixture y guardados solo dentro del
+  backup, nunca en el directorio managed de runs reales. No se midió un modelo,
+  root de producto o sesión de usuario, ni se registró una captura del experimento.
+  No presentar sus números de ejemplo como resultados de CodeGraph.
+- `opencode debug config` seleccionó la plantilla global nueva del comando,
+  idéntica a source; su agente/header/metadata permanecen iguales. No se ejecutó
+  el comando con una tarea real ni se amplió su permiso de Bash.
+- **42 tests post-sync pasados, cero omitidos**; son los mismos tests de 8.k,
+  usando fixtures/DB temporales. La elegibilidad y comportamiento previo del
+  helper se conservan fuera del formatter, como se verificó en canónicos.
+- **1.561 fingerprints protegidos** intactos; los tres destinos autorizados se
+  comprueban aparte por hash/modo. Nueve proyectos, índices Git, guía VB restaurada
+  e índice del usuario, activos de Claude/8.A y demás configuración sin cambios.
+  Metadata de filesystem de los índices CodeGraph igual, sin abrir sus DB.
+  Cero escrituras de producto o Git de productos.
+
+**Publicación autorizada:** cuatro archivos CodeGraph y este plan Core en dos
+commits `main`/tres pushes: CodeGraph a GitHub y Core a GitHub/GitLab. Cuenta/owner
+GitHub `juanma91m`, alias `github-juanma91m-v2`; Core GitLab `juanma.91m`.
+Identidad Git previa preservada, sin `auth switch`, cambios de remotes/config o
+tokens persistidos. Las ramas remotas coincidían con sus bases en el preflight.
+Guardar `publication-plan.json`/`publication.json` en este backup con hashes,
+árboles limpios y HEAD remotos finales iguales; no hacer otro commit circular del
+plan solo para su propio hash. Nunca publicar productos AUNE.
+
+**Activación:** nuevas invocaciones Python del helper leen el script actualizado;
+reiniciar OpenCode para recargar comando/playbook si ya estaban en contexto o
+cache. No hay cambios Claude que activar por este lote ni un servidor de
+aplicación, runtime o índice que reinstalar/reiniciar. **8.B sigue sin ejecutarse**
+y requiere autorización propia de caso/presupuesto/rol. Después se puede pedir
+la planificación de 9; no se inició automáticamente.
+
 ## 9. Separación de artifact-planner y artifact-renderer
 
 **Decisión requerida:** evaluar si `documenter` debe planificar/renderizar lo
@@ -4685,14 +4884,19 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 | 2026-10-27 | Punto 8.A, implementación y bloqueo final | Usuario aprobó y exigió cambios globales. Se precisan skill/playbook/README globales de CodeGraph y adaptación Claude, más test/plan: seis archivos sin delta local de este patch. 39 tests sin omisiones y primera pasada de diez perfiles/59 agentes/27 casos documentales correctas; luego cierre bloqueado por AGENTS.md ausente e índice Git cambiado de VB, fuera del alcance y sin autoría establecida. No restaurar ni rebaselinizar sin aclaración. Nativas extra Aggregator preservadas; transitorios CodeGraph VB registrados sin intervención. Sin deploy/publicación/modelos; 8.g conserva evidencia y límites, 8.B diferido. |
 | 2026-10-27 | Punto 8.A, desbloqueo y revalidación final | Usuario autorizó restaurar solo AGENTS.md de VB desde el canónico; copia idéntica al original, índice Git actual del usuario preservado y baseline sin sobrescribir. Revalidación fresca global+nueve perfiles/59 agentes y 39 tests sin omisiones; 1.550 huellas originales iguales más un índice explícitamente controlado. Una escritura de producto autorizada y cero Git writes. 8.A listo canónicos/sandbox, no promovido/publicado; detalle en 8.h. |
 | 2026-10-27 | Punto 8.A, promoción y publicación autorizada | Usuario autorizó promover y publicar CodeGraph/Claude/Core. Tres contratos globales copiados selectivamente, carga real en global+nueve perfiles, 59 agentes, 39 tests sin omisiones y 1.551 fingerprints protegidos; guía VB e índice del usuario preservados, sin escrituras de producto en esta promoción. Backup/ledger final `point8a-20261027T173905Z`; alcance tres commits/cuatro remotos. Reiniciar clientes/servidor si aplica; 8.B no ejecutado. |
+| 2026-10-27 | Punto 8.A, publicación verificada | CodeGraph `15309e9`, Claude `8a9189a`, Core `3062371`: tres árboles limpios/cuatro HEAD remotos iguales al cierre, en ledger `point8a-20261027T173905Z/publication.json`. Usuario confirmó después reinicio de OpenCode; no exigir otro por revisar un plan. |
+| 2026-10-27 | Punto 8.B, revisión de pertinencia | Usuario pidió evaluar ajustes o seguir de largo. Se recomienda mantener diferido/no bloqueante y pasar a planificar 9: sin regresión/caso decisorio aportado no hay ensayo obligatorio. Se precisan pregunta con/sin frente antes/después, referencia heurística de 10 KiB no equivalente a política, cobertura parcial de manual_calls y piloto inicial de un par si se reabre. Solo plan, sin experimentar ni cambiar instrumentación; 8.j. |
+| 2026-10-27 | Punto 8.B, precisiones de diseño implementadas | Usuario pidió aplicar los ajustes: solo formatter Markdown, playbook/comando, tres tests nuevos y plan (cinco archivos). Claves/cálculos/JSON/elegibilidad/CLI literal fuera formatter, 42 tests sin omisiones y 1.564 fingerprints protegidos. Activos instalados e índices sin cambios; no experimento real, despliegue o publicación. Detalle 8.k; 8.B sigue diferido. |
+| 2026-10-27 | Punto 8.B, precisiones promovidas y publicación autorizada | Usuario autorizó promoción/publicación CG/Core sin experimento. Tres assets copiados, CLI instalada con fixture JSON igual antes/después salvo fecha y Markdown nuevo; plantilla nativa del comando cargada, metadata igual, 42 tests sin omisiones, 1.561 fingerprints protegidos y cero escrituras de producto/Git. Backup/ledger `point8b-design-20261027T203813Z`; alcance dos commits/tres remotos. Detalle 8.l; no benchmark de modelos. |
 
 ## Próxima acción
 
-**8.A implementado, validado y promovido; bloqueo VB resuelto** (8.g–8.i).
-Completar publicación ya autorizada y registrar hashes/HEAD remotos/árboles limpios
-en ledger durable y memoria, sin commit circular. Reiniciar OpenCode/Claude y el
-servidor `serve` si aplica. Guía VB e índice actual del usuario preservados; no
-volver a restaurarlos por esta publicación. 8.B sigue diferido y exige aprobación.
+**8.A cerrado/publicado; precisiones de medición promovidas** (8.k–8.l).
+Completar publicación ya autorizada y registrar hashes/estado remoto/árboles
+limpios en ledger durable y memoria, sin commit circular. Reiniciar OpenCode para
+el comando/playbook nuevo, no runtimes/índices. El experimento sigue opcional y
+diferido, no bloquea 9, cuya planificación necesita indicación propia. No repetir
+promoción 8.A/restauración VB, ampliar permisos o tocar índices por ese experimento.
 Los puntos 1–6, fixes GitHub y 7.A/7.B están publicados; no repetir esas operaciones.
 Reinicio de OpenCode confirmado por el usuario. 7.C no añade poda editorial.
 Nunca publicar productos AUNE ni abrir/reparar sus índices por cerrar un plan.
