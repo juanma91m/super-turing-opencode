@@ -1,0 +1,16 @@
+{
+  "ssh-inspect": {
+    "path": "scripts/ssh_inspect.py",
+    "interpreter": "python3",
+    "verbs": {
+      "help": {"positionals": [], "options": {}},
+      "hosts": {"positionals": [], "options": {}},
+      "containers": {"positionals": [{"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,252}"}], "options": {}},
+      "container": {"positionals": [{"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,252}"}, {"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,127}"}], "options": {}},
+      "logs": {"positionals": [{"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,252}"}, {"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,127}"}], "options": {"--tail": "int", "--since": {"pattern": "[1-9][0-9]{0,5}[smhd]"}}},
+      "services": {"positionals": [{"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,252}"}], "options": {}},
+      "service": {"positionals": [{"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,252}"}, {"pattern": "[A-Za-z0-9][A-Za-z0-9_.@-]{0,120}\\.service"}], "options": {}},
+      "service-logs": {"positionals": [{"pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,252}"}, {"pattern": "[A-Za-z0-9][A-Za-z0-9_.@-]{0,120}\\.service"}], "options": {"--tail": "int", "--since": {"pattern": "[1-9][0-9]{0,5}[smhd]"}}}
+    }
+  }
+}
