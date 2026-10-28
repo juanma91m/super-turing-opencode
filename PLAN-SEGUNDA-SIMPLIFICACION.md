@@ -23,9 +23,11 @@ Core `3062371`, tres commits/cuatro pushes verificados en el ledger de 8.i.
 Bloqueo VB resuelto sin tocar el índice del usuario. El usuario confirmó después
 otro reinicio de OpenCode; no se infiere confirmación de Claude. 8.B experimental
 sigue diferido/no ejecutado. Sus precisiones de diseño y presentación fueron
-implementadas/validadas y promovidas selectivamente (8.k–8.l). Publicación de
-CodeGraph/Core autorizada; hashes/resultados finales en el ledger durable de 8.l.
-9–10 pendientes. No hay promociones/publicaciones de 6/7.A/7.B todavía por ejecutar.
+implementadas/validadas/promovidas/publicadas (8.k–8.l): CodeGraph `fc8e59c`, Core
+`96728b8`, dos commits/tres pushes verificados en el ledger de 8.l. 9.A implementado,
+validado y promovido selectivamente; publicación autorizada y resultado final en
+el ledger de 9.h. 10 pendiente. No hay promociones/publicaciones de los puntos
+anteriores todavía por ejecutar.
 
 ## Objetivo
 
@@ -4791,8 +4793,10 @@ la planificación de 9; no se inició automáticamente.
 
 ## 9. Separación de artifact-planner y artifact-renderer
 
-**Decisión requerida:** evaluar si `documenter` debe planificar/renderizar lo
-rutinario directamente, reservando sesiones independientes para especialización real.
+**Decisión acordada (9.g):** `documenter` planifica/renderiza lo rutinario
+directamente; planner/renderer se conservan para especialización opcional real.
+Implementado/validado y promovido selectivamente (9.h); publicación canónica
+autorizada, con resultado final verificable en el ledger indicado allí.
 
 **Ubicación:** Addon Documents: `.opencode/agent/` y workflow documental.
 
@@ -4809,6 +4813,363 @@ cantidad de agentes. Especificar capacidades únicas antes de proponer un retiro
 calidad, editabilidad, seguridad y aislamiento. Aprobación explícita antes de retirar roles.
 
 **Rollback:** restaurar agentes/routing previos; no modificar artefactos existentes.
+
+### 9.a. Diagnóstico y ownership — 2026-10-27
+
+**Pedido al iniciar 9:** planificar. En esa etapa solo se modificó este documento; no se retiraron
+roles, editaron permisos o publicaron documentos. No se delegó el relevamiento ni
+se consultaron preferencias/plantillas privadas para una tarea de arquitectura.
+
+Documents tiene **trabajo previo ajeno a este punto**: `CHANGELOG.md`,
+`DOCUMENTS-MANIFEST.json`, `README.md`, `tests/test_lifecycle.sh` modificados y
+`planner-helpers/`, `scripts/review_document.py`, `skills/lectura-documental/`,
+`tests/test_review_document.py` sin publicar. Se leyó para entender convivencia,
+no se corrigió, revirtió, ejecutó ni se lo incorpora por arrastre a una publicación
+de 9. La propuesta evita esos paths para no mezclar el helper de lectura con
+cambios del workflow de generación. Si cambia su estado antes de implementar,
+reconciliar el preflight, no restaurar Git ni regenerar el addon completo.
+
+Se inspeccionaron siete agentes, ocho tools, comandos, skill/workflow compartidos,
+wrappers y documentación de ambos clientes. Metadata nativa global y de nueve
+perfiles, más evaluación V1 pura, confirman el contrato instalado. Los siete
+agentes y las ocho tools fuente coinciden con sus copias activas. **1.032
+fingerprints protegidos** intactos y estado dirty previo Documents idéntico al
+inicio. Evidencia temporal `/tmp/opencode/point9-audit/{report,protected}.json`.
+No es una prueba de salida o selección de agentes por un modelo.
+
+| Rol | Capacidad actual | Diferencia útil que no debe perderse |
+|---|---|---|
+| `documenter` | Primary, 40 pasos; edit allow, Bash deny, task allow; ocho tools editoriales | Puede planificar, escribir spec y renderizar directamente. Canvas exclusivo entre estos roles; lectura Confluence allow y create/update ask cuando MCP disponible |
+| `artifact-planner` | Subagent; read/glob/grep allow; edit/Bash/task deny; sin tools editoriales habilitadas | Contexto de planificación sin editar ni renderizar; devuelve storyline/plan/spec preliminar, no un archivo escrito ni datos inventados |
+| `artifact-renderer` | Subagent; edit/Bash/task deny; siete tools editoriales (no canvas) | Contexto de ejecución acotado, sin edición semántica ni escritura Confluence; puede crear artefactos mediante tools, por lo que no es un sandbox universal de solo lectura |
+| `visual-qa` | Subagent; preview/validate; edit/Bash/task deny, render false | Revisión visual separada, todas las páginas/slides, sin editar fuentes ni sustituirla por receipt/compilación |
+| `content-editor`, `data-viz`, `diagram-designer` | Subagents sin tools de render ni delegación | Edición propuesta, decisiones de gráficos/specs y diseño de diagramas a partir de evidencia; no se eliminan ni fusionan |
+
+Ninguno declara un modelo propio en estos archivos; no cambiar modelos/steps por
+suponer una diferencia de costo. Los permisos evaluados de Confluence son por IDs
+declarados: no se verificaron autenticación, disponibilidad o escrituras remotas.
+La separación por rol restringe ciertas operaciones, **no prueba aislamiento OS,
+inmutabilidad universal de estado MCP ni corrección del contenido**.
+
+**Conclusión:** planner/renderer no aportan una tool exclusiva frente al primary,
+pero sí contextos y restricciones distintos. Eliminarlos solo por superposición
+perdería una opción de menor exposición. Además, **el workflow actual no obliga a
+delegarles**: `documenter` ya dice usar especialistas para responsabilidades
+acotadas y la referencia enumera etapas, no una cadena de dos sesiones hijas.
+No hay una redundancia obligatoria demostrada ni ahorro medido por retirarlos.
+
+### 9.b. Routing real: tres flujos que no se deben confundir
+
+1. **Artifact Studio / OpenCode:** `/artifact`, `/report`, `/deck`, `/docx`,
+   `/artifact-preview`, `/artifact-check`, `/canvas` apuntan a `documenter` en
+   metadata nativa. Los cuatro primeros generan desde spec; preview/check tienen
+   alcance propio y no deben empezar a renderizar por el workflow estándar. Canvas
+   es interactivo/local y no reemplaza publicación determinista por defecto.
+2. **QMD/Quarto/Pandoc + D2:** `/publicar-documento` y `/crear-diagrama` no fijan
+   agente; usan skills/wrappers y conservan PDF/DOCX/**ODT**, QMD como fuente y QA
+   de editables. `documenter` tiene Bash deny y no puede simplemente heredar estos
+   wrappers. No redirigir esos comandos al primary para unificar nombres.
+   Claude porta este flujo, no estos tres agentes Artifact Studio: no crear roles
+   Claude equivalentes ni darles nuevas tools por simetría nominal.
+3. **Lectura de adjuntos:** el trabajo previo `document-review` desde planner
+   convierte/extrae para lectura, no genera una entrega editorial nueva. Queda
+   separado, con sus restricciones y autoridad propias; no usarlo como bypass de
+   publicación ni incluirlo en el diff de 9.
+
+**Nueve overlays:** 59 agentes locales y sus guías/configs en paridad con
+instalados; no hay homónimos de los siete agentes ni shadows de los nueve comandos
+en los paths locales inspeccionados. En **los nueve perfiles efectivos**:
+
+- `documenter → task artifact-planner/artifact-renderer/visual-qa` allow;
+  sus subagentes mantienen task deny y no delegan una segunda etapa por su cuenta.
+- `master-dev` y `planner` tienen task deny a esos destinos y a `documenter`.
+  No declarar resuelto un pedido mixto porque el modelo podría inventar ese
+  despacho, ni tocar 59 headers para habilitarlo. La selección explícita del
+  primary o los comandos ya dirigidos a él son entradas distintas de `task`.
+
+Para pedidos mixtos código/documentos, conservar evidencia/handoff y worktree del
+proyecto, y usar una entrada autorizada existente. Si el rol activo no puede
+completar el flujo elegido, declarar el límite y pedir modo/comando compatible,
+no ampliar permisos, publicar Markdown como si fuera el archivo solicitado ni
+remplazar silenciosamente el flujo ODT por uno que no lo soporta. La propuesta
+de 9 no pretende habilitar todas las combinaciones desde cualquier rol.
+
+### 9.c. Candidato 9.A: despacho explícito, no retiro de roles
+
+**Recomendación a aprobar:** conservar todos los agentes y permisos; precisar el
+default y los triggers de uso en los contratos Artifact Studio. Nada se cambia
+todavía. Si el objetivo fuera solo reducir el número de agentes, este punto puede
+concluir sin retiro: no hay obligación de borrar dos roles por cumplir la hipótesis.
+
+- **Rutinario directo en `documenter`:** propósito/audiencia/formato y evidencia
+  suficientes, plantilla aprobada y spec acotado. Planificar/escribir spec y llamar
+  tools de render directamente sin una estación obligatoria planner→renderer.
+  No definir “rutinario” por cantidad de páginas, porque sea “breve” o porque se
+  pidan varios formatos; el primary ya soporta los motores/formats habituales.
+- **Planner opcional:** diseño editorial complejo, entregas coordinadas que
+  realmente necesiten otro contexto o planificación separada solicitada por el
+  usuario. Explicitar objetivo, evidencia/faltantes y salida preliminar acotada.
+  Un subagente no resuelve datos desconocidos del usuario inventándolos ni evita
+  preguntar algo crítico; no edita ni renderiza por hacer ese trabajo.
+- **Renderer opcional:** ejecución desde spec ya validado cuando separar contexto
+  de render aporta valor, lote/iteración que justifique el handoff o pedido
+  explícito de contexto render-only. Handoff por paths/spec/formatos/checks y
+  retorno de artefactos/receipts/diagnósticos, sin duplicar todo el contexto.
+  Pedir PDF+DOCX por sí solo no obliga a abrir una sesión hija.
+- **QA independiente no opcional:** `documenter` conserva el despacho explícito a
+  `visual-qa` para revisar todas las páginas/slides y el control de fixes (máximo
+  tres ciclos automáticos). Planner/renderer no revisan y aprueban solos su salida.
+  Si no se logra QA, declararlo y no afirmar entrega lista. No sustituirlo por
+  validación estructural, receipt, fonts check o conversión exitosa.
+- Conservar edición/validación de specs, procedencia/no fabricación, editabilidad,
+  render local, privacidad y assets de marca fuera de Git, paths, receipts/checks
+  deterministas y manejo de fallo con last-good. Confluence sigue requiriendo
+  petición explícita y confirmación interactiva de cada escritura; no se ejecuta
+  ninguna prueba remota para evaluar la poda.
+
+El ahorro candidato sería coordinación/contexto de una delegación innecesaria,
+si realmente ocurre en uso. **No se demostró que el modelo la haga hoy**, ni se
+promete reducir schemas, tokens, latencia o roles. Las descripciones más precisas
+pueden aumentar algo el catálogo: tradeoff por selección, no poda cosmética.
+
+### 9.d. Archivos exactos y límites de 9.A
+
+**Seis archivos Documents más este plan Core**, solo después de aprobar:
+
+- `.opencode/agent/documenter.md`: insertar cláusula de routing por necesidad;
+  conservar header completo y párrafos existentes de seguridad/QA.
+- `.opencode/agent/artifact-planner.md` y `artifact-renderer.md`: precisar solo
+  descripción/trigger opcional, no su capacidad, modo o límites. Encabezados
+  idénticos salvo esos dos campos description; nombres/body de guards preservados.
+- `.opencode/skills/artifact-generation/references/workflow.md`: default directo,
+  condiciones de especialización y QA independiente. Mantener el orden de etapas
+  y sus obligaciones; no copiar reglas de dominio o layouts al workflow.
+- `artifact-studio/README.md`: explicar este routing en su integración OpenCode,
+  sin tocar README raíz que ya tiene trabajo previo.
+- `tests/test_agent_routing.py` nuevo: regresiones de contrato/discovery/dispatch
+  estático y capacidades, sin implementar un clasificador de lenguaje natural.
+- Core: registro de alcance/resultados en este plan, no un patch de Core agents.
+
+**Fuera:** manifiesto/installer/lifecycle, archivos preexistentes dirty/untracked,
+tools/libs/renderers/QA engines, specs, templates/runtimes/dependencias,
+publicaciones/artefactos, settings/modelos/permisos/Task targets, comandos y flujo
+legacy/lectura/Claude, cuatro especialistas restantes y nueve overlays. No nuevos
+agentes/skills/loaders o obsoleteTargets. Un hallazgo que exija ese alcance vuelve
+a aprobación, no se integra por ser vecino del código.
+
+### 9.e. Pruebas exigidas y fronteras de evidencia
+
+Especificación de validación acordada antes de implementar (resultados en 9.g):
+
+1. Contratos: directo rutinario, planificación compleja/solicitada, renderer
+   separado cuando aporte o sea solicitado, QA independiente/todas las páginas/
+   máximo tres ciclos, preview/check sin render no pedido, diagnóstico de fallo
+   sin tratar last-good como candidato. Preservar literalmente cláusulas previas
+   de specs, privacidad, fuentes y Confluence; diferencia de headers solo dos
+   descripciones. Tests/fixtures de texto no prueban obediencia LLM.
+2. Loader nativo `opencode debug config`/`debug agent`, global y nueve perfiles:
+   nombres/modos/steps/modelos/toolsets/reglas iguales, salvo dos descripciones
+   previstas y cuerpos/punteros modificados; documenter conserva ocho tools,
+   renderer siete, planner cero, visual-QA preview/validate y no render/edit/task.
+   Confluence ask del primary intacto y deny de subagentes; no prueba auth/MCP.
+3. Routing: siete comandos Artifact Studio/canvas mantienen su agent, legacy no
+   se liga al primary y mantiene ODT/QMD/QA. Master/planner no ganan task ni tools;
+   especialistas/QA siguen accesibles desde documenter. Los nueve perfiles no
+   requieren copias locales. Preservar las extensiones nativas de proyectos.
+4. Regresiones deterministas focalizadas con dependencias **ya existentes**:
+   spec/path/receipts de Artifact Studio y, si disponibles, su fixture de
+   integración PDF/PPTX/DOCX y diagramas semánticos en temporales aprobados, sin
+   tocar productos o last-good existentes. No usar golden global ni publicar
+   documentos reales. Faltantes/conversores/browser omitidos se informan, no se
+   instalan ni cuentan como QA visual cumplido.
+5. Fuente de renderer/tooling sin cambios más metadata prueban que se conservan
+   las capacidades invocables, no que el agente elija el nuevo routing. Una
+   prueba completa de agente/calidad requeriría autorización/datos/presupuesto y
+   operador/rol habilitado aparte; `agent-design` no delega ni lanza modelos para
+   simularlo. No forzar un experimento como requisito ceremonial ni afirmar QA
+   visual independiente de un entregable por pasar un test estructural.
+6. Diff/fingerprints de trabajo previo Documents, manifest/lifecycle/helper de
+   lectura, activos instalados, Claude, herramientas y capas de los nueve
+   productos/índices Git intactos. No hacer commits, despliegue, regeneración o
+   publicaciones por probar composición. Al estabilizar, registrar diferencias
+   estáticas separadas de cualquier ahorro operativo no medido.
+
+### 9.f. Aprobación, promoción y rollback
+
+Alcance: **implementar/validar 9.A solo canónicos/sandbox**, conservando los tres
+roles y QA independiente, sin ampliar permisos ni retirar componentes. El usuario
+aprobó esta etapa el 2026-10-28 (9.g); la promoción/publicación se autorizó después
+en 9.h. Si se decide que la claridad adicional no
+compensa el texto/mantenimiento, conservar contratos sin cambios también es válido.
+
+Si luego se autoriza promover: backup y ledger de los tres agentes y workflow
+alcanzados, source/instalado y global+nueve perfiles verificados, promoción
+selectiva del dueño Documents; no installer completo para arrastrar helper de
+lectura, manifest o runtimes previos. No instalar tests/README/plan en productos.
+Publicar únicamente el patch de este punto cuando se autorice, separándolo del
+trabajo previo; no reset/amend ni staging de todo el repo para facilitarlo.
+
+Rollback: revertir solo cambios aprobados y copias promovidas según ledger, sin
+restaurar encima de drift/trabajo ajeno. Todos los roles conservan sus nombres,
+por lo que no hay que resucitar archivos borrados o deshacer nueve overrides.
+No restaurar artefactos, worktrees, datos, marca privada o índices para volver al
+routing previo. Reiniciar OpenCode si sus assets cambiaron; Claude no requiere
+reinicio por 9.A si no cambió ningún asset suyo. No ejecutar el siguiente punto
+ni la medición diferida por cerrar este contrato.
+
+### 9.g. Implementación y validación de 9.A — 2026-10-28
+
+**Autorización:** el usuario aceptó avanzar después de la propuesta explícita de
+implementar/validar solo canónicos/sandbox, sin despliegue, publicación ni modelos.
+Se implementaron exactamente los seis paths Documents de 9.d más este plan Core.
+Sin Git writes, instaladores, dependencias nuevas, operaciones Confluence/Jira o
+documentos reales. HEAD base Documents `7b9b6ee`, Core `96728b8`; no se crearon commits.
+
+**Cambio realizado:**
+
+- `documenter`: dos párrafos de routing; resuelve directamente lo suficientemente
+  definido, sin cadena obligatoria ni heurística por páginas/brevedad/multiformato.
+  Planner/renderer opcionales por complejidad/contexto/pedido y handoff acotado con
+  brief, paths de evidencia/spec/assets, outputs, restricciones y checks. Preguntar
+  faltantes materiales, no inventarlos ni despacharlos como sustituto de aclarar.
+- Planner/renderer: solo sus dos campos `description` modificados. Header primary
+  completo, otros campos de ambos headers y cuerpos de guards preservados
+  literalmente. No se retiró/fusionó ningún rol ni cambió modelo/steps/capacidad.
+- Workflow: ownership explícito y QA independiente aun en renders directos, con
+  tres ciclos y hallazgos pendientes. Sus catorce etapas originales se conservaron
+  literalmente/en orden. Preview/check, canvas, QMD/Quarto/ODT y lectura separados;
+  no ampliar Task de roles técnicos para resolver pedidos mixtos.
+- `artifact-studio/README.md` alinea la integración; README raíz no tocado.
+  `tests/test_agent_routing.py` aporta trece regresiones de contrato, no un
+  clasificador de intenciones ni simulación de obediencia del modelo.
+
+**Validación final:**
+
+1. **13 tests Python pasados**, cero omisiones: inventario, default directo,
+   triggers opcionales, subagents sin delegación, capacidades, fuentes/privacidad,
+   Confluence, QA/tres ciclos, catorce etapas y siete comandos. Legacy conserva
+   wrappers/QMD/ODT sin ligarlo al primary con Bash deny.
+2. **22 tests Vitest pasados en siete archivos**, cero omisiones:
+   `spec`, `paths`, `receipt-verification`, `diagram-delivery`, `service-flow`,
+   `narrated-sequence`, `integration`. Fixtures sintéticos bajo
+   `/tmp/opencode/point9/fixtures/`: PDF/PPTX/DOCX estructuralmente válidos,
+   diagramas SVG/PNG/PDF y receipts/source-bytes/last-good. No golden global ni
+   entrega real; no se declaró QA perceptual de esos fixtures.
+3. **Typecheck `tsc -p tsconfig.json --noEmit` pasado**, usando dependencias ya
+   existentes. Node `v22.23.2`; no build con emit ni instalación de conversores.
+4. **Loader OpenCode nativo** `1.19.4--202610232249`: `debug config` antes/después
+   en global y nueve perfiles sandbox con stack global/plugins activos. Paridad de
+   **59 agentes locales** fuente/producto; todos los registros/configs iguales
+   salvo el prompt del primary y dos descripciones autorizados. Además **60 pares de
+   agentes resueltos** (documenter/planner/renderer/QA + master-dev/planner técnico
+   por diez perfiles) con tools/reglas/modelos/steps iguales antes/después.
+5. Contratos efectivos: documenter mantiene ocho tools editoriales, renderer siete,
+   planner cero y QA solo preview/validate. Task primary→especialistas/QA allow;
+   task de subagentes deny y master-dev/planner técnico→siete roles documentales
+   deny. Confluence create/update sigue ask en primary y deny en los subagentes
+   revisados. No es una prueba de disponibilidad/autenticación/escritura MCP.
+6. **1.493 fingerprints protegidos intactos** de 1.499 baseline, excluyendo solo
+   los cinco archivos fuente existentes del candidato y este plan. Nuevo test
+   autorizado por status exacto; ningún dirty/untracked nuevo ajeno al alcance.
+   Trabajo previo Documents, manifiesto/lifecycle/helper de lectura, fuentes de
+   tools/renderers, activos globales/Claude, nueve capas de producto y sus índices
+   Git sin cambios. Siete agentes instalados siguen idénticos a los originales:
+   el candidato **no está activo**. `git diff --check` pasó en ambos canónicos.
+
+**Precisiones del sandbox:** no se ejecutó el loader dentro de los productos.
+El bootstrap nativo puede intentar instalar dependencias en directorios sin
+`node_modules` (detectado en `~/.opencode` y Gateway); se evitó antes de lanzarlo.
+Se copiaron configs y se enlazaron assets de los nueve perfiles en temporales,
+usando package/lock y node_modules globales preexistentes. Discovery de home se
+aisló: `~/.opencode` solo contiene launcher/metadata de Background, no roles/configs.
+Esto valida composición del candidato con assets reales, no una sesión ejecutada
+en cada producto ni un sandbox OS. Dos comparaciones iniciales del auditor fallaron
+por orden variable de los allows automáticos de skills; se corrigió el auditor,
+no los permisos. Solo se canonicalizan bloques contiguos de allows a directorios
+literales de skills (misma acción, conmutan) y prefijos temporales conocidos;
+los denies/asks y demás orden de precedencia se preservan. La pasada final cumple
+todos los contratos. Metadata nativa/fixtures no prueban selección LLM ni ahorro.
+
+**Delta estático, no ahorro:** seis archivos Documents 20.707→36.405 bytes
+(+15.698, incluye test nuevo de 11.053). Tres agentes 7.386→8.702 (+1.316);
+workflow 1.816→3.551 (+1.735), README Studio 11.505→13.099 (+1.594).
+El costo adicional compra selección explícita y regresiones; no reduce schemas,
+roles o capacidades y no demuestra menos tokens/latencia/delegaciones en uso.
+
+Evidencia temporal seleccionada: `/tmp/opencode/point9/{baseline,native,protected,
+source-delta}.json` y originales/candidato `before/after`; auditor
+`/tmp/opencode/point9-validate.py`. El registro durable de resultados es esta
+sección, no depende de conservar temporales ni configura secretos crudos.
+
+**Estado al finalizar esta etapa:** 9.A implementado/validado en canónicos/sandbox.
+La promoción/publicación posterior se registra en 9.h; mantener trabajo previo Documents
+separado. Rollback canónico: quitar solo dos párrafos nuevos del primary, restituir
+las dos descriptions, quitar ownership nuevo del workflow y bloque routing nuevo
+del README Studio, y retirar solo el test de este punto si sigue sin drift.
+No revertir plan completo ni otros cambios Documents. Nada que revertir en activos
+o productos. No hace falta reiniciar clientes por un cambio aún no desplegado.
+8.B real permanece diferido y 10 no iniciado.
+
+### 9.h. Promoción selectiva y publicación autorizada — 2026-10-28
+
+**Autorización:** el usuario confirmó desplegar y publicar 9.A tras cerrar las
+interrupciones de SSH, handoff y guías portables de VB. No amplía el alcance a
+lectura documental pendiente, cambios de aplicación o productos AUNE.
+
+**Preflight nuevo:** los seis archivos candidatos coinciden con las huellas de
+9.g y los cuatro activos aún eran los originales. Se capturó un baseline fresco
+del stack actual, que ya contiene los arreglos intermedios publicados. No se
+reutilizó el baseline antiguo para restaurar encima de esos cambios autorizados.
+Índices canónicos sin staging previo; fuentes Documents/Core en `main`, remotos
+igual a HEAD antes de publicar. Cuenta GitHub `juanma91m` con su alias SSH existente.
+
+**Promoción:** copiados solo `agents/documenter.md`, `agents/artifact-planner.md`,
+`agents/artifact-renderer.md` y
+`skills/artifact-generation/references/workflow.md` en la instalación global.
+Sin installer, dependencias nuevas, configuración MCP, marker de Documents o
+runtimes modificados. README de Studio/test/plan se publican solo como fuentes;
+no se copian a productos. Cero escrituras de producto o Git writes de producto.
+
+**Validación vigente:**
+
+- 35 tests pasados, cero omisiones: 13 contratos Python y 22 Vitest focalizados
+  (spec, paths, receipts, atomic delivery, service-flow, narrated-sequence e
+  integración PDF/PPTX/DOCX). Salidas sintéticas solo en temporales de la release.
+- Typecheck sin emisión pasado con dependencias existentes. No golden global,
+  documentos reales ni QA perceptual declarada por pasar tests estructurales.
+- `opencode debug config`/`debug agent` en global y nueve perfiles sandbox:
+  60 pares antes/después y otros 60 registros instalados verificados tras copiar.
+  El before usa la composición real instalada, sin override que pueda esconder
+  restricciones inline del proyecto. Los 59 agentes locales conservan paridad.
+- Modelos, modos, steps, herramientas y permisos idénticos salvo el prompt del
+  primary y las dos descriptions previstas. Documenter conserva ocho editoriales,
+  renderer siete, planner cero y visual-QA preview/validate sin render/edit/task.
+  Confluence ask del primary y deny de subagentes, así como los límites Task de
+  roles técnicos, permanecen intactos. No prueba auth ni invocación MCP.
+- 1.536 fingerprints protegidos tras promoción: trabajo previo Documents,
+  scripts/registro SSH, stack de handoff, Claude, nueve capas locales e índices
+  intactos. `git diff --check` correcto. No se ejecutaron modelos o delegaciones.
+
+**Backup PIN y evidencia autónoma:**
+`~/.config/opencode/.stack-sync-backups/point9a-20261028T182650/` contiene
+`activation.json`, cuatro originales, `verification.json`, datos nativos y
+`rollback.py`. El rollback verifica hashes de los cuatro destinos y originales
+antes de cualquier escritura; dry run comprobado. `--apply` solo con autorización
+explícita y sin drift. No restaura worktrees, artefactos o índices de productos.
+
+**Publicación autorizada:** seis archivos de 9.d en Documents y este plan en Core,
+dos commits y tres remotos (Documents GitHub; Core GitHub/GitLab). No stage-all,
+reset o inclusión del helper de lectura, manifest/lifecycle/README raíz/CHANGELOG
+previos. El resultado definitivo, SHA y HEAD remotos comprobados quedan en
+`publication.json` dentro de ese backup; no se crea un commit circular solo para
+anotar su propio hash. Core debe quedar limpio; Documents conserva únicamente el
+trabajo previo excluido, por lo que no se exige falsamente un árbol totalmente limpio.
+
+**Operación:** reiniciar OpenCode para cargar los agentes/descriptions nuevos;
+solo si se usa un `opencode serve` externo, reiniciar también ese proceso. No son
+servidores de aplicación ni CodeGraph. Claude no cambió por 9.A y no requiere un
+reinicio adicional por este lote. Routing más explícito no demuestra ahorro de
+tokens/latencia o cumplimiento LLM. 8.B real sigue diferido y 10 no se inicia aquí.
 
 ## 10. Composición local y snapshots manuales
 
@@ -4888,17 +5249,24 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 | 2026-10-27 | Punto 8.B, revisión de pertinencia | Usuario pidió evaluar ajustes o seguir de largo. Se recomienda mantener diferido/no bloqueante y pasar a planificar 9: sin regresión/caso decisorio aportado no hay ensayo obligatorio. Se precisan pregunta con/sin frente antes/después, referencia heurística de 10 KiB no equivalente a política, cobertura parcial de manual_calls y piloto inicial de un par si se reabre. Solo plan, sin experimentar ni cambiar instrumentación; 8.j. |
 | 2026-10-27 | Punto 8.B, precisiones de diseño implementadas | Usuario pidió aplicar los ajustes: solo formatter Markdown, playbook/comando, tres tests nuevos y plan (cinco archivos). Claves/cálculos/JSON/elegibilidad/CLI literal fuera formatter, 42 tests sin omisiones y 1.564 fingerprints protegidos. Activos instalados e índices sin cambios; no experimento real, despliegue o publicación. Detalle 8.k; 8.B sigue diferido. |
 | 2026-10-27 | Punto 8.B, precisiones promovidas y publicación autorizada | Usuario autorizó promoción/publicación CG/Core sin experimento. Tres assets copiados, CLI instalada con fixture JSON igual antes/después salvo fecha y Markdown nuevo; plantilla nativa del comando cargada, metadata igual, 42 tests sin omisiones, 1.561 fingerprints protegidos y cero escrituras de producto/Git. Backup/ledger `point8b-design-20261027T203813Z`; alcance dos commits/tres remotos. Detalle 8.l; no benchmark de modelos. |
+| 2026-10-27 | Punto 8.B, precisiones publicadas | CodeGraph `fc8e59c` y Core `96728b8` publicados, dos árboles limpios y tres HEAD remotos iguales al cierre en `point8b-design-20261027T203813Z/publication.json`. Ajustes cerrados; experimento real sigue no ejecutado/opcional. |
+| 2026-10-27 | Punto 9, planificación | Usuario pidió planificar. Fuentes y metadata global+nueve perfiles distinguen capacidades/aislamiento, no muestran obligación de cadena planner→renderer. Se recomienda conservar roles y permisos, explicitar default directo y especialización opcional, QA independiente intacta. Artifact Studio, QMD/Quarto y lectura separados; seis files Documents+plan propuestos, trabajo previo dirty preservado y 1.032 fingerprints intactos. Solo plan; aprobación pendiente 9.a–9.f, sin generación ni modelos. |
+| 2026-10-28 | Punto 9.A, implementación/validación | Usuario aprobó canónicos/sandbox. Seis paths Documents+plan, sin retiro de roles o delta de permisos/modelos/tools; primary directo, especialistas opcionales y QA independiente. 35 tests sin omisiones, typecheck, carga nativa global+nueve perfiles/59 agentes y 60 pares resueltos; 1.493 fingerprints protegidos, dirty previo/activos/productos/índices intactos. Fixtures sintéticos no son QA perceptual ni ahorro probado. Detalle 9.g; sin despliegue/publicación/modelos. |
+| 2026-10-28 | Punto 9.A, promoción y publicación autorizada | Usuario autorizó promover/publicar: cuatro activos globales copiados, 35 tests sin omisiones y typecheck, composición actual global+nueve perfiles antes/después y post-sync, 59 agentes locales y 1.536 fingerprints protegidos. Sin cambios de permisos/modelos/tools, sin productos o modelos. Backup PIN point9a-20261028T182650 y ledger final publication.json; alcance seis fuentes Documents+plan Core, preservando dirty previo. Detalle 9.h; reiniciar OpenCode. |
 
 ## Próxima acción
 
-**8.A cerrado/publicado; precisiones de medición promovidas** (8.k–8.l).
-Completar publicación ya autorizada y registrar hashes/estado remoto/árboles
-limpios en ledger durable y memoria, sin commit circular. Reiniciar OpenCode para
-el comando/playbook nuevo, no runtimes/índices. El experimento sigue opcional y
-diferido, no bloquea 9, cuya planificación necesita indicación propia. No repetir
-promoción 8.A/restauración VB, ampliar permisos o tocar índices por ese experimento.
+**9.A promovido y validado**, delimitado en 9.c–9.h, con publicación autorizada de
+Documents/Core: verificar el resultado final en el ledger `publication.json` del
+backup antes de dar por publicados los remotos. Tras comprobarlo, no repetir el
+lote; el siguiente punto es planificar 10 solo si el usuario lo pide. Reiniciar
+OpenCode por estos cuatro activos, sin ampliar permisos o retirar roles. Preservar
+trabajo previo Documents, aún fuera de alcance; no normalizarlo con un sync amplio.
+8.A y precisiones de medición ya publicados; no repetir operaciones. Experimento
+8.B sigue opcional/diferido. No confundir los tres workflows ni habilitar task a
+documenter desde roles técnicos para ocultar un límite de routing existente.
 Los puntos 1–6, fixes GitHub y 7.A/7.B están publicados; no repetir esas operaciones.
-Reinicio de OpenCode confirmado por el usuario. 7.C no añade poda editorial.
+El reinicio confirmado anteriormente no cubre esta promoción de 9.A. 7.C no añade poda editorial.
 Nunca publicar productos AUNE ni abrir/reparar sus índices por cerrar un plan.
 No confundir relevamiento de fuentes, configuración o fixtures con llamadas
 efectivas probadas, obediencia de modelos o ahorro operativo demostrado.
