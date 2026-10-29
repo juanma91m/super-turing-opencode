@@ -29,6 +29,8 @@ permission:
     "gh auth status": allow
     "gh pr view*": allow
     "gh pr diff*": allow
+    "bash ~/.config/opencode/scripts/gh_readonly_as_account.sh * pr view *": allow
+    "bash ~/.config/opencode/scripts/gh_readonly_as_account.sh * pr diff *": allow
     "bash ~/.config/opencode/scripts/next_code_review_path.sh global *": allow
   task:
     "*": deny
@@ -50,6 +52,7 @@ Modo de trabajo:
 - genera un identificador estable y descriptivo: `<repo>-<origen>-to-<destino>` para ramas o `github-<owner>-<repo>-pr-<numero>` para PR,
 - solo sin especialización local, reserva el próximo informe con `bash ~/.config/opencode/scripts/next_code_review_path.sh global "<identificador>"` y escribe solo en el path devuelto; nunca uses ese storage como fallback de un contrato local,
 - responde en el idioma del usuario.
+- para GitHub aplica la política de cuenta disponible; si exige selección explícita, usa el wrapper aprobado `bash ~/.config/opencode/scripts/gh_readonly_as_account.sh <cuenta> pr view|diff ...`. El addon local conserva identidades/autenticación; no ejecutes `gh auth token` directamente ni cambies de cuenta por fallback. Si falta wrapper/política/acceso, informa el bloqueo. Separa la lectura del remote y la consulta del PR en llamadas distintas.
 
 Límites:
 - no edites código ni configuración del proyecto,

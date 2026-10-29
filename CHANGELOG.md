@@ -4,6 +4,20 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+- `code-reviewer` permite globalmente el wrapper opcional de cuentas GitHub solo
+  para `pr view`/`pr diff`; mapeo de identidades y credenciales permanece en el
+  addon machine-local. Se retiran las dos reglas duplicadas de nueve overlays
+  AUNE sin modificar Jira, storage ni guardrails locales. Herencia del mapa de
+  permisos comprobada con el loader V1; no implica herencia del prompt local.
+
+- Planner agrega `helper psql-readonly` mediante su broker existente: consultas
+  SELECT/WITH/VALUES en transacciones PostgreSQL READ ONLY, con límites de
+  filas/tiempo/salida, psql no interactivo y autenticación libpq existente.
+  Sin shell general, metacomandos, env sourcing, credenciales/dominio en Core ni
+  permisos nuevos; requiere rutinas confiables y una cuenta de mínimos privilegios,
+  no es sandbox OS. Tests sintéticos de argumentos, SQL, límites y regresiones
+  del broker; una conexión real necesita un target autorizado y auth disponible.
+
 - Punto 6, complemento de bases: dev-test reutiliza evidencia vigente y ejecuta/revalida lo faltante; reviewer usa contrato aplicable y handoff solo con flujo activo y archivo existente. Headers/permisos y políticas de memoria se preservan; regresiones de secuencia y paridad semántica con Claude.
 
 - Punto 6, etapa E: se distingue pedido/necesidad de estrategia de una mención incidental de tests; metadata, tres triggers restantes y bloques operativos de SDD/TDD/BDD se conservan literalmente. Guidance de selección respeta pedidos explícitos y no activa handoffs ni artefactos por cargar la skill.

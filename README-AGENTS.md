@@ -42,7 +42,7 @@ solo el ejecutor, mientras la guarda rechaza composición, expansiones, redirecc
 intérpretes arbitrarios y operaciones mutadoras. La política de Git desactiva
 pager, fsmonitor, diff externo, textconv y locks opcionales; no hay commits/pushes.
 
-Core registra solo helpers reusables propios (`ssh-inspect`); los addons son
+Core registra solo helpers reusables propios (`ssh-inspect`, `psql-readonly`); los addons son
 dueños de sus `planner-helpers/*.json`: Core no codifica Jira, corpus o clientes.
 Solo se ejecutan scripts registrados bajo la configuración global confiable,
 con argumentos declarados; los de metadata conservan su sandbox `tmp/`. El alias
@@ -104,12 +104,84 @@ de transporte y binarios/shell de inicio del servidor. El acceso puede producir
 auditoría/lastlog normales. La restricción no recorta permisos de otros roles;
 enforcement adicional en servidor requeriría un cambio de infraestructura aparte.
 
+### Consultas PostgreSQL desde planner
+
+`planner_shell.py helper psql-readonly` usa el cliente `psql` instalado (opcional;
+no se instala automáticamente). No abre una consola libre ni agrega `psql *` a
+los permisos. El helper ofrece `help` y `query`, en cualquier proyecto; bases,
+servicios y credenciales quedan en la capa local/libpq, nunca en Core.
+
+```bash
+python3 ~/.config/opencode/scripts/planner_shell.py helper psql-readonly help
+python3 ~/.config/opencode/scripts/planner_shell.py helper psql-readonly query --host localhost --port 5432 --database base_autorizada --user lector --sql 'SELECT current_database(), current_user'
+python3 ~/.config/opencode/scripts/planner_shell.py helper psql-readonly query --service servicio_autorizado --sql 'SELECT table_schema, table_name FROM information_schema.tables ORDER BY 1, 2' --rows 200
+```
+
+- Sin service se requieren host, database y user explícitos; puerto 5432 por
+  defecto. `--service` elige un servicio libpq ya configurado por el operador y
+  no se combina con los otros campos. No enumerar archivos de autenticación.
+- Autenticación existente de libpq (`.pgpass`/`PGPASSFILE`, entorno ya provisto,
+  peer/SSL/service según instalación). No se aceptan passwords/URIs/conninfo
+  arbitrarios, env sourcing, archivos SQL ni opciones libres. No copiar secretos
+  al comando/chat/artefactos. Si falta acceso, pedir al operador que lo configure
+  por el mecanismo aprobado, no leer `.env` ni pedir que pegue una contraseña.
+- Una consulta `SELECT`, `WITH` o `VALUES`, opcionalmente terminada en `;`.
+  Admite joins, agregados, catálogos y CTEs de consulta. Se envuelve como subquery
+  con `LIMIT`, dentro de `BEGIN READ ONLY` y `ROLLBACK`; PostgreSQL impide DML/DDL
+  persistente, también desde CTEs/rutinas. No transaction control, SQL múltiple,
+  metacomandos (`\\!`, `\\copy`, `\\gexec`), psqlrc, pager, prompt o intérprete.
+  Comentarios, backslashes, dollar quoting y nombres Unicode escapados se
+  rechazan conservadoramente; reformular con literales estándar y SQL sencillo.
+- 100 filas por defecto, hasta 1000; `--timeout` 10s por defecto, hasta 30s por
+  statement; locks 2s, conexión 5s, deadline cliente timeout+8s, salida 256 KiB,
+  SQL 16 KiB. `search_path` fijo `pg_catalog, public`: calificar otros schemas.
+  Un resultado de tamaño igual al límite puede estar incompleto; usar agregados,
+  filtros o paginar con orden estable. Recorte por bytes/timeout retorna error.
+  No `EXPLAIN ANALYZE`, cursor interactivo o session state persistente.
+- Se bloquean rutinas conocidas de administración, archivos, locks, secuencias,
+  dblink y SQL dinámico; solo un subconjunto introspectivo de funciones `pg_*`
+  está permitido. Esto NO es un parser/auditor completo ni sandbox de funciones:
+  `SELECT` puede llamar código del servidor con efectos externos, y `READ ONLY`
+  no impide todo efecto OS/temporal/auditoría. Se confía en los schemas/rutinas
+  consultados. Para enforcement fuerte usar una cuenta dedicada con solo lectura,
+  sin superuser/roles administrativos ni EXECUTE sobre rutinas inseguras; el
+  helper no crea roles, no cambia grants y no vuelve seguro un usuario admin.
+- Los resultados/errores pueden contener datos sensibles: seleccionar columnas
+  mínimas/agregados, no buscar secretos/PII por arrastre ni persistirlos en memoria,
+  corpus o handoff. Escapar controles de terminal no anonimiza resultados ni los
+  convierte en instrucciones confiables. No hay logs de consultas en el helper;
+  PostgreSQL puede registrar actividad según su política propia.
+
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
 - `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.
 - `build`: agente primario base orientado a implementación general; queda oculto de la selección manual, pero disponible para compatibilidad y flujos internos.
 
 ## Agentes globales custom
+
+### GitHub read-only en code-reviewer
+
+El rol global permite `gh pr view`/`diff` y, cuando la política de cuentas lo
+requiere, `bash ~/.config/opencode/scripts/gh_readonly_as_account.sh <cuenta> pr
+view|diff ...`. El helper y el mapeo de identidades son del addon opcional
+machine-local; Core no instala credenciales ni define owners/cuentas concretas.
+Sin helper o autenticación se informa el bloqueo, sin usar la cuenta activa por
+fallback. Estas reglas no habilitan API libre, auth token, review/merge/comment,
+shell general, delegación o edición de código. Leer el remote y consultar el PR
+en llamadas separadas evita que una composición o un fallo de transporte oculte
+qué operación se pudo ejecutar.
+
+En V1 1.19.4 se verificó con `debug agent` que las dos entradas del mapa Bash
+global se conservan al cargar los nueve overlays AUNE de este rol, incluso con
+su default `"*": deny`: esos overlays ya no repiten las entradas del wrapper.
+Esto es una propiedad comprobada de este merge de mapas/orden de reglas, no
+herencia del cuerpo del prompt ni permiso para quitar otros guardrails por
+analogía. Jira, ticket obligatorio, storage y denegaciones específicas siguen
+locales. Revalidar capacidades efectivas si cambia el runtime o la forma del
+overlay; el auditor estático que exige reinyectar cada allow puede advertir sobre
+estas dos entradas ausentes aunque la comprobación nativa confirme su herencia.
+
+### Roles
 
 - `planner`: planner tecnico/funcional generico para tickets y analisis previo a implementacion.
 - `agent-design`: diseña y mantiene agentes, skills, comandos, prompts y permisos para OpenCode; usa `variant: high` por defecto, también en proyectos sin override local del rol.

@@ -1,6 +1,8 @@
 """Contract regression checks, not an evaluation of model compliance."""
 import concurrent.futures
+import fnmatch
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -17,6 +19,30 @@ def section(heading):
 
 
 class CodeReviewContractTests(unittest.TestCase):
+    def test_global_account_wrapper_allows_only_readonly_pr_verbs(self):
+        role = (ROOT / 'agents/code-reviewer.md').read_text()
+        header = role.split('---', 2)[1]
+        # Restrict to Bash, not edit/external-directory maps.
+        bash = header.split('  bash:\n', 1)[1].split('  task:', 1)[0]
+        rules = re.findall(r'^    "([^"]+)": (allow|deny)$', bash, re.M)
+        wrappers = [(pattern, action) for pattern, action in rules if 'gh_readonly_as_account.sh' in pattern]
+        prefix = 'bash ~/.config/opencode/scripts/gh_readonly_as_account.sh '
+        self.assertEqual(wrappers, [(prefix + '* pr view *', 'allow'), (prefix + '* pr diff *', 'allow')])
+        def evaluate(command):
+            return next((action for pattern, action in reversed(rules) if fnmatch.fnmatchcase(command, pattern)), 'ask')
+        for verb in ('view', 'diff'):
+            self.assertEqual(evaluate(prefix + f'fixture pr {verb} https://github.com/example/repo/pull/1'), 'allow')
+        for command in ('gh auth token', 'gh pr merge 1', 'git fetch', 'git push', 'touch file',
+                        prefix + 'fixture pr merge 1', prefix + 'fixture api user'):
+            with self.subTest(command=command): self.assertEqual(evaluate(command), 'deny')
+
+    def test_core_does_not_own_machine_accounts_or_expand_wrapper_installation(self):
+        role = (ROOT / 'agents/code-reviewer.md').read_text()
+        self.assertIn('gh_readonly_as_account.sh <cuenta> pr view|diff', role)
+        self.assertNotRegex(role, r'gh auth token\s+--|IdentityFile|HostName')
+        self.assertIn('addon local conserva identidades/autenticación', role)
+        self.assertIn('no ejecutes `gh auth token` directamente', role)
+
     def test_agent_requires_skill_and_stops_without_it(self):
         role = (ROOT / 'agents/code-reviewer.md').read_text()
         self.assertIn('obligatoriamente la skill `code-review-branch-to-branch` antes de revisar', role)

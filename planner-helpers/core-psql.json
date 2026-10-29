@@ -1,0 +1,23 @@
+{
+  "psql-readonly": {
+    "path": "scripts/psql_readonly.py",
+    "interpreter": "python3",
+    "verbs": {
+      "help": {"positionals": [], "options": {}},
+      "query": {
+        "positionals": [],
+        "options": {
+          "--service": {"pattern": "[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}"},
+          "--host": {"pattern": "[A-Za-z0-9_./:-]{1,253}"},
+          "--port": "int",
+          "--database": {"pattern": "[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}"},
+          "--user": {"pattern": "[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}"},
+          "--sql": "text",
+          "--rows": "int",
+          "--timeout": "int"
+        },
+        "required": ["--sql"]
+      }
+    }
+  }
+}

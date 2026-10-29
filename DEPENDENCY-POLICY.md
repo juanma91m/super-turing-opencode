@@ -60,6 +60,10 @@ de instalar la base. Ese preflight:
 ## Estado actual
 
 - Base: npm y Chromium user-space; Git/Python/Node siguen siendo bootstrap del sistema.
+- Base, inspección PostgreSQL opcional: cliente `psql` administrado por el operador.
+  El helper detecta su ausencia y falla sin conectar ni instalar; no es requisito
+  de arranque de OpenCode. Servidor, roles y autenticación libpq son del entorno
+  autorizado y no se crean ni se alteran mediante el stack.
 - Knowledge: Go y Qdrant administrados; local-only es el default portable; Docker/Cloud son opt-in.
 - CodeGraph: paquete npm fijado en runtime propio.
 - Ticketing: Python estándar, sin runtime adicional.
