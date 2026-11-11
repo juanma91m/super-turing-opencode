@@ -24,10 +24,12 @@ Bloqueo VB resuelto sin tocar el índice del usuario. El usuario confirmó despu
 otro reinicio de OpenCode; no se infiere confirmación de Claude. 8.B experimental
 sigue diferido/no ejecutado. Sus precisiones de diseño y presentación fueron
 implementadas/validadas/promovidas/publicadas (8.k–8.l): CodeGraph `fc8e59c`, Core
-`96728b8`, dos commits/tres pushes verificados en el ledger de 8.l. 9.A implementado,
-validado y promovido selectivamente; publicación autorizada y resultado final en
-el ledger de 9.h. 10 pendiente. No hay promociones/publicaciones de los puntos
-anteriores todavía por ejecutar.
+`96728b8`, dos commits/tres pushes verificados en el ledger de 8.l. 9.A cerrado y
+publicado: Documents `df86b7b`, Core `0c3ce82`, dos commits/tres pushes comprobados
+en el ledger de 9.h. El usuario confirmó reinicio de OpenCode y PC al pedir 10.
+10 cerrado sin implementación (10.h): no se justificó el coste del generador.
+**Iniciativa técnicamente cerrada, 2026-10-29.** No hay promociones/publicaciones
+de cambios técnicos anteriores todavía por ejecutar; queda versionar este registro.
 
 ## Objetivo
 
@@ -5173,8 +5175,9 @@ tokens/latencia o cumplimiento LLM. 8.B real sigue diferido y 10 no se inicia aq
 
 ## 10. Composición local y snapshots manuales
 
-**Decisión requerida:** evaluar especialización declarativa y composición al
-generar, extendiendo herramientas existentes en vez de crear otro addon.
+**Decisión final:** conservar las herramientas y snapshots actuales. La propuesta
+de composición declarativa se analizó pero no se implementa; ver 10.h. Las
+subsecciones 10.a–10.g se conservan como antecedente, no como trabajo autorizado.
 
 **Ubicación:** Core: recomposición/auditoría; manifests y especializaciones de
 overlays canónicos. No mover dominio AUNE al Core.
@@ -5192,6 +5195,255 @@ Se puede descartar si cuesta más de lo que ahorra.
 y exclusión de Claude/productos. Probar generación en sandbox antes de cualquier despliegue.
 
 **Rollback:** conservar snapshots anteriores y restaurar solo el mecanismo aprobado.
+
+### 10.a. Diagnóstico y herramientas existentes — 2026-10-29
+
+**Pedido inicial:** planificar. Solo se modificó este documento; no se ejecutó
+un generador nuevo, no se migraron snapshots ni se desplegó configuración. El
+reinicio de OpenCode y PC está confirmado por el usuario; no es un pendiente de 9.A.
+
+El problema es de mantenimiento, no falta de agentes o de MCPs. Hoy hay:
+
+- `scripts/recompose_additive_agents.py`: copia tres bases **globales** de Core
+  (`agent-design`, `master-dev`, `planner`) y aplica augment Knowledge/Ticketing
+  en ese orden según los markers instalados. No compone `.opencode/agents/` de
+  proyectos ni admite especializaciones declarativas locales. Sus callers de
+  install/sync deben seguir funcionando sin flags nuevos obligatorios.
+- `check_local_overlays.py`: auditoría semiestructurada de archivos contra la
+  base global; compara metadata, allowlists, headings y grupos de tokens. No
+  valida intención completa, permisos efectivos con plugins, equivalencia de
+  cuerpos, procedencia del snapshot o vigencia respecto de una base pinneada.
+  Su exit code actual es 0 aun si el reporte contiene findings: una futura
+  comprobación de composición no puede dar por aprobado solo por ese código.
+- `check_overlay_sync.py`: compara canónico/target mediante `sync_manifest.txt`
+  y `obsolete_targets.txt`. Es read-only y detecta drift/extra/obsoletos, pero
+  paridad no demuestra que el snapshot conserve un contrato global vigente.
+- Los overlays sincronizan archivos completos con rsync. Los scripts de
+  instalación/sync pueden cargar `config/local.env`, configurar credenciales,
+  hacer pull o instalar paquetes: **no ejecutarlos para este relevamiento**.
+  La auditoría usó paths explícitos y helpers read-only, sin leer envs reales.
+
+No se encontró un contrato de composición local declarado en las superficies
+relevadas. Las diferencias se mantienen como Markdown completo. No corresponde
+inventar un addon, agente, skill, comando o dependencia para resolverlo: el dueño
+de una posible extensión de generación/auditoría es Core, y el dominio sigue local.
+
+### 10.b. Matriz de los nueve overlays y baseline
+
+Relevados los nueve canónicos y sus productos, no solo VB. **59 agentes locales,
+144.547 bytes** de definiciones completas, sin contar las bases globales heredadas.
+Los nueve manifests de despliegue pasan sin drift; la auditoría existente contra
+el stack global instalado reporta **0 warnings/0 errors**, 141 items OK y 37
+restricciones explícitas accepted. No hay urgencia que justifique una migración
+masiva; el piloto debe demostrar una mejora de mantenimiento.
+
+| Overlay | Agentes locales | Diferencias que la composición no debe normalizar |
+|---|---:|---|
+| Higyrus | 11 | Java11/JDO/Vaadin/Gradle, handoff de tickets y memoria de cierre, planner local, curator local/addon; no agregar flags de otros stacks |
+| Virtual Broker | 7 | Spring/JPA/Maven/Next/AntD, handoff natural recién aprobado, guías Claude públicas autónomas y review formal separado |
+| Market Data | 7 | Python/FastAPI/Celery y frontend; backend-python local sin base Core homónima; solo review formal de tickets, no handoff de implementación |
+| Keycloak | 4 | SPI/realms/themes y compatibilidad; sin clon local dev-test; reviewer niega pattern checks explícitamente; no leer material privado |
+| Higyrus Gateway | 6 | Ruteo reactivo/auth; helpers Jira solo read-only y review formal, sin verdict/result de implementación |
+| Aggregator | 6 | Sin UI activa, builds por mise, sin handoff de implementación; no borrar skills nativas ni recortar allows legacy por este punto |
+| Documento API | 6 | Contratos de documentos/firma/filesystem/JPA; review formal, sin handoff de implementación ni frontend |
+| Perfil Inversor | 6 | Exámenes/evaluación/Flyway/Maven; review formal sin handoff de implementación ni frontend |
+| OMS API | 6 | Backend TypeScript/Nest, modos FIX/OMS/concurrencia; backend-typescript local sin base Core; sin frontend ni handoff de implementación |
+
+Los tres agentes sin base homónima en Core son `knowledge-curator` de Higyrus,
+`backend-python-developer` de Market Data y `backend-typescript-developer` de OMS.
+No asignarles una base Java o genérica por conveniencia. Los nueve configs raíz
+solo declaran los overrides nativos `plan`/`build`; no se descubrieron definiciones
+inline de esos 59 roles que deban sustituirse para este piloto.
+
+También hay asimetría real de tamaños: el cuerpo de reviewer tiene 34 líneas no
+vacías en VB y 30 en Keycloak, mientras otros seis overlays expresan el suyo en
+2–4 líneas largas. En VB, 11 de sus 34 líneas aparecen literalmente en la base
+Core, incluyendo headings/boilerplate; esto **no equivale a once reglas redundantes
+ni prueba equivalencia semántica**. Nueve cabeceras reviewer distintas de Core.
+No hay base empírica para reemplazar todos los cuerpos o deduplicar permisos a ciegas.
+
+Evidencia temporal `/tmp/opencode/point10/{inventory,baseline}.json`, auditor
+`/tmp/opencode/point10-audit.py`. Ocho regresiones actuales de auditoría/paridad
+pasaron sin omisiones. Son pruebas existentes, no del generador propuesto. Se
+protegen agentes/configs/assets y todos los índices, no se inspeccionan DBs,
+logs de clientes, claves, corpus o código funcional de aplicaciones.
+
+### 10.c. Decisión recomendada: 10.A preview con un piloto, no migración
+
+**Propuesta a aprobar:** extender herramientas existentes y preparar únicamente
+el piloto `reviewer` de **Virtual Broker**, generando siempre en sandbox. Elegido
+porque tiene una base Core homónima, semántica comparable y permisos de review
+acotados; no porque todos los repos deban parecerse a VB. No usar planner/master
+como primer caso: concentran handoff, memoria, delegación y diferencias críticas.
+
+El candidato separaría, en el canónico del overlay:
+
+1. `agent-composition.json`: descriptor de mantenimiento con schemaVersion,
+   nombre del rol, referencia a `agents/reviewer.md` de Core y SHA-256 de esa base,
+   paths relativos del header y fragmento local, y target lógico del snapshot.
+2. `agent-sources/reviewer/header.yaml`: **cabecera local completa congelada**,
+   copiada literalmente del snapshot actual, incluyendo orden de permisos,
+   tools/model/variant y límites. En 10.A no se hereda ni mergea metadata de Core:
+   se ensaya compartir solo el cuerpo común. No prometer que esto deduplica headers.
+3. `agent-sources/reviewer/local.md`: dominio y restricciones adicionales de VB,
+   Jira/CodeGraph, distinción reviewer/code-reviewer y no ejecutar validación final
+   principal. No volver a pegar todo el rol dentro del fragmento ni mover dominio
+   al Core. Una diferencia normativa con la base es bloqueo, no “último párrafo gana”.
+
+La salida sería un Markdown completo: cabecera local, cuerpo de la base Core y
+especialización local acotada. La primera versión **no será necesariamente byte
+idéntica al cuerpo anterior**: debe pasar un contraste de responsabilidades,
+guardrails y reglas locales, además de la igualdad exacta de cabecera y permisos
+efectivos. No simular una migración no-op ni aceptar el candidato por un conteo
+de tokens comunes. Si agregar la base solo duplica texto o introduce conflictos,
+se revisa o se descarta el piloto.
+
+Los sources viven **fuera** de `agent/agents` y de las carpetas de descubrimiento:
+de otro modo OpenCode podría cargarlos como agentes nuevos. El manifest no es
+`opencode.json`, no agrega `extends` al frontmatter ni emite `__replace__` u otros
+campos de generación al runtime. El producto sigue consumiendo el snapshot completo
+existente; no necesita Core/manifest/generador al abrir una sesión.
+
+### 10.d. Contrato del preview y precedencia
+
+- Extender `recompose_additive_agents.py` con un modo **preview-local explícito**,
+  preservando el modo global actual, sus flags y el orden Knowledge→Ticketing.
+  El nuevo modo exige manifest, base Core confiable y output de sandbox explícitos;
+  no deduce la base desde el home personal ni habilita auto-sync al arrancar.
+- Base = archivos versionados de Core y SHA fijado. El directorio base se aporta
+  por parámetro; el manifest no contiene paths `/home/...`, scripts, plugins,
+  comandos shell ni consultas remotas. No fetch/pull ni actualización automática
+  del pin. Una base modificada requiere revisión y nuevo hash acordado.
+- En el piloto: cuerpo común primero, especialización después; metadata local
+  completa, sin unión automática de allows ni ordenamiento de reglas. Rechazar
+  inputs inválidos, faltantes, repetidos, hashes incorrectos, traversals y escapes
+  por symlink antes de escribir. No templates ejecutables/eval ni macros de shell.
+- Escribir solo el target declarado dentro del output temporal; nunca en Core,
+  la instalación, el canónico o el producto por omisión. No `rmtree` de un output
+  arbitrario ni borrar snapshots/otros agentes. Render repetible en outputs nuevos
+  debe dar bytes iguales; `check` compara sin escribir. No usar fechas/paths
+  absolutos que vuelvan no determinista el contenido.
+- Receipt/provenance fuera del prompt, con hashes de base/header/fragmento/output
+  y versión de formato. No llenar contexto del agente con metadatos de build.
+  Integrar esa comprobación con `check_local_overlays.py`, sin reemplazar sus
+  findings ni ocultarlos por exit code 0; paridad sigue en `check_overlay_sync.py`.
+- Runtime verificado: `1.19.4--202610232249`, familia V1. Su loader asigna el cuerpo
+  Markdown como prompt y mezcla configuración por orden; el evaluador usa la última
+  regla coincidente. Claves desconocidas de agente pueden acabar en `options`, no
+  crean herencia de instrucciones. Context7 actual devolvió APIs V2 distintas:
+  no copiar esos campos `agents/system/permissions` ni inferir semántica V2 aquí.
+  La autoridad de compatibilidad es el binario y la fuente V1 local inspeccionada.
+- Las recetas de playbook con `--dangerously-skip-permissions` no se ejecutaron
+  ni son una vía de validación. Usar helpers directos read-only y config nativa
+  sin bypass; aclarar en la documentación el carácter no nativo de los sentinels.
+
+### 10.e. Alcance propuesto para implementar 10.A
+
+Solo tras aprobar, **once paths en dos canónicos**, primero código/datos y sandbox:
+
+**Core (7):**
+- `scripts/recompose_additive_agents.py`: modo preview-local sin alterar defaults.
+- `scripts/check_local_overlays.py`: comprobar procedencia/composición opcional.
+- `tests/test_local_agent_composition.py` nuevo: schema, determinismo y fronteras.
+- `tests/test_overlay_audit.py`: compatibilidad y findings de composición.
+- `PLAYBOOK-LOCAL-OVERLAYS.md` y `LOCAL-OVERLAY-TEMPLATE.md`: uso/precedencia/límites,
+  sin presentarlos como features nativos ni recomendar saltar permisos.
+- Este plan: resultados y decisión de continuidad.
+
+**Canónico VB (4):**
+- `agent-composition.json` nuevo.
+- `agent-sources/reviewer/header.yaml` y `agent-sources/reviewer/local.md` nuevos.
+- `tools/test_workflow_contract.py`: revisar los inputs del piloto y sus previews
+  en temporales sin sustituir las regresiones de los snapshots actualmente activos.
+
+**Fuera de 10.A:** los 59 `.opencode/agents/*.md` existentes (incluido reviewer VB),
+comandos/skills/helpers/configs/modelos/Task, markers/addons, manifests de sync y
+obsoletos, instaladores, guías públicas CLAUDE, productos, estado local/envs/índices,
+CodeGraph, Documents pendiente, corpus y cualquier agente nuevo. Los cuatro paths
+del piloto no entran al manifest de despliegue. No rollout a los otros ocho repos.
+No cambiar runtime ni crear un segundo addon/CLI/MCP para este preview.
+
+**10.B requiere otra aprobación:** solo si el piloto aporta valor, adoptar el
+snapshot generado en el canónico, revisar su diff semántico y probar sync selectivo.
+Publicación/deploy siguen siendo puertas separadas. No retirar snapshots:
+seguirán versionados/auditables y útiles para rollback; lo que se elimina sería
+su edición manual, no necesariamente la copia física o su contexto residente.
+
+### 10.f. Validación y criterios de salida
+
+1. Core: llamadas antiguas del compositor siguen produciendo los tres agentes
+   globales y sus augments iguales; sin cambios de models/permisos/markers.
+2. Esquema/paths: inputs y output cerrados, SHA incorrecto falla antes de escribir,
+   sin exec/red/envs reales, ni escritura a fuentes, instalación, `.git` o productos.
+   Campo desconocido de receta no se transforma silenciosamente en opción runtime.
+3. Preview determinista e idempotencia de check; receta/provenance/output se
+   corresponden. Header del piloto byte idéntico al local actual: orden, modos,
+   modelo/variant, tools, edit/Bash/Task y denies sin cambio ni allows nuevos.
+4. Matriz semántica reviewer: rol de revisión propia, no implementación/corrección,
+   no revisión formal accidental, evidencia/cumplimiento/riesgo, contexto async,
+   memoria material, Jira acotado, CodeGraph estructural y restricciones locales.
+   No basta la igualdad de keywords; registrar cualquier diferencia no equivalente.
+5. Loader nativo en sandbox con paquetes ya existentes: config/agente original y
+   preview con stack global+nueve perfiles. Solo se sustituye el candidato en VB;
+   otros 58 snapshots idénticos y otros ocho perfiles sin cambios. Probar también
+   pérdida de metadata, cambio de base, pin obsoleto, output modificado y fragmento
+   ausente. No instalar dependencias para completar la prueba.
+6. Protección específica: Higyrus conserva handoff/memoria/Spotless, VB handoff
+   natural y guías autónomas, Keycloak niega pattern checks y no gana dev-test local,
+   Aggregator conserva mise/recortes UI/skills nativas; los siete sin handoff de
+   implementación no lo reciben. Ningún proyecto gana Task/MCP o Git writes.
+7. Comparar coste real de mantenimiento: fuente editada a mano, tamaño y claridad
+   del fragmento, cantidad de duplicación, diff ante cambio de base y complejidad
+   de generación. **No afirmar ahorro de contexto, tokens o latencia**; el output
+   puede ser igual o más largo. Sin modelos/benchmarks/delegaciones desde este rol.
+
+Aceptar 10.B solo con evidencia de menor mantenimiento y sin degradación de
+contratos. Si el fragmento repite la base, exige excepciones frágiles o expande
+contexto sin utilidad suficiente, mantener snapshots actuales y cerrar 10 sin
+migración también es un resultado válido. No convertir el piloto en deuda obligatoria.
+
+### 10.g. Aprobación, rollback y estado
+
+**Estado al formular el piloto:** planificado, sin aprobación de implementación.
+La decisión posterior de no realizarlo queda registrada en 10.h.
+Relevamiento: nueve paridades pass, 0 warnings/errors del auditor actual, ocho
+tests existentes pasados y 1.580 fingerprints protegidos salvo este plan. No
+pruebas del nuevo generador, nuevos manifests o previews producidos todavía.
+
+Rollback 10.A: quitar únicamente cambios aprobados de código/docs/datos del
+preview si siguen sin drift; los snapshots y activos no se tocaron, no requieren
+restauración. En 10.B, si se autoriza, conservar original+receipt y revertir solo
+el snapshot/promoción alcanzados según hashes; nunca restore/reset sobre trabajo
+ajeno ni retirar nativos/obsoletos por parecido de nombre. No restaurar índices.
+
+Esta planificación no autoriza implementación, despliegue, instalación, commits,
+pushes o corridas de modelos. Reinicio de 9.A confirmado; no pedir otro por editar
+este plan. Conocimiento/corpus y worktrees de aplicaciones siguen fuera del alcance.
+
+### 10.h. Decisión final y cierre de la iniciativa — 2026-10-29
+
+**Decisión:** no implementar 10.A/10.B. Tras discutir el coste y el beneficio, se
+concluyó que sumar manifests, fragmentos, generación y verificaciones no estaba
+justificado por un problema recurrente medido. El usuario aceptó dejarlo y cerrar
+la simplificación. No hay un piloto pendiente ni autorización para construirlo.
+
+Se conservan los 59 snapshots, las herramientas existentes y las diferencias
+locales. La paridad verificada y los tests actuales no prueban perfección del
+comportamiento, pero tampoco aportan evidencia de que este generador compense su
+complejidad. Si aparecen drift real o mantenimiento repetitivo costoso, se evalúa
+de nuevo con un caso concreto; la propuesta histórica no se ejecuta por inercia.
+
+**Cierre técnico:** puntos 1–9.A y ajustes asociados implementados, sincronizados
+y publicados según sus ledgers; punto 10 descartado razonadamente sin código,
+configuración o despliegue nuevos. Reinicio posterior a 9.A confirmado. El ensayo
+real de 8.B permanece opcional/no ejecutado y no bloquea el cierre. La investigación
+REA/reverse-engineer es una idea externa a esta iniciativa, diferida por el usuario
+hasta una necesidad concreta: no agregar ahora agentes, MCPs o dependencias.
+
+Solo cambia este documento. No se repiten suites, despliegues o publicaciones
+técnicas para cerrar administrativamente. El trabajo previo ajeno de Documents
+sigue preservado/fuera de alcance. El commit/push del registro documental requiere
+autorización explícita; no es un cambio técnico pendiente ni se declara publicado.
 
 ## Registro obligatorio por punto
 
@@ -5253,20 +5505,17 @@ Completar al avanzar, sin crear un reporte nuevo para cada microiteración:
 | 2026-10-27 | Punto 9, planificación | Usuario pidió planificar. Fuentes y metadata global+nueve perfiles distinguen capacidades/aislamiento, no muestran obligación de cadena planner→renderer. Se recomienda conservar roles y permisos, explicitar default directo y especialización opcional, QA independiente intacta. Artifact Studio, QMD/Quarto y lectura separados; seis files Documents+plan propuestos, trabajo previo dirty preservado y 1.032 fingerprints intactos. Solo plan; aprobación pendiente 9.a–9.f, sin generación ni modelos. |
 | 2026-10-28 | Punto 9.A, implementación/validación | Usuario aprobó canónicos/sandbox. Seis paths Documents+plan, sin retiro de roles o delta de permisos/modelos/tools; primary directo, especialistas opcionales y QA independiente. 35 tests sin omisiones, typecheck, carga nativa global+nueve perfiles/59 agentes y 60 pares resueltos; 1.493 fingerprints protegidos, dirty previo/activos/productos/índices intactos. Fixtures sintéticos no son QA perceptual ni ahorro probado. Detalle 9.g; sin despliegue/publicación/modelos. |
 | 2026-10-28 | Punto 9.A, promoción y publicación autorizada | Usuario autorizó promover/publicar: cuatro activos globales copiados, 35 tests sin omisiones y typecheck, composición actual global+nueve perfiles antes/después y post-sync, 59 agentes locales y 1.536 fingerprints protegidos. Sin cambios de permisos/modelos/tools, sin productos o modelos. Backup PIN point9a-20261028T182650 y ledger final publication.json; alcance seis fuentes Documents+plan Core, preservando dirty previo. Detalle 9.h; reiniciar OpenCode. |
+| 2026-10-29 | Punto 9.A, cierre confirmado | Ledger final confirma Documents df86b7b/Core0c3ce82, dos commits/tres pushes y 1.539 fingerprints de publicación protegidos; trabajo previo Documents preservado. El usuario confirmó reinicio de OpenCode y PC al pedir planificar 10. No repetir despliegue/publicación ni pedir otro reinicio por relevar. |
+| 2026-10-29 | Punto 10, planificación | Relevados nueve overlays/59 agentes/144.547 bytes, paridad 9/9 y auditoría actual sin warnings/errors (37 restricciones accepted), ocho tests existentes pasados. Composer actual solo global3; diferencias de cuerpos/permisos impiden asumir migración mecánica. Se propone 10.A preview-local en herramientas Core y un piloto reviewer VB con header congelado, sin tocar snapshots/activos/Claude/productos; once paths propuestos. Solo este plan modificado, 1.580 fingerprints protegidos; implementación pendiente (10.a–10.g). |
+| 2026-10-29 | Cierre de simplificación | Tras revisar coste/beneficio, usuario acepta no implementar el generador del punto 10 y dejar REA para una necesidad futura. Iniciativa técnicamente cerrada: 1–9.A publicados, 10 descartado, ensayo real 8.B opcional/diferido no bloqueante. Solo registro documental actualizado; sin cambios técnicos, deploy, commits o pushes nuevos. Detalle 10.h. |
 
 ## Próxima acción
 
-**9.A promovido y validado**, delimitado en 9.c–9.h, con publicación autorizada de
-Documents/Core: verificar el resultado final en el ledger `publication.json` del
-backup antes de dar por publicados los remotos. Tras comprobarlo, no repetir el
-lote; el siguiente punto es planificar 10 solo si el usuario lo pide. Reiniciar
-OpenCode por estos cuatro activos, sin ampliar permisos o retirar roles. Preservar
-trabajo previo Documents, aún fuera de alcance; no normalizarlo con un sync amplio.
-8.A y precisiones de medición ya publicados; no repetir operaciones. Experimento
-8.B sigue opcional/diferido. No confundir los tres workflows ni habilitar task a
-documenter desde roles técnicos para ocultar un límite de routing existente.
-Los puntos 1–6, fixes GitHub y 7.A/7.B están publicados; no repetir esas operaciones.
-El reinicio confirmado anteriormente no cubre esta promoción de 9.A. 7.C no añade poda editorial.
-Nunca publicar productos AUNE ni abrir/reparar sus índices por cerrar un plan.
-No confundir relevamiento de fuentes, configuración o fixtures con llamadas
-efectivas probadas, obediencia de modelos o ahorro operativo demostrado.
+**Sin próximos cambios técnicos en esta iniciativa.** Usar el stack y corregir
+problemas concretos cuando aparezcan. El punto 10 no se implementa; 8.B real y REA
+no quedan como requisitos pendientes. No repetir 1–9.A ni pedir reinicios por
+editar este registro. Solo falta versionar el cierre documental si se autoriza.
+Preservar trabajo ajeno de Documents; no sync amplio, commits de productos AUNE,
+reparaciones de índices o experimentos por cerrar administrativamente. Mantener
+las fronteras de evidencia: tests/configuración no prueban obediencia del modelo
+ni ahorro operativo.
