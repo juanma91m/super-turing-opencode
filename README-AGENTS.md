@@ -34,7 +34,10 @@ el conjunto completo de instrucciones recibido por el modelo.
 `planner` no dispone de shell general. Para Git de lectura usa
 `python3 ~/.config/opencode/scripts/planner_shell.py git status --short` (u otra
 operación admitida); para helpers usa `... helper <id> <args>`. `--help` enumera
-los IDs instalados. Read/Grep/Glob siguen siendo la vía ordinaria de lectura.
+los IDs, operaciones y flags requeridos del registro instalado. Antes de declarar
+que una operación no está disponible, comprobar ese contrato y el error real;
+`edit: deny` no impide por sí solo un helper de metadata aprobado.
+Read/Grep/Glob siguen siendo la vía ordinaria de lectura.
 
 El plugin `planner-shell-guard.ts` valida llamadas Bash del turno ejecutor y falla
 cerrado si no puede resolver el rol. Bash nativo deniega por defecto y permite
@@ -42,7 +45,7 @@ solo el ejecutor, mientras la guarda rechaza composición, expansiones, redirecc
 intérpretes arbitrarios y operaciones mutadoras. La política de Git desactiva
 pager, fsmonitor, diff externo, textconv y locks opcionales; no hay commits/pushes.
 
-Core registra solo helpers reusables propios (`ssh-inspect`, `psql-readonly`); los addons son
+Core registra solo helpers reusables propios (`local-inspect`, `ssh-inspect`, `psql-readonly`); los addons son
 dueños de sus `planner-helpers/*.json`: Core no codifica Jira, corpus o clientes.
 Solo se ejecutan scripts registrados bajo la configuración global confiable,
 con argumentos declarados; los de metadata conservan su sandbox `tmp/`. El alias
@@ -54,9 +57,62 @@ no se duplica lógica ni se modifica `settings.json`. Es una frontera de comando
 no aislamiento OS frente a programas confiables comprometidos o un operador que
 modifique la configuración global. No cubre permisos de otros roles autorizados.
 
-Quitar la guarda, usar `--pure` o ejecutar un intérprete por otra vía no es un
-fallback permitido. Una operación fuera de la política se entrega al implementador,
-no se ensancha la allowlist durante el análisis. Reiniciar clientes tras instalar.
+La política de planner es **inspección autónoma, no mutación** dentro del alcance
+autorizado: no derivar a implementación por una lectura que ya tenga una vía
+aprobada. Consultar el contrato completo y comprobar el error antes de declarar
+una limitación. Una lectura verdaderamente ausente se informa como faltante de
+tooling, sin inventar acceso ni pedir cambio de rol por rutina.
+No se modifica la propia guarda/allowlist durante el análisis, ni se usa `--pure`
+o un intérprete alternativo como bypass. Código, configuración, servicios, datos
+e infraestructura siguen protegidos contra mutaciones; se conserva la excepción
+explícita de los artefactos de handoff mediante su helper/sandbox. Reiniciar
+clientes tras instalar cambios de guías.
+
+### Diagnóstico local de solo lectura
+
+`helper local-inspect` agrega diagnósticos Linux/GNU sin habilitar `df *`, `du *`
+ni shell general. Operaciones: `df`, `du`, `stat`, `free`, `uptime`, `uname`,
+`lsblk`, `processes`, `listeners`, `connections`, `addresses` y `routes`;
+opciones cerradas, binarios de directorios del sistema (`bin`/`sbin`), sin pager, stdin,
+entorno arbitrario ni intérprete. Read/Grep/Glob siguen cubriendo otras lecturas.
+
+```bash
+python3 ~/.config/opencode/scripts/planner_shell.py helper local-inspect help
+python3 ~/.config/opencode/scripts/planner_shell.py helper local-inspect df --path /home
+python3 ~/.config/opencode/scripts/planner_shell.py helper local-inspect du --path /home/usuario --depth 1 --limit 30 --timeout 120
+python3 ~/.config/opencode/scripts/planner_shell.py helper local-inspect free
+python3 ~/.config/opencode/scripts/planner_shell.py helper local-inspect listeners
+python3 ~/.config/opencode/scripts/planner_shell.py helper local-inspect routes
+```
+
+Usar la ruta personal real de cada máquina; no hay identidades hardcodeadas en
+el helper. `df --inodes` consulta inodos. `stat --path PATH` muestra solo tipo,
+tamaños y fecha. `lsblk` limita columnas a nombre, tipo, tamaño, filesystem,
+mountpoints y flag RO, sin números de serie/UUID ni acceso crudo a dispositivos.
+Procesos expone PID/PPID/UID/GID/estado/nombre, sin argv ni envs. Las operaciones
+de red usan `ss`/`ip` con argumentos fijos de consulta: no kill, add, del, flush
+ni opciones elegidas por el caller. Si falta el binario, informar sin instalar.
+
+`du` devuelve JSON ordenado por bytes asignados; profundidad 0..3 (default 1),
+top 1..200 (30), timeout 1..120s (30). Otras operaciones: 10s. Captura combinada
+stdout/stderr y salida formateada acotadas a 256 KiB; timeout/recorte/error devuelve
+no-cero y evidencia incompleta, sin reintentar con sudo. El top declara si omite
+filas. No cruza filesystems ni sigue symlinks recursivamente; una ruta explícita
+se canonicaliza y valida, incluidos redirects a rutas sensibles/virtuales.
+
+Se rechazan targets sensibles y `/proc`, `/sys`, `/dev`, `/run`; en recorridos
+se excluyen nombres sensibles (credenciales, `.env*`, `.ssh`, `private`, etc.).
+Los patrones se publican en el resultado: **los totales excluyen esos datos** y
+no son un inventario completo ni una estimación de espacio recuperable. No se
+lee contenido ni se borra/modifica nada intencionalmente; aun así, hay I/O,
+posibles actualizaciones normales de atime/auditoría y exposición de nombres.
+Limitarse al objetivo del usuario, no recorrer otros usuarios por arrastre ni
+persistir inventarios en memoria/corpus. No es un sandbox OS ni garantiza riesgo
+cero frente a binarios confiables comprometidos o cambios concurrentes de rutas.
+
+El registro declara `clients: ["opencode"]`; el hook Claude compartido rechaza
+este helper. Los helpers sin `clients` mantienen su compatibilidad previa. Esta
+ampliación no modifica permisos/configuración de Claude ni de otros roles.
 
 ### Inspección remota de solo lectura
 
@@ -70,17 +126,39 @@ python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect help
 python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect hosts
 python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect containers <alias>
 python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect container <alias> <contenedor>
+python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect networks <alias>
+python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect network <alias> <red>
+python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect stats <alias> <contenedor>
+python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect processes <alias> <contenedor>
+python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect listeners <alias>
+python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect routes <alias>
 python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect logs <alias> <contenedor> --tail 100 --since 24h
 python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect services <alias>
 python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect service <alias> <unidad.service>
 python3 ~/.config/opencode/scripts/planner_shell.py helper ssh-inspect service-logs <alias> <unidad.service> --tail 100 --since 24h
 ```
 
-Inspección Docker proyecta solo identificador, nombre, imagen, fechas, estado y
-reinicios; no `.Config.Env`, labels, mounts ni comandos. Systemd proyecta estado
-y timestamps, no Environment/ExecStart o cat de unidades. Created/StartedAt no
-demuestran por sí solos un despliegue: distinguir creación, arranque y release.
-No hay fallback mutador ni elevación si la cuenta no puede leer Docker/journal.
+La inspección ya no se reduce a identidad/fechas:
+
+- `container` incluye identidad/imagen, estado/health/exit/PID, redes por nombre
+  con aliases/DNSNames/IP/gateway, puertos/DNS, metadatos de montajes y límites
+  de CPU/memoria/PIDs/reinicio. No se leen archivos dentro de mounts.
+- `networks`/`network`, `images`/`image`, `volumes`/`volume` permiten inventario y
+  metadatos técnicos de esos recursos, incluyendo pertenencia de contenedores.
+- `stats` es una sola muestra; `processes` usa `docker top` sin argv/envs, no
+  `docker exec`. No se inicia proceso arbitrario dentro del contenedor.
+- Host: `system-info`, `disk`, `memory`, `uptime`, `host-processes`, `listeners`,
+  `connections`, `addresses`, `routes`, además de servicios y logs existentes.
+
+Los formatos remotos son fijos. La proyección estructurada conserva los campos
+seguros y omite env, labels, comandos/args, opciones arbitrarias de drivers y
+payloads de health checks. DNSNames puede faltar en Engines/CLIs antiguos: no
+confundir campo ausente con prueba de ausencia de DNS. Una respuesta JSON truncada
+o inválida no se muestra como raw inspect ni como un objeto vacío válido.
+Metadatos/nombres/rutas siguen siendo potencialmente privados; no persistir
+inventarios automáticamente. Systemd no expone Environment/ExecStart ni cat de
+unidades. Created/StartedAt no prueban despliegue. No restart/run/exec/connect/
+disconnect/pull/prune/rm ni fallback mutador/elevación si falta acceso.
 
 Logs: 100 líneas/24h por defecto; máximo 500 líneas, ventana relativa de 7d,
 64 KiB de salida y 30s por consulta. No follow/pager. Recorte/timeout es evidencia
@@ -152,6 +230,15 @@ python3 ~/.config/opencode/scripts/planner_shell.py helper psql-readonly query -
   convierte en instrucciones confiables. No hay logs de consultas en el helper;
   PostgreSQL puede registrar actividad según su política propia.
 
+### PRs durante planning
+
+Cuando está instalado el addon de cuentas, planner usa el helper registrado
+`github-pr` por el broker y la skill de cuentas disponible. Puede recuperar PR,
+diff, reviews y comentarios inline sin asumir el rol de revisor formal. No se
+habilita `gh` directo ni se amplían permisos Bash; el addon posee el registro,
+identidades, wrapper y endpoint GET fijo para comentarios inline. La política
+de cuenta y paginación se respeta antes de afirmar que no hay comentarios.
+
 ## Agentes base de OpenCode presentes en el esquema efectivo
 
 - `plan`: agente primario base de OpenCode. En este stack queda oculto/deshabilitado en favor del agente custom `planner`.
@@ -197,7 +284,7 @@ Los cambios de defaults requieren reiniciar OpenCode. Una sesión reabierta pued
 - `frontend-web-developer`: implementador de capa de presentacion web en el stack real del proyecto, incluyendo Vaadin, React, Angular u otros.
 - `merge-conflict-resolver`: integra conflictos de merge/rebase preservando la intención funcional de ambas ramas.
 - `reviewer`: revisor tecnico centrado en riesgos, regresiones, compatibilidad, performance y validaciones pendientes.
-- `code-reviewer`: revisión independiente de desarrollos de terceros por ramas o Pull Request; guarda informes incrementales y evita observaciones cosméticas.
+- `code-reviewer`: revisión independiente de desarrollos de terceros por ramas o Pull Request; requiere ticket y guarda informes incrementales en `tmp/<ticket>/code-review/code-review-N.md` del repo revisado, nunca en `~/code-reviews`. El helper `next_code_review_path.sh ticket <ticket> --content '<informe literal>'` reserva y escribe sin Edit/apply_patch; el rol relee el archivo antes de declararlo guardado. No crea handoff de implementación ni reporta observaciones cosméticas.
 - `ui-web-designer`: diseña interfaces y flujos web con criterio de UX, Material UI, Stitch y Playwright cuando haga falta. No implementa codigo; su foco es diseño y definicion visual.
 
 ## Agentes de soporte/base que pueden aparecer en OpenCode
@@ -254,6 +341,7 @@ comandos `/ticket-*` y el workflow de handoff asociado.
 - `planner`, `master-dev`, `reviewer` y `agent-design` también pueden actuar como tutores técnicos: explicar conceptos primero, desafiar atajos y hacer explícito el porqué técnico cuando eso ayude al crecimiento del usuario.
 - `reviewer` conserva el workflow de verificación post-solución durante desarrollo propio; `code-reviewer` se usa para aprobar implementaciones de terceros y ambos comparten solo criterios técnicos reutilizables.
 - Antes de revisar un PR, `code-reviewer` valida repo actual vs URL, consistencia del ticket y snapshot de commits; un cambio posterior del head requiere una nueva revisión incremental.
+- Con ticket identificado, `code-reviewer` contrasta descripción, criterios y comentarios mediante la integración read-only aprobada disponible, global/addon o local; no exige handoff para leer requisitos. La conversación del PR no sustituye la del ticket. El addon Ticketing conserva el wiring Jira; storage y contratos locales siguen vigentes.
 - Toda revisión de PR lee comentarios y reviews antes del veredicto. En rereviews, las justificaciones del autor se vuelven a contrastar con el head, los contratos y los hallazgos previos: se aceptan solo con evidencia suficiente y, si no satisfacen, el informe explica por qué el riesgo continúa.
 - SDD/TDD/BDD se aplican como heurística pragmática: usar criterios de aceptación, escenarios y test-first cuando aclaran o reducen riesgo; no forzarlos en microcambios triviales ni en zonas donde el harness vuelva el ritual más caro que útil.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.

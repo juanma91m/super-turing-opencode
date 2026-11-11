@@ -51,6 +51,25 @@ class PlannerShellTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             guard.check_invocation(f'python3 {guard.BROKER} git status', ROOT.parent, ROOT)
 
+    def test_local_inspection_uses_registered_contract_and_stays_opencode_scoped(self):
+        prefix = f'python3 {guard.BROKER} helper local-inspect'
+        for suffix in ('help', 'df --path /home', 'du --path /home --depth 1 --limit 30',
+                       'stat --path /tmp', 'free', 'uptime', 'uname', 'lsblk'):
+            with self.subTest(suffix=suffix):
+                guard.check_invocation(prefix + ' ' + suffix, ROOT)
+        for suffix in ('rm --path /tmp', 'du --path /home --dereference',
+                       'du --path /home --depth 4', 'df', 'free --path /home',
+                       'df --path /home | sort -h', 'df --path /home > file'):
+            with self.subTest(suffix=suffix), self.assertRaises(ValueError):
+                guard.check_invocation(prefix + ' ' + suffix, ROOT)
+        with self.assertRaises(ValueError):
+            guard.check_invocation(prefix + ' help', ROOT, client='claude')
+        payload = {'cwd': str(ROOT), 'tool_input': {'command': prefix + ' help'}}
+        for flag, expected in (('--check', 0), ('--claude-hook', 2)):
+            done = subprocess.run([sys.executable, str(guard.BROKER), flag],
+                                  input=json.dumps(payload), capture_output=True, text=True)
+            self.assertEqual(done.returncode, expected, done.stderr)
+
     def test_single_quoted_metadata_is_literal(self):
         payload = "O'Brien; `literal` $(not-executed)\n# markdown"
         command = ' '.join(shlex.quote(x) for x in ('python3', str(guard.BROKER), 'helper', 'test', payload))
@@ -114,10 +133,10 @@ class PlannerShellTests(unittest.TestCase):
             shutil.copy2(addon / 'planner-helpers/ticketing.json', config / 'planner-helpers/ticketing.json')
             app = project / 'app.py'
             app.write_text('unchanged\n')
-            (root / 'missing.example').write_text('')  # Synthetic, empty config; no real .env is read.
-            with patch.dict(os.environ, {'JIRA_ENV_FILE': str(root / 'missing.example'),
-                                        'JIRA_BASE_URL': 'https://jira.invalid', 'JIRA_EMAIL': 'synthetic@example.invalid',
-                                        'JIRA_API_TOKEN': 'synthetic'}):
+            # Local handoff must not require even synthetic Jira credentials or
+            # an env file. A regression must fail here, not be masked by fixtures.
+            with patch.dict(os.environ, {'PATH': os.environ.get('PATH', os.defpath),
+                                        'JIRA_ENV_FILE': str(root / 'missing.example')}, clear=True):
                 command, cwd, env = guard.prepare(['helper', 'jira', 'verdict', 'TEST-1', '--content',
                                                     'Literal `$()`; no shell execution'], project, config)
                 result = subprocess.run(command, cwd=cwd, env=env, capture_output=True, text=True)

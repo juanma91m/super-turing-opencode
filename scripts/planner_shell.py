@@ -193,13 +193,17 @@ def prepare(args, cwd, config=CONFIG):
     raise ValueError('Use planner_shell.py git <read-only operation> or helper <registered id>')
 
 
-def check_invocation(command, cwd, project=None, config=CONFIG, broker=BROKER):
+def check_invocation(command, cwd, project=None, config=CONFIG, broker=BROKER, client='opencode'):
     tokens = literal_argv(command)
     if len(tokens) < 3 or tokens[0] != 'python3' or Path(tokens[1]).expanduser().resolve() != broker:
         raise ValueError('Planner Bash only accepts python3 ~/.config/opencode/scripts/planner_shell.py ...')
     where = Path(cwd).resolve()
     if project and not where.is_relative_to(Path(project).resolve()):
         raise ValueError('Planner shell cannot switch to a different repository')
+    if tokens[2:3] == ['helper'] and len(tokens) > 3:
+        entry = declarations(config).get(tokens[3], {})
+        if client not in entry.get('clients', ['opencode', 'claude']):
+            raise ValueError('Helper is not approved for this client')
     prepare(tokens[2:], where, config)
 
 
@@ -211,12 +215,19 @@ def main(args):
             if tool.get('dangerouslyDisableSandbox'):
                 raise ValueError('Planner cannot disable the runtime sandbox')
             cwd = payload.get('cwd', os.getcwd())
-            check_invocation(tool['command'], cwd, payload.get('project_root'))
+            check_invocation(tool['command'], cwd, payload.get('project_root'),
+                             client='claude' if args == ['--claude-hook'] else 'opencode')
             return 0  # Never auto-approve or override other permission/secret guards.
         command, cwd, env = prepare(args, Path.cwd())
         if command is None:
             print('Planner shell: git <read-only operation> | helper <addon id> <args>. Other reads: Read/Grep/Glob.')
-            print('Registered helpers: ' + ', '.join(sorted(declarations(CONFIG))))
+            available = declarations(CONFIG)
+            print('Registered helpers: ' + ', '.join(sorted(available)))
+            for name, entry in sorted(available.items()):
+                verbs = entry.get('verbs', {})
+                if verbs:
+                    operations = [f"{verb} {' '.join(schema.get('required', []))}".strip() for verb, schema in verbs.items()]
+                    print(name + ': ' + ' | '.join(operations))
             return 0
         return subprocess.run(command, cwd=cwd, env=env).returncode
     except (ValueError, KeyError, TypeError, IndexError, OSError) as error:

@@ -41,3 +41,16 @@ test("planner cannot choose a peer repository as Bash workdir", async () => {
   await expect(hooks["tool.execute.before"]!({ tool: "bash", sessionID: "s", callID: "c" },
     { args: { command: safe, workdir: "/" } })).rejects.toThrow()
 })
+
+test("planner permits bounded local diagnostics but not raw commands or mutation options", async () => {
+  const hooks = await Guard(context("planner"))
+  const prefix = `python3 ${broker} helper local-inspect`
+  for (const command of [`${prefix} df --path /home`, `${prefix} du --path /home --depth 1`, `${prefix} free`]) {
+    await hooks["tool.execute.before"]!({ tool: "bash", sessionID: "s", callID: "c" }, { args: { command } })
+  }
+  for (const command of ["df -h /home", `${prefix} rm --path /tmp`, `${prefix} du --path /home --dereference`,
+    `${prefix} df --path /home | sort -h`]) {
+    await expect(hooks["tool.execute.before"]!({ tool: "bash", sessionID: "s", callID: "c" },
+      { args: { command } })).rejects.toThrow()
+  }
+})

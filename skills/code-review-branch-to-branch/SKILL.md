@@ -14,9 +14,9 @@ description: Usa para aprobar desarrollos de terceros comparando ramas o Pull Re
 ## Contrato efectivo del proyecto
 
 - Resolver primero el agente y las instrucciones locales: conservan sus entradas, requisitos de ticket/Jira, helper/cuenta, storage, formato y criterios específicos. Este procedimiento común no los reemplaza por defaults globales ni amplía permisos.
-- Un ticket es opcional globalmente, pero obligatorio si así lo exige el repo. El storage global solo aplica sin especialización local: nunca es fallback de un flujo por ticket.
+- El informe pertenece al repositorio revisado: `tmp/<ticket>/code-review/code-review-N.md`. Resolver un ticket consistente; si falta, pedirlo antes de revisar. `~/code-reviews` nunca es fallback de un flujo por ticket ni el destino por defecto.
 - Los comandos aportan entradas y routing, no autorización de escritura. Si el modo pedido requiere un agente/helper/storage no habilitado, pedir el contexto compatible en vez de forzarlo.
-- Usar el helper de reserva aprobado por el agente efectivo justo antes de escribir; escribir solo en el path devuelto, sin sobrescribir informes previos. No crear handoff de implementación; si ya existe, es solo contexto adicional cuando la capa local lo permite.
+- Usar el helper aprobado por el agente efectivo, sin sobrescribir informes previos. El helper común admite `ticket <ticket> --content '<informe literal>'` para reservar y escribir en una única llamada, sin Edit/apply_patch; preferir esa vía para completar el informe cuando esté habilitada. Ejecutarlo desde el repositorio revisado: devuelve el path relativo a la raíz Git, incluso desde un subdirectorio. Releer el archivo real antes de anunciarlo guardado; un path reservado vacío no es un informe. Si falla, declarar no guardado, sin redirecciones ni destinos alternativos. No crear handoff de implementación; si ya existe, es solo contexto adicional cuando la capa local lo permite.
 - Antes de operar con GitHub, aplicar la política de cuenta disponible; usar únicamente `gh pr view`/`gh pr diff` o el wrapper read-only habilitado por esa política y agente. No improvisar acceso a credenciales ni comandos fuera de la allowlist.
 
 ## Entradas
@@ -58,6 +58,7 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 - Si título/head producen más de un ticket distinto, no elegir por intuición: pedir aclaración.
 - Si no aparece ticket en el PR pero se recibió uno explícito, usarlo y dejar constancia.
 - No consultar Jira ni crear `tmp/<ticket>/` hasta resolver cualquier discrepancia.
+- Con un ticket consistente, leer descripción, criterios y comentarios por la integración read-only aprobada disponible, global/addon o local, antes del veredicto. No requiere adoptar handoff ni crear `tmp/`. Los comentarios del PR no sustituyen los del ticket; en rerevisión, refrescar los relevantes aunque el código no haya cambiado. Registrar fuente/momento de consulta, paginación o recortes y desvíos materiales frente a lo pedido; si falta acceso, informar la operación/error concreto o tool ausente, sin afirmar cobertura ni inventar contexto.
 
 ### Conversación obligatoria del PR
 
@@ -101,11 +102,11 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 - No leer `node_modules`, vendorizados, generados, locks ni repos hermanos salvo que el diff los toque o una compatibilidad crítica no pueda probarse de otra forma.
 - No repetir `git diff`/`git show`/búsquedas o status equivalentes si la evidencia ya está disponible.
 - Cargar como máximo 3 skills: esta skill, la skill Jira/local si existe y una skill de dominio elegida por el diff.
-- No consultar memoria, Rovo, web o documentación externa por defecto. Escalar solo cuando falta un dato crítico imposible de obtener del ticket y del código.
+- No consultar memoria, búsquedas amplias Rovo, web o documentación externa por defecto. La lectura puntual del ticket identificado por una integración aprobada sí forma parte del review. Escalar solo cuando falta un dato crítico imposible de obtener del ticket y del código.
 
 ## Jira y CodeGraph acotados durante review
 
-- Jira: solo si el flujo del repo lo habilita, una única llamada de contexto acotado por el helper y parámetros definidos en su contrato local. No asumir un helper global ni cambiar el tratamiento local de Jira inaccesible. Nunca `issue` raw por defecto (vuelca ADF, metadata, comentarios y adjuntos innecesarios); no recorrer épica, hermanos, adjuntos ni Rovo por defecto.
+- Jira: usar la integración read-only aprobada global/addon o local, sin exigir opt-in del repo al handoff. Si existe especialización, conservar el helper y parámetros definidos en su contrato local. No asumir un helper global ni cambiar el tratamiento local de Jira inaccesible. Obtener contexto acotado (descripción, criterios y comentarios); ampliar solo por un faltante material, respetando límites locales y declarando paginación/recortes. Nunca `issue` raw por defecto (vuelca ADF, metadata, comentarios y adjuntos innecesarios); no recorrer épica, hermanos, adjuntos ni búsquedas amplias Rovo por defecto.
 - CodeGraph/`codegraph_explore`/`mcp__codegraph__explore`: usarlo solo si reemplaza exploración manual, con una consulta compacta y acotada a los símbolos del diff — nunca arquitectura global, trazas masivas ni reindexación durante un review. Si una consulta devuelve salida masiva o no reduce lecturas, dejar de usarlo para esa revisión y volver a diff/lectura directa.
 
 ## Qué buscar

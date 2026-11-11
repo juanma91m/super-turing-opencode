@@ -1,8 +1,10 @@
 """Contract regression checks, not an evaluation of model compliance."""
 import concurrent.futures
 import fnmatch
+import json
 import os
 import re
+import shlex
 from pathlib import Path
 import subprocess
 import tempfile
@@ -55,7 +57,14 @@ class CodeReviewContractTests(unittest.TestCase):
                      'nunca es fallback de un flujo por ticket',
                      'pedir el contexto compatible', 'No crear handoff de implementación'):
             self.assertIn(rule, contract)
-        self.assertIn('solo sin especialización local', (ROOT / 'agents/code-reviewer.md').read_text())
+        role = (ROOT / 'agents/code-reviewer.md').read_text()
+        self.assertIn('tmp/<ticket>/code-review/code-review-N.md', role)
+        self.assertIn('si falta, pregúntalo antes de revisar', role)
+        self.assertIn('ticket <ticket> --content', role)
+        self.assertNotIn('global *": allow', role)
+        self.assertIn('  edit: deny', role)
+        self.assertIn('relee ese archivo', role)
+        self.assertIn('un path reservado vacío no es un informe', contract)
 
     def test_branch_orientation_and_merge_base(self):
         branch = section('### Ramas')
@@ -113,12 +122,23 @@ class CodeReviewContractTests(unittest.TestCase):
                      'consecuencia técnica o funcional relevante', 'validación accionable'):
             self.assertIn(rule, section('## Umbral anti-ruido'))
 
-    def test_local_report_format_is_preserved_and_jira_is_project_owned(self):
+    def test_ticket_reads_allow_global_addon_without_overriding_local_contract(self):
         self.assertIn('conservar sus secciones, campos y extensiones', section('## Formato del informe'))
         jira = section('## Jira y CodeGraph acotados durante review')
+        self.assertIn('integración read-only aprobada global/addon o local', jira)
+        self.assertIn('sin exigir opt-in del repo al handoff', jira)
         self.assertIn('helper y parámetros definidos en su contrato local', jira)
         self.assertIn('No asumir un helper global ni cambiar el tratamiento local de Jira inaccesible', jira)
         self.assertNotIn('jira_helper.sh', jira)
+        ticket = section('### Ticket consistente')
+        for rule in ('leer descripción, criterios y comentarios',
+                     'Los comentarios del PR no sustituyen los del ticket',
+                     'en rerevisión, refrescar', 'paginación o recortes',
+                     'No requiere adoptar handoff'):
+            self.assertIn(rule, ticket)
+        role = (ROOT / 'agents/code-reviewer.md').read_text()
+        self.assertNotIn('úsalo solo si su contenido está disponible', role)
+        self.assertNotIn('atlassian-rovo_', role)  # Concrete integration belongs to the addon.
 
     def test_commands_keep_inputs_routing_and_defer_to_effective_agent(self):
         for filename, inputs in (('code-review.md', ('`$1`', '`$2`')),
@@ -144,21 +164,76 @@ class ReviewReportHelperTests(unittest.TestCase):
         self.env = dict(os.environ, HOME=str(self.home), GIT_OPTIONAL_LOCKS='0',
                         GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull)
 
-    def reserve(self, mode, subject):
-        return subprocess.run(['bash', str(HELPER), mode, subject], cwd=self.repo, env=self.env,
-                              capture_output=True, text=True, timeout=15)
+    def reserve(self, mode, subject, *args, cwd=None):
+        return subprocess.run(['bash', str(HELPER), mode, subject, *args], cwd=cwd or self.repo, env=self.env,
+                               capture_output=True, text=True, timeout=15)
 
-    def test_global_reservation_is_incremental_and_does_not_overwrite(self):
-        first = self.reserve('global', 'example-feature-to-main')
-        self.assertEqual(first.returncode, 0, first.stderr)
-        report = Path(first.stdout.strip())
-        self.assertEqual(report, self.home / 'code-reviews/example-feature-to-main/code-review-1.md')
-        report.write_text('previous findings\n')
-        second = self.reserve('global', 'example-feature-to-main')
-        self.assertEqual(second.returncode, 0, second.stderr)
-        self.assertEqual(Path(second.stdout.strip()).name, 'code-review-2.md')
-        self.assertEqual(report.read_text(), 'previous findings\n')
+    def test_global_storage_is_rejected_without_creating_artifacts(self):
+        result = self.reserve('global', 'example-feature-to-main')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('storage global retirado', result.stderr)
+        self.assertFalse((self.home / 'code-reviews').exists())
         self.assertFalse((self.repo / 'tmp').exists())
+
+    def test_ticket_content_is_written_literally_and_never_overwritten(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
+        content = '# Review\n$(touch injected) `rm -rf imaginary`\nñ y "comillas"\n'
+        first = self.reserve('ticket', 'TEST-123', '--content', content)
+        self.assertEqual(first.returncode, 0, first.stderr)
+        report = self.repo / first.stdout.strip()
+        self.assertEqual(report.read_text(), content)
+        self.assertEqual(report.stat().st_mode & 0o777, 0o600)
+        second = self.reserve('ticket', 'TEST-123', '--content', 'round 2')
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertEqual(second.stdout.strip(), 'tmp/TEST-123/code-review/code-review-2.md')
+        self.assertEqual((self.repo / second.stdout.strip()).read_text(), 'round 2\n')
+        self.assertEqual(report.read_text(), content)
+        self.assertFalse((self.repo / 'injected').exists())
+        self.assertFalse((self.home / 'code-reviews').exists())
+        self.assertEqual({p.name for p in (self.repo / 'tmp/TEST-123').iterdir()}, {'code-review'})
+
+    def test_subdirectory_still_writes_at_git_root(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
+        subdir = self.repo / 'src'
+        subdir.mkdir()
+        result = self.reserve('ticket', 'TEST-123', '--content', 'review', cwd=subdir)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((self.repo / result.stdout.strip()).read_text(), 'review\n')
+        self.assertFalse((subdir / 'tmp').exists())
+
+    def test_empty_content_or_unexpected_args_fail_without_creating_report(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
+        for args in (('--content', '  \n'), ('--content',), ('--unknown', 'value'),
+                     ('--content', 'report', 'extra')):
+            with self.subTest(args=args):
+                result = self.reserve('ticket', 'TEST-123', *args)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((self.repo / 'tmp').exists())
+
+    def test_symlinked_directories_cannot_escape_the_ticket_storage(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
+        outside = self.root / 'outside'
+        outside.mkdir()
+        for components in (('tmp',), ('tmp', 'TEST-123'), ('tmp', 'TEST-123', 'code-review')):
+            link = self.repo.joinpath(*components)
+            link.parent.mkdir(parents=True, exist_ok=True)
+            link.symlink_to(outside, target_is_directory=True)
+            result = self.reserve('ticket', 'TEST-123', '--content', 'review')
+            self.assertNotEqual(result.returncode, 0, components)
+            self.assertEqual(list(outside.iterdir()), [])
+            link.unlink()
+
+    def test_existing_symlink_file_is_skipped_without_touching_target(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
+        directory = self.repo / 'tmp/TEST-123/code-review'
+        directory.mkdir(parents=True)
+        app = self.repo / 'application.txt'
+        app.write_text('unchanged\n')
+        (directory / 'code-review-1.md').symlink_to(app)
+        result = self.reserve('ticket', 'TEST-123', '--content', 'review')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), 'tmp/TEST-123/code-review/code-review-2.md')
+        self.assertEqual(app.read_text(), 'unchanged\n')
 
     def test_ticket_reservation_stays_local_without_handoff_or_global_fallback(self):
         subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
@@ -184,10 +259,34 @@ class ReviewReportHelperTests(unittest.TestCase):
                 self.assertFalse((self.home / 'code-reviews').exists())
 
     def test_concurrent_reservations_are_unique(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-            results = list(pool.map(lambda _: self.reserve('global', 'same-review'), range(4)))
+            results = list(pool.map(lambda n: self.reserve('ticket', 'TEST-123', '--content', f'review {n}'), range(4)))
         self.assertTrue(all(p.returncode == 0 for p in results))
         self.assertEqual(len({p.stdout.strip() for p in results}), 4)
+        self.assertEqual({(self.repo / p.stdout.strip()).read_text() for p in results},
+                         {f'review {n}\n' for n in range(4)})
+
+    @unittest.skipUnless(os.environ.get('OPENCODE_REVIEW_RUNTIME_SMOKE') == '1',
+                         'opt-in: validates the installed OpenCode role and helper')
+    def test_installed_runtime_writes_through_helper_but_cannot_patch_application(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
+        content = '# Runtime fixture\nNo application review performed.\n'
+        command = ('bash ~/.config/opencode/scripts/next_code_review_path.sh ticket TEST-123 '
+                   '--content ' + shlex.quote(content))
+        result = subprocess.run(
+            ['opencode', 'debug', 'agent', 'code-reviewer', '--tool', 'bash', '--params',
+             json.dumps({'command': command, 'workdir': str(self.repo)})],
+            cwd=self.repo, env=os.environ, capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('tmp/TEST-123/code-review/code-review-1.md', result.stdout)
+        self.assertEqual((self.repo / 'tmp/TEST-123/code-review/code-review-1.md').read_text(), content)
+        denied = subprocess.run(
+            ['opencode', 'debug', 'agent', 'code-reviewer', '--tool', 'apply_patch', '--params',
+             json.dumps({'patchText': '*** Begin Patch\n*** Add File: application.txt\n+not allowed\n*** End Patch'})],
+            cwd=self.repo, env=os.environ, capture_output=True, text=True, timeout=60)
+        self.assertNotEqual(denied.returncode, 0)
+        self.assertFalse((self.repo / 'application.txt').exists())
 
 
 if __name__ == '__main__':

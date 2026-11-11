@@ -1,0 +1,22 @@
+{
+  "local-inspect": {
+    "path": "scripts/local_inspect.py",
+    "interpreter": "python3",
+    "clients": ["opencode"],
+    "verbs": {
+      "help": {"positionals": [], "options": {}},
+      "df": {"positionals": [], "options": {"--path": "text", "--inodes": "flag"}, "required": ["--path"]},
+      "du": {"positionals": [], "options": {"--path": "text", "--depth": {"pattern": "[0-3]"}, "--limit": "int", "--timeout": "int"}, "required": ["--path"]},
+      "stat": {"positionals": [], "options": {"--path": "text"}, "required": ["--path"]},
+      "free": {"positionals": [], "options": {}},
+      "uptime": {"positionals": [], "options": {}},
+      "uname": {"positionals": [], "options": {}},
+      "lsblk": {"positionals": [], "options": {}},
+      "processes": {"positionals": [], "options": {}},
+      "listeners": {"positionals": [], "options": {}},
+      "connections": {"positionals": [], "options": {}},
+      "addresses": {"positionals": [], "options": {}},
+      "routes": {"positionals": [], "options": {}}
+    }
+  }
+}

@@ -10,7 +10,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
+from http.server import BaseHTTPRequestHandler
+from socketserver import UnixStreamServer
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +31,153 @@ broker = load('planner_shell', 'scripts/planner_shell.py')
 
 
 class SSHInspectionTests(unittest.TestCase):
+    def test_planner_contract_distinguishes_inspection_from_operational_mutation(self):
+        role = (ROOT / 'agents/planner.md').read_text()
+        self.assertIn('Tu frontera es inspeccionar frente a mutar',role)
+        self.assertIn('no una derivación automática a implementación',role)
+        self.assertIn('artefactos de handoff',role)
+        self.assertIn('No modifiques código, configuración, archivos del sistema, servicios, infraestructura ni estado remoto',role)
+        self.assertIn('"*": deny',role.split('---',2)[1])
+
+    def test_structured_network_metadata_preserves_aliases_without_sensitive_subtrees(self):
+        fixture = {'Id':'fixture', 'Name':'app', 'Networks':{'shared':{
+            'NetworkID':'net', 'Aliases':['api'], 'DNSNames':['app','api'],
+            'IPAddress':'192.0.2.2', 'DriverOpts':{'password':'never-expose-driver-secret'}}},
+            'Ports':{'8080/tcp':[{'HostIp':'127.0.0.1','HostPort':'8080'}]},
+            'Mounts':[{'Type':'bind','Source':'/srv/app','Destination':'/app','RW':False,
+                       'Mode':'password=never-expose-mount-secret','Options':{'token':'never-expose-option'}}],
+            'Memory':1024,'NanoCpus':1000000000,'HealthStatus':'healthy',
+            'Env':['never-expose-env'],'Labels':{'secret':'never-expose-label'},'Cmd':['never-expose-arg']}
+        result = json.loads(inspect.project_metadata('container',json.dumps(fixture)))
+        self.assertEqual(result['Networks']['shared']['Aliases'],['api'])
+        self.assertEqual(result['Networks']['shared']['DNSNames'],['app','api'])
+        self.assertEqual(result['Ports'],fixture['Ports'])
+        self.assertEqual(result['Mounts'][0]['Destination'],'/app')
+        self.assertNotIn('never-expose',json.dumps(result))
+        # Old Engine/CLI data without DNSNames remains useful, not a template error.
+        del fixture['Networks']['shared']['DNSNames']
+        result = json.loads(inspect.project_metadata('container',json.dumps(fixture)))
+        self.assertNotIn('DNSNames',result['Networks']['shared'])
+
+    def test_all_new_operations_are_registered_reads_with_fixed_arguments(self):
+        operations = [('networks',[]),('network',['shared']),('images',[]),('image',['registry.invalid/app:v1']),
+                      ('volumes',[]),('volume',['data']),('stats',['app']),('processes',['app'])]
+        operations += [(name,[]) for name in inspect.HOST_READS]
+        for name, extra in operations:
+            with self.subTest(operation=name):
+                argv = ['ssh-inspect',name,'fixture-one',*extra]
+                command, _ = broker.helper_command(argv,ROOT,ROOT)
+                self.assertEqual(command[2:],argv[1:])
+                remote = shlex.split(self.command(name,'fixture-one',*extra)[-1])
+                self.assertFalse({'exec','run','create','connect','disconnect','rm','restart','start','stop','sudo','bash','sh'} & set(remote))
+                if name == 'stats': self.assertIn('--no-stream',remote)
+                if name in ('processes','host-processes'):
+                    self.assertNotIn('args',','.join(remote))
+                    self.assertIn('comm',','.join(remote))
+
+    def test_new_reads_do_not_accept_freeform_commands_or_mutation_flags(self):
+        for values in (['network','fixture-one','net','--format','{{json .}}'],
+                       ['stats','fixture-one','app','--format','anything'],
+                       ['processes','fixture-one','app','args'],['addresses','fixture-one','add'],
+                       ['routes','fixture-one','flush'],['connect','fixture-one','net','app'],
+                       ['volume','fixture-one','data','--remove']):
+            with self.subTest(values=values), redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                inspect.parser().parse_args(values)
+        for operation in ('network','volume','stats','processes'):
+            for target in ('../x','--help','x;id','$(id)','x\nid'):
+                with self.subTest(operation=operation,target=target), redirect_stderr(io.StringIO()), redirect_stdout(io.StringIO()), self.assertRaises((ValueError,SystemExit)):
+                    self.command(operation,'fixture-one',target)
+
+    def test_invalid_or_truncated_metadata_is_not_dumped_raw(self):
+        projection = lambda text: inspect.project_metadata('container',text)
+        output, code, reason = inspect.bounded_output([sys.executable,'-c','print("unstructured-private-fixture")'],projection=projection)
+        self.assertEqual(code,3)
+        self.assertIn('incomplete',reason)
+        self.assertNotIn('unstructured-private-fixture',output)
+        output, code, reason = inspect.bounded_output([sys.executable,'-c',
+            'import sys; print("partial-private-fixture"); sys.exit(7)'],projection=projection)
+        self.assertEqual(code,7)
+        self.assertNotIn('partial-private-fixture',output)
+        self.assertIn('incomplete',output)
+        for data in ('[]', '{"Networks":[]}', '{"Mounts":[1]}'):
+            with self.subTest(data=data), self.assertRaises(ValueError):
+                inspect.project_metadata('container',data)
+
+    def test_container_template_with_real_docker_cli_and_synthetic_readonly_engine(self):
+        docker = shutil.which('docker')
+        if not docker: self.skipTest('Docker client absent; do not install or start a daemon')
+        fixture = {'Id':'a'*64,'Name':'/fixture','Image':'sha256:'+'b'*64,'Created':'2026-01-01T00:00:00Z',
+                   'Config':{'Image':'fixture:v1','Hostname':'fixture','Env':['PRIVATE_FIXTURE'],
+                             'Labels':{'private':'PRIVATE_FIXTURE'}},
+                   'State':{'Status':'running','Running':True,'Health':{'Status':'healthy','Log':[{'Output':'PRIVATE_FIXTURE'}]}},
+                   'HostConfig':{'Memory':1024,'NanoCpus':1000000000,'NetworkMode':'shared'},
+                   'NetworkSettings':{'Ports':{},'Networks':{'shared':{'Aliases':['api'],'DNSNames':['fixture','api'],
+                       'NetworkID':'n'*64,'EndpointID':'e'*64,'IPAddress':'192.0.2.2','IPPrefixLen':24,
+                       'Gateway':'192.0.2.1','DriverOpts':{'private':'PRIVATE_FIXTURE'}}}},
+                   'Mounts':[{'Type':'bind','Source':'/srv/app','Destination':'/app','Mode':'PRIVATE_FIXTURE','RW':False}]}
+        calls = []
+        fixtures = {'container':fixture,
+                    'network':{'Id':'n'*64,'Name':'shared','Driver':'bridge','IPAM':{'Config':[{'Subnet':'192.0.2.0/24'}]},
+                               'Containers':{'a'*64:{'Name':'fixture','IPv4Address':'192.0.2.2/24','Labels':{'token':'PRIVATE_FIXTURE'}}}},
+                    'image':{'Id':'sha256:'+'b'*64,'RepoTags':['fixture:v1'],'RootFS':{'Type':'layers','Layers':[]},
+                             'Config':{'Env':['PRIVATE_FIXTURE']}},
+                    'volume':{'Name':'data','Driver':'local','Mountpoint':'/var/lib/docker/volumes/data/_data',
+                              'Options':{'password':'PRIVATE_FIXTURE'}}}
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self,*args): pass
+            def do_HEAD(self):
+                calls.append(self.command)
+                self.send_response(200); self.send_header('API-Version','1.51'); self.end_headers()
+            def do_GET(self):
+                calls.append(self.command)
+                path = self.path.split('?')[0]
+                operation = next((name for name,suffix in (('container','/containers/fixture/json'),
+                    ('network','/networks/fixture'),('image','/images/fixture/json'),('volume','/volumes/fixture')) if path.endswith(suffix)),None)
+                if operation: data = json.dumps(fixtures[operation]).encode()
+                elif path.endswith('/_ping'): data = b'OK'
+                else:
+                    self.send_error(404); return
+                self.send_response(200); self.send_header('Content-Type','application/json')
+                self.send_header('Content-Length',str(len(data))); self.end_headers(); self.wfile.write(data)
+        with tempfile.TemporaryDirectory(prefix='docker-inspect-') as temporary:
+            root = Path(temporary)
+            config = root / 'config'; config.mkdir()
+            with UnixStreamServer(str(root / 'engine.sock'),Handler) as server:
+                worker = threading.Thread(target=server.serve_forever,daemon=True); worker.start()
+                try:
+                    done = subprocess.run([docker,'--config',str(config),'--host','unix://' + str(root / 'engine.sock'),
+                                           'container','inspect','--format',inspect.INSPECT_FORMAT,'fixture'],
+                        env={'PATH':str(Path(docker).parent) + ':/usr/bin:/bin','HOME':str(root),'DOCKER_API_VERSION':'1.51'},
+                        capture_output=True,text=True,timeout=10)
+                    self.assertEqual(done.returncode,0,done.stderr)
+                    result = json.loads(inspect.project_metadata('container',done.stdout))
+                    self.assertEqual(result['Networks']['shared']['Aliases'],['api'])
+                    self.assertEqual(result['Networks']['shared']['DNSNames'],['fixture','api'])
+                    self.assertEqual(result['HealthStatus'],'healthy')
+                    self.assertNotIn('PRIVATE_FIXTURE',json.dumps(result))
+                    del fixture['State']['Health']
+                    for operation in ('container','network','image','volume'):
+                        done = subprocess.run([docker,'--config',str(config),'--host','unix://' + str(root / 'engine.sock'),
+                                               operation,'inspect','--format',inspect.METADATA_FORMATS[operation],'fixture'],
+                            env={'PATH':str(Path(docker).parent) + ':/usr/bin:/bin','HOME':str(root),'DOCKER_API_VERSION':'1.51'},
+                            capture_output=True,text=True,timeout=10)
+                        self.assertEqual(done.returncode,0,done.stderr)
+                        result = json.loads(inspect.project_metadata(operation,done.stdout))
+                        self.assertNotIn('PRIVATE_FIXTURE',json.dumps(result))
+                        if operation == 'container': self.assertIsNone(result['HealthStatus'])
+                    self.assertTrue(calls)
+                    self.assertTrue(set(calls) <= {'GET','HEAD'})
+                finally:
+                    server.shutdown(); worker.join(timeout=5)
+
+    def test_container_inspection_covers_networks_aliases_ports_mounts_and_resources(self):
+        self.assertEqual(inspect.CONTAINER_FIELDS['Networks'], '.NetworkSettings.Networks')
+        self.assertIn('"NetworkSettings" "Networks"',inspect.INSPECT_FORMAT)
+        for field in ('Aliases', 'DNSNames', 'IPAddress', 'Gateway'):
+            self.assertIn(field, inspect.ENDPOINT_FIELDS)
+        for field in ('Ports', 'Mounts', 'Memory', 'NanoCpus', 'HealthStatus'):
+            self.assertIn(field, inspect.CONTAINER_FIELDS)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

@@ -4,6 +4,40 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+- `code-reviewer` guarda informes por ticket en `tmp/<ticket>/code-review/`,
+  sin fallback a `~/code-reviews`. El helper retira `global` y permite reservar
+  y escribir con `ticket --content`, sin habilitar edición de código; rechaza
+  symlinks en el destino y no sobrescribe revisiones anteriores. Una reserva
+  vacía no es una entrega: exige releer el archivo real antes de cerrar.
+
+- `code-reviewer` consulta requisitos y comentarios de tickets por integraciones
+  read-only aprobadas globales/addons o locales, sin exigir handoff por proyecto.
+  Conserva hardening, contratos/storage locales y declara acceso o paginación
+  faltantes; el wiring concreto Jira permanece en Ticketing.
+
+- Planner se orienta a inspección autónoma sin mutaciones, conservando solo los
+  artefactos del handoff como excepción controlada. La inspección SSH/Docker
+  incluye redes/aliases/DNS, puertos, mounts/recursos/estado, imágenes/volúmenes,
+  métricas/procesos y diagnósticos de host/red; local agrega procesos/red.
+  Sin shell/exec/sudo ni operaciones de cambio; proyecciones excluyen secretos
+  y payloads, con tests de CLI Docker real contra un Engine sintético read-only.
+
+- Planner puede recuperar evidencia de PRs mediante el helper opcional `github-pr`
+  registrado por el addon de cuentas: metadata, diff, reviews/conversación y un
+  GET fijo paginado de comentarios inline. No se abre shell, API arbitraria ni
+  escritura GitHub; identidades y credenciales siguen fuera del Core portable.
+- El help del broker de planner muestra operaciones y flags requeridos del registro
+  instalado, no solo IDs. La regresión de handoff exige escribir mediante el
+  helper sin credenciales ni archivo env, para no ocultar dependencias indebidas
+  del addon Ticketing detrás de credenciales ficticias en los tests.
+
+- Planner agrega `helper local-inspect` para diagnósticos Linux de disco,
+  metadatos, memoria, sistema y dispositivos (`df`, `du`, `stat`, `free`,
+  `uptime`, `uname`, `lsblk`), con opciones cerradas, límites de tiempo/salida,
+  exclusiones sensibles y sin shell general, sudo ni escrituras. `du` ordena
+  internamente y declara exclusiones, top y errores parciales. Registro limitado
+  a OpenCode mediante `clients`; el hook Claude conserva su alcance anterior.
+
 - `code-reviewer` permite globalmente el wrapper opcional de cuentas GitHub solo
   para `pr view`/`pr diff`; mapeo de identidades y credenciales permanece en el
   addon machine-local. Se retiran las dos reglas duplicadas de nueve overlays
