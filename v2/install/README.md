@@ -1,5 +1,8 @@
 # Actualización V2 conservadora desde repos remotos
 
+Para una notebook antigua, empezar por [NOTEBOOK.md](NOTEBOOK.md): diagnóstico
+acotado sin instalar y selección de la ruta del owner antes de modificar datos.
+
 ## Alcance real
 
 Linux con Python 3, Git, Node compatible (22.22.2+, 24.15+ o 26+), npm/corepack,
