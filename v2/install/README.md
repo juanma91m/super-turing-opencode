@@ -2,6 +2,8 @@
 
 Para una notebook antigua, empezar por [NOTEBOOK.md](NOTEBOOK.md): diagnóstico
 acotado sin instalar y selección de la ruta del owner antes de modificar datos.
+`update` lo guarda automáticamente junto a un `NEXT-STEPS.md` local con acciones
+por resultado; no es necesario compartir salidas con otra máquina o conversación.
 
 ## Alcance real
 

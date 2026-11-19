@@ -450,6 +450,14 @@ def install_lease(home):
         file.unlink(); os.close(fd)
 
 
+def record_diagnostic_attempt(directory, record):
+    if directory is None: return
+    try:
+        write(directory / 'attempt.json', record)
+    except (OSError, ValueError):
+        print('[stack-update] Could not save the optional attempt receipt; keep the generation journal. Installation result is unchanged.', file=sys.stderr)
+
+
 def main():
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
@@ -460,7 +468,18 @@ def main():
     parser.add_argument('--source-lock', type=Path); parser.add_argument('--clients-closed', action='store_true')
     parser.add_argument('--github-account', help='Explicit local gh account for private Git fetch; no account switch or token file')
     args = parser.parse_args()
+    diagnostic_directory = None
+    generation = None
     try:
+        if args.action == 'update':
+            sys.dont_write_bytecode = True
+            spec = importlib.util.spec_from_file_location('notebook_preflight', ROOT / 'v2/install/notebook-preflight.py')
+            diagnostic = importlib.util.module_from_spec(spec); spec.loader.exec_module(diagnostic)
+            inventory = diagnostic.inspect(args.home, history=args.history_db)
+            diagnostic_directory = diagnostic.save_report(args.home, inventory)
+            print('[stack-update] Diagnóstico y continuación local: ' + str(diagnostic_directory / 'NEXT-STEPS.md'), file=sys.stderr, flush=True)
+            if inventory['earlyBlockers']:
+                raise ValueError('Notebook preflight blocked: ' + ', '.join(inventory['earlyBlockers']) + '; follow the local NEXT-STEPS.md')
         if args.action == 'verify-backup':
             if args.destination is None: raise ValueError('--destination generation required')
             verify_backup(args.destination / 'backup'); result = {'kind':'backup-verified','writesPerformed':0}
@@ -474,9 +493,13 @@ def main():
                           'limitation':'Known SQLite/native2.2.7 layouts and existing qualified addon runtimes only. Unknown legacy config is refused, never normalized.'}
             else:
                 root = args.destination or args.home / '.local/share/opencode-stack/updates' / (time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()) + '-' + uuid.uuid4().hex[:8])
+                generation = root
                 with install_lease(args.home): result = update(selected, root, closed=args.clients_closed, source_lock=args.source_lock,github_account=args.github_account)
+        record_diagnostic_attempt(diagnostic_directory, {'kind':'update-attempt','status':'complete','generation':result.get('generation'),'sourceStoresReplaced':False})
         print(json.dumps(result))
     except (ValueError, OSError, subprocess.SubprocessError) as error:
+        destination = generation or args.destination
+        record_diagnostic_attempt(diagnostic_directory, {'kind':'update-attempt','status':'stopped','errorType':type(error).__name__,'generation':str(destination) if destination else None,'automaticRetry':False})
         parser.exit(1, 'Stack update refused/stopped: ' + (str(error) if isinstance(error, ValueError) else type(error).__name__) + '. Keep all generations/backups; no automatic cleanup.\n')
 
 
