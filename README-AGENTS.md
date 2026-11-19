@@ -114,6 +114,33 @@ El registro declara `clients: ["opencode"]`; el hook Claude compartido rechaza
 este helper. Los helpers sin `clients` mantienen su compatibilidad previa. Esta
 ampliación no modifica permisos/configuración de Claude ni de otros roles.
 
+### Documentos de análisis solicitados, sin ticket
+
+Un pedido explícito de guardar un diagnóstico/plan Markdown no es implementación
+ni obliga a inventar un ticket. Planner usa el helper Core, sin `Edit` ni shell libre:
+
+```bash
+python3 ~/.config/opencode/scripts/planner_shell.py helper analysis-doc help
+python3 ~/.config/opencode/scripts/planner_shell.py helper analysis-doc write --path tmp/diagnostico/nota.md --content '# Diagnóstico solicitado'
+python3 ~/.config/opencode/scripts/planner_shell.py helper analysis-doc inspect --path tmp/diagnostico/nota.md
+```
+
+El broker ancla al repo activo aun desde un subdirectorio; fuera de Git usa el cwd
+autorizado. Solo paths canónicos `tmp/.../*.md`, ASCII sin componentes ocultos,
+hasta 64 KiB UTF-8. No enlaces, destinos ejecutables/versionados, `verdict.md`,
+`result-dev.md` o carpetas `code-review`. Crear no sobrescribe; para actualizar se
+requiere `--expected-sha256` devuelto por inspect/write y vigente. Publicación
+atómica, permisos 0600 y lock cooperativo; no append/delete/comandos libres.
+Releer el archivo antes de anunciarlo guardado; ante un error, inspeccionar antes
+de reintentar, porque una falla de filesystem puede dejar resultado incierto.
+
+Este pedido autoriza el documento acotado, no cambios de aplicación ni handoff.
+La intención del usuario es regla del rol, no algo que el helper deduzca: el límite
+técnico es el filesystem/registro. No incluir secretos ni contenido privado; el
+helper rechaza marcas privadas, pero no es un detector universal de secretos ni
+sandbox frente a procesos hostiles que cambien directorios concurrentemente.
+El registro es solo OpenCode; el hook Claude compartido no lo habilita.
+
 ### Inspección remota de solo lectura
 
 `planner_shell.py helper ssh-inspect` permite operaciones fijas sobre aliases
@@ -258,13 +285,13 @@ shell general, delegación o edición de código. Leer el remote y consultar el 
 en llamadas separadas evita que una composición o un fallo de transporte oculte
 qué operación se pudo ejecutar.
 
-En V1 1.19.4 se verificó con `debug agent` que las dos entradas del mapa Bash
-global se conservan al cargar los nueve overlays AUNE de este rol, incluso con
-su default `"*": deny`: esos overlays ya no repiten las entradas del wrapper.
-Esto es una propiedad comprobada de este merge de mapas/orden de reglas, no
+En V1 1.19.4 se verificó con `debug agent` la composición de las dos entradas del
+mapa Bash global con deltas nativos de proyectos. El resultado del rollout privado
+se documenta en su capa organizacional, no como política de esta base portable.
+Es una propiedad comprobada de este merge de mapas/orden de reglas, no
 herencia del cuerpo del prompt ni permiso para quitar otros guardrails por
-analogía. Jira, ticket obligatorio, storage y denegaciones específicas siguen
-locales. Revalidar capacidades efectivas si cambia el runtime o la forma del
+analogía. Jira, ticket obligatorio, storage y denegaciones específicas pertenecen
+al pedido o contrato organizacional/local adoptado. Revalidar capacidades efectivas si cambia el runtime o la forma del
 overlay; el auditor estático que exige reinyectar cada allow puede advertir sobre
 estas dos entradas ausentes aunque la comprobación nativa confirme su herencia.
 
@@ -284,7 +311,7 @@ Los cambios de defaults requieren reiniciar OpenCode. Una sesión reabierta pued
 - `frontend-web-developer`: implementador de capa de presentacion web en el stack real del proyecto, incluyendo Vaadin, React, Angular u otros.
 - `merge-conflict-resolver`: integra conflictos de merge/rebase preservando la intención funcional de ambas ramas.
 - `reviewer`: revisor tecnico centrado en riesgos, regresiones, compatibilidad, performance y validaciones pendientes.
-- `code-reviewer`: revisión independiente de desarrollos de terceros por ramas o Pull Request; requiere ticket y guarda informes incrementales en `tmp/<ticket>/code-review/code-review-N.md` del repo revisado, nunca en `~/code-reviews`. El helper `next_code_review_path.sh ticket <ticket> --content '<informe literal>'` reserva y escribe sin Edit/apply_patch; el rol relee el archivo antes de declararlo guardado. No crea handoff de implementación ni reporta observaciones cosméticas.
+- `code-reviewer`: revisión independiente por ramas o Pull Request, sin ticket/Jira ni archivos obligatorios por defecto. Entrega en la respuesta salvo contrato/pedido de persistencia; si se adopta review por ticket conserva consistencia, integración aprobada y storage definidos. El writer global es una capacidad opcional segura, no una orden de invocarlo ni fallback a `~/code-reviews`. No crea handoff, edita código ni reporta observaciones cosméticas.
 - `ui-web-designer`: diseña interfaces y flujos web con criterio de UX, Material UI, Stitch y Playwright cuando haga falta. No implementa codigo; su foco es diseño y definicion visual.
 
 ## Agentes de soporte/base que pueden aparecer en OpenCode

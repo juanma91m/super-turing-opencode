@@ -17,6 +17,21 @@ spec.loader.exec_module(guard)
 
 
 class PlannerShellTests(unittest.TestCase):
+    def test_analysis_document_does_not_require_a_ticket_or_general_edit(self):
+        command = ' '.join(shlex.quote(x) for x in ('python3', str(guard.BROKER), 'helper',
+            'analysis-doc', 'write', '--path', 'tmp/tsa/habilitar-apis.md', '--content', '# Synthetic diagnosis'))
+        guard.check_invocation(command, ROOT, ROOT)
+        for suffix in ('help', 'inspect --path tmp/tsa/habilitar-apis.md'):
+            guard.check_invocation(f'python3 {guard.BROKER} helper analysis-doc {suffix}', ROOT, ROOT)
+        with self.assertRaises(ValueError):
+            guard.check_invocation(command, ROOT, ROOT, client='claude')
+
+    def test_ticket_identifier_validation_is_not_relaxed_for_document_requests(self):
+        addon = ROOT.parent / 'super-turing-opencode-ticketing'
+        if not addon.exists(): self.skipTest('Optional Ticketing checkout is absent')
+        with self.assertRaisesRegex(ValueError, 'declared format'):
+            guard.helper_command(['jira', 'write', 'tsa', '--file', 'habilitar-apis.md', '--content', '# fixture'], ROOT, addon)
+
     def test_read_only_git_and_branch_listing(self):
         for args in (['status', '--short'], ['diff', '--stat'], ['log', '--oneline', '-n', '5'],
                      ['show', '--stat', 'HEAD'], ['rev-parse', '--show-toplevel'],

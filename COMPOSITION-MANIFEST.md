@@ -8,8 +8,9 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 
 1. stack base global,
 2. addons globales opcionales,
-3. runtime/background gestionado,
-4. overlays locales por proyecto.
+3. capa organizacional opt-in, cuando exista,
+4. overlays locales por proyecto,
+5. runtime/background gestionado, como plano técnico de ejecución y no de dominio.
 
 ## Superficies de despliegue
 
@@ -95,6 +96,13 @@ Racional:
 | identidades, aliases o rutas propias de una máquina | addon privado machine-local |
 | servicios compartidos, endpoints o políticas exclusivas de AUNE | `super-turing-opencode-aune` |
 | dominio, stack, comandos o restricciones de un producto concreto | overlay local del proyecto |
+
+La ubicación física global no implica ownership de la base portable. Un addon
+privado puede desplegar en `~/.config/opencode/` sin convertirse en Core. Separar
+mecanismo reusable de política: comparar un PR, validar contexto y escribir un
+informe de forma segura son capacidades generales; exigir Jira, ticket o un
+destino organizacional en todos los reviews pertenece al contrato opt-in.
+Sin ese contrato, el review general puede responder sin ticket ni archivos.
 
 Una regla descubierta en un proyecto debe subir a global solo cuando:
 

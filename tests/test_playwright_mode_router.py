@@ -2,6 +2,7 @@ import importlib.util
 import io
 import os
 import pathlib
+import subprocess
 import unittest
 from unittest import mock
 
@@ -14,6 +15,24 @@ SPEC.loader.exec_module(ROUTER)
 
 
 class PlaywrightModeRouterTest(unittest.TestCase):
+    def test_legacy_command_matches_committed_v1_when_no_explicit_entry_point(self):
+        original = subprocess.run(['git', 'show', 'HEAD:scripts/playwright_mode_router.py'], cwd=MODULE_PATH.parents[1], check=True, capture_output=True, text=True).stdout
+        namespace = {'__name__': 'legacy_fixture'}
+        exec(compile(original, '<committed-router-fixture>', 'exec'), namespace)
+        with mock.patch.dict(os.environ, {'PLAYWRIGHT_MCP_PACKAGE': '@playwright/mcp@fixture'}, clear=True), mock.patch.object(ROUTER.shutil, 'which', return_value='/usr/bin/npx'):
+            for mode in ('headless', 'visible'):
+                before, after = namespace['PlaywrightUpstream'](), ROUTER.PlaywrightUpstream()
+                before.mode = after.mode = mode
+                self.assertEqual(before._command(), after._command())
+
+    def test_explicit_cli_never_falls_back_to_npx(self):
+        with mock.patch.dict(os.environ, {'PLAYWRIGHT_MCP_CLI': str(MODULE_PATH)}, clear=True), mock.patch.object(ROUTER.shutil, 'which', return_value='/usr/bin/node'):
+            command = ROUTER.PlaywrightUpstream()._command()
+            self.assertEqual(command[:2], ['/usr/bin/node', str(MODULE_PATH)])
+            self.assertNotIn('-y', command)
+        with mock.patch.dict(os.environ, {'PLAYWRIGHT_MCP_CLI': '/missing/fixture/cli.js'}, clear=True):
+            with self.assertRaises(RuntimeError): ROUTER.PlaywrightUpstream()._command()
+
     def command_for(self, mode):
         upstream = ROUTER.PlaywrightUpstream()
         upstream.mode = mode

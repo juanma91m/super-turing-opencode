@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "name": "jmagnaterra-opencode-stack",
-  "version": "0.15.2",
+  "version": "0.15.4",
   "components": {
     "playwright": {
       "mode": "runtime-selectable, headless-default",
@@ -46,6 +46,7 @@
     "commands/stack-doctor.md",
     "package-lock.json",
     "package.json",
+    "lib/permission-policy.ts",
     "plugins/agent-identity.ts",
     "plugins/env-guard.ts",
     "plugins/permission-autopilot.ts",
@@ -53,6 +54,7 @@
     "planner-helpers/core-ssh.json",
     "planner-helpers/core-psql.json",
     "planner-helpers/core-local.json",
+    "planner-helpers/core-analysis-doc.json",
     "scripts/check_code_patterns.sh",
     "scripts/check_local_overlays.py",
     "scripts/check_local_overlays.sh",
@@ -66,6 +68,7 @@
     "scripts/playwright_mode_router.py",
     "scripts/recompose_additive_agents.py",
     "scripts/planner_shell.py",
+    "scripts/planner_doc.py",
     "scripts/local_inspect.py",
     "scripts/ssh_inspect.py",
     "scripts/psql_readonly.py",

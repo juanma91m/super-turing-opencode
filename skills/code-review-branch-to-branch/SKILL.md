@@ -14,9 +14,10 @@ description: Usa para aprobar desarrollos de terceros comparando ramas o Pull Re
 ## Contrato efectivo del proyecto
 
 - Resolver primero el agente y las instrucciones locales: conservan sus entradas, requisitos de ticket/Jira, helper/cuenta, storage, formato y criterios específicos. Este procedimiento común no los reemplaza por defaults globales ni amplía permisos.
-- El informe pertenece al repositorio revisado: `tmp/<ticket>/code-review/code-review-N.md`. Resolver un ticket consistente; si falta, pedirlo antes de revisar. `~/code-reviews` nunca es fallback de un flujo por ticket ni el destino por defecto.
+- Ticket, consulta externa e informe en disco son requisitos del pedido/contrato adoptado, no defaults universales: un ID detectado no activa un workflow. Si el contrato exige ticket y falta, pedirlo antes del diff. Sin ese requisito, revisar sin ticket ni consulta Jira y entregar el resultado en la respuesta, sin inventar carpetas.
+- Si se adopta persistencia por ticket, conservar el destino definido por ese contrato. `~/code-reviews` nunca es fallback de un flujo por ticket ni el destino por defecto; no elegir otro storage cuando el aprobado falta.
 - Los comandos aportan entradas y routing, no autorización de escritura. Si el modo pedido requiere un agente/helper/storage no habilitado, pedir el contexto compatible en vez de forzarlo.
-- Usar el helper aprobado por el agente efectivo, sin sobrescribir informes previos. El helper común admite `ticket <ticket> --content '<informe literal>'` para reservar y escribir en una única llamada, sin Edit/apply_patch; preferir esa vía para completar el informe cuando esté habilitada. Ejecutarlo desde el repositorio revisado: devuelve el path relativo a la raíz Git, incluso desde un subdirectorio. Releer el archivo real antes de anunciarlo guardado; un path reservado vacío no es un informe. Si falla, declarar no guardado, sin redirecciones ni destinos alternativos. No crear handoff de implementación; si ya existe, es solo contexto adicional cuando la capa local lo permite.
+- Solo con persistencia requerida, usar el helper aprobado por el agente efectivo, sin sobrescribir informes previos. El helper común admite `ticket <ticket> --content '<informe literal>'` para reservar y escribir en una única llamada, sin Edit/apply_patch; su disponibilidad no obliga a crear un informe. Ejecutarlo desde el repositorio revisado: devuelve el path relativo a la raíz Git, incluso desde un subdirectorio. Releer el archivo real antes de anunciarlo guardado; un path reservado vacío no es un informe. Si falla, declarar no guardado, sin redirecciones ni destinos alternativos. No crear handoff de implementación; si ya existe, es solo contexto adicional cuando la capa local lo permite.
 - Antes de operar con GitHub, aplicar la política de cuenta disponible; usar únicamente `gh pr view`/`gh pr diff` o el wrapper read-only habilitado por esa política y agente. No improvisar acceso a credenciales ni comandos fuera de la allowlist.
 
 ## Entradas
@@ -53,6 +54,7 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 
 ### Ticket consistente
 
+- Aplicar esta sección cuando el pedido requiera contexto de ticket o el contrato adoptado lo exija. Detectar un ID o disponer de Jira no basta; sin ese alcance no se consulta el tracker ni se bloquea un review sin ticket.
 - Extraer identificadores únicos `<PROYECTO>-<numero>` del ticket explícito, título y head branch.
 - Si hay ticket explícito y el PR contiene otro identificador distinto, detenerse y pedir confirmación.
 - Si título/head producen más de un ticket distinto, no elegir por intuición: pedir aclaración.
@@ -62,7 +64,7 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 
 ### Conversación obligatoria del PR
 
-- Después de validar repositorio y ticket, leer siempre los comentarios y reviews disponibles mediante `gh pr view` antes de cerrar hallazgos o emitir conclusión.
+- Después de validar repositorio y el ticket cuando sea aplicable, leer siempre los comentarios y reviews disponibles mediante `gh pr view` antes de cerrar hallazgos o emitir conclusión.
 - En una rerevisión, volver a consultarlos aunque el `headRefOid` no haya cambiado: una respuesta nueva puede aportar decisiones de refinamiento, evidencia, limitaciones o justificaciones que cambien el veredicto.
 - Contrastar las justificaciones del autor con el ticket/criterios actualizados, el código del head, contratos, callers e impacto real. Son evidencia a evaluar, no autoridad automática.
 - Aceptar una justificación solo cuando explica el riesgo y la evidencia disponible la sostiene. Si no satisface, mantener o reformular el hallazgo y explicar concretamente por qué la razón es insuficiente o qué riesgo sigue abierto.
@@ -89,7 +91,7 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 
 ## Rerevisión incremental
 
-- Conservar los informes anteriores y generar uno nuevo; nunca sobrescribirlos.
+- Si hay persistencia requerida, conservar los informes anteriores y generar uno nuevo; nunca sobrescribirlos. Sin ella, registrar el delta y conclusión en la respuesta.
 - Comparar el snapshot previo con el actual y revisar el delta de código y conversación.
 - Para cada hallazgo previo, indicar `resuelto`, `pendiente` o `retirado por justificación suficiente`, con evidencia.
 - No aprobar solo porque el autor respondió ni rechazar solo porque el ticket original difiere: decidir por la consistencia entre justificación, contrato vigente, implementación y riesgo material.
@@ -102,11 +104,11 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 - No leer `node_modules`, vendorizados, generados, locks ni repos hermanos salvo que el diff los toque o una compatibilidad crítica no pueda probarse de otra forma.
 - No repetir `git diff`/`git show`/búsquedas o status equivalentes si la evidencia ya está disponible.
 - Cargar como máximo 3 skills: esta skill, la skill Jira/local si existe y una skill de dominio elegida por el diff.
-- No consultar memoria, búsquedas amplias Rovo, web o documentación externa por defecto. La lectura puntual del ticket identificado por una integración aprobada sí forma parte del review. Escalar solo cuando falta un dato crítico imposible de obtener del ticket y del código.
+- No consultar memoria, búsquedas amplias Rovo, web o documentación externa por defecto. La lectura puntual del ticket forma parte del review solo si el pedido/contrato requiere ese contexto; un ID aislado no la activa. Escalar solo cuando falta un dato crítico imposible de obtener del contexto disponible y del código.
 
 ## Jira y CodeGraph acotados durante review
 
-- Jira: usar la integración read-only aprobada global/addon o local, sin exigir opt-in del repo al handoff. Si existe especialización, conservar el helper y parámetros definidos en su contrato local. No asumir un helper global ni cambiar el tratamiento local de Jira inaccesible. Obtener contexto acotado (descripción, criterios y comentarios); ampliar solo por un faltante material, respetando límites locales y declarando paginación/recortes. Nunca `issue` raw por defecto (vuelca ADF, metadata, comentarios y adjuntos innecesarios); no recorrer épica, hermanos, adjuntos ni búsquedas amplias Rovo por defecto.
+- Jira: únicamente cuando el pedido/contrato requiere contexto de ticket, usar la integración read-only aprobada global/addon o local, sin exigir opt-in del repo al handoff. Si existe especialización, conservar el helper y parámetros definidos en su contrato local. No asumir un helper global ni cambiar el tratamiento local de Jira inaccesible. Obtener contexto acotado (descripción, criterios y comentarios); ampliar solo por un faltante material, respetando límites locales y declarando paginación/recortes. Nunca `issue` raw por defecto (vuelca ADF, metadata, comentarios y adjuntos innecesarios); no recorrer épica, hermanos, adjuntos ni búsquedas amplias Rovo por defecto.
 - CodeGraph/`codegraph_explore`/`mcp__codegraph__explore`: usarlo solo si reemplaza exploración manual, con una consulta compacta y acotada a los símbolos del diff — nunca arquitectura global, trazas masivas ni reindexación durante un review. Si una consulta devuelve salida masiva o no reduce lecturas, dejar de usarlo para esa revisión y volver a diff/lectura directa.
 
 ## Qué buscar
@@ -152,7 +154,7 @@ No reportar por defecto:
 
 ## Formato del informe
 
-Esta es la plantilla base. Si el repo exige formato propio, conservar sus secciones, campos y extensiones, incorporando la trazabilidad de snapshot, conversación y rerevisión exigida aquí; no reemplazarlo por la plantilla global.
+Esta es la plantilla base para la respuesta o el informe solicitado, no una orden de crear un archivo. Si el repo exige formato propio, conservar sus secciones, campos y extensiones, incorporando la trazabilidad de snapshot, conversación y rerevisión exigida aquí; no reemplazarlo por la plantilla global. No forzar campos de ticket cuando no aplican.
 
 ```md
 # Code review: <origen/PR> -> <destino>

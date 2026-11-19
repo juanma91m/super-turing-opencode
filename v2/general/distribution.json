@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "opencode-general-v2",
+  "contract": "general-native/1",
+  "nativeVersion": "2.2.7",
+  "scope": "machine-bound candidate configuration and owner bundles; not global cutover",
+  "components": [
+    { "id": "context7", "owner": "opencode-stack", "builder": "v2/context7/general.mjs" },
+    { "id": "knowledge", "owner": "super-turing-opencode-knowledge", "builder": "v2/general.mjs" },
+    { "id": "ticketing", "owner": "super-turing-opencode-ticketing", "builder": "v2/general.mjs" },
+    { "id": "codegraph", "owner": "super-turing-opencode-codegraph", "builder": "v2/general.mjs" },
+    { "id": "playwright", "owner": "opencode-stack", "builder": "v2/playwright/general.mjs" },
+    { "id": "documents", "owner": "super-turing-opencode-documents", "builder": "v2/general.mjs" },
+    { "id": "notifier", "owner": "super-turing-opencode-notifier", "builder": "v2/general.mjs" }
+  ],
+  "excluded": ["background", "stitch", "private addons", "organizational and project overlays"],
+  "dependencies": "Owner preflights select existing approved runtimes. No implicit install, update, auth copying or storage migration."
+}

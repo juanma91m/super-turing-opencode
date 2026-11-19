@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openai/gpt-6.1-sol",
+  "update": "disable",
+  "snapshots": false,
+  "warming": false,
+  "plugins": [],
+  "mcp": { "servers": {} },
+  "permissions": [{ "action": "*", "resource": "*", "effect": "deny" }],
+  "policies": [
+    { "action": "provider.use", "resource": "*", "effect": "deny" },
+    { "action": "tool.use", "resource": "*", "effect": "deny" }
+  ]
+}

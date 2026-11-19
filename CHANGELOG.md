@@ -4,13 +4,27 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
-- `code-reviewer` guarda informes por ticket en `tmp/<ticket>/code-review/`,
+- 0.15.4: Planner puede guardar documentos Markdown de análisis pedidos
+  explícitamente bajo `tmp/` mediante el helper Core `analysis-doc`, sin inventar
+  ticket ni activar handoff. Registro solo OpenCode; `edit: deny`, broker y
+  validación Jira intactos. Creación sin sobrescritura y actualización con digest
+  esperado; sin symlinks, hardlinks, archivos versionados, aplicación o artefactos
+  reservados de handoff/review. Tests con filesystem/broker sintéticos.
+
+- 0.15.3: `code-reviewer` y la skill común dejan de imponer ticket/Jira y
+  persistencia organizacional a todo review. Esos requisitos pertenecen al
+  pedido/contrato opt-in; sin ellos, salida en la respuesta. Se conservan
+  hardening, presupuesto, seguridad del writer y todos los permisos. El perfil
+  privado conserva la obligación formal en su propia capa; el scaffolding deja
+  de usar un producto concreto como patrón universal.
+
+- Cuando el contrato adopta persistencia, `code-reviewer` guarda informes por ticket en `tmp/<ticket>/code-review/`,
   sin fallback a `~/code-reviews`. El helper retira `global` y permite reservar
   y escribir con `ticket --content`, sin habilitar edición de código; rechaza
   symlinks en el destino y no sobrescribe revisiones anteriores. Una reserva
   vacía no es una entrega: exige releer el archivo real antes de cerrar.
 
-- `code-reviewer` consulta requisitos y comentarios de tickets por integraciones
+- Cuando el pedido/contrato requiere ese contexto, `code-reviewer` consulta requisitos y comentarios de tickets por integraciones
   read-only aprobadas globales/addons o locales, sin exigir handoff por proyecto.
   Conserva hardening, contratos/storage locales y declara acceso o paginación
   faltantes; el wiring concreto Jira permanece en Ticketing.

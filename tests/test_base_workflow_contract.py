@@ -6,6 +6,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class BaseWorkflowTests(unittest.TestCase):
+    def test_planner_accepts_explicit_diagnosis_document_without_ticket_handoff(self):
+        text = (ROOT / 'agents/planner.md').read_text()
+        self.assertIn('helper analysis-doc', text)
+        self.assertIn('sin inventar ticket ni activar handoff', text)
+        self.assertIn('pedido explícito', text)
+        self.assertIn('  edit: deny', text)
+        self.assertNotIn('  edit: allow', text)
+
     def test_core_validator_reuses_current_evidence_and_runs_missing_checks(self):
         text = (ROOT / 'agents/dev-test.md').read_text()
         for clause in ('ejecutada/leída en este trabajo', 'sigue vigente', 'no repetir por ritual',

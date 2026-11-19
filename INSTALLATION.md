@@ -1,5 +1,17 @@
 # Instalación del stack OpenCode
 
+## Ruta vigente V2
+
+Ver [actualización preservando datos](v2/install/README.md). El corte a 2.2.7 ya
+se completó en la máquina auditada; una notebook antigua debe pasar su propio
+preflight, backups e historial nativo en copia. No copiar perfiles/bindings de otra
+máquina ni sobrescribir su DB con la de esta. No ejecutar el corte fechado de
+`migrations/v2/` en otra máquina: es un recibo/procedimiento machine-local.
+
+**Lo siguiente documenta el instalador V1 histórico.** No usar `--complete`,
+Background o Stitch para actualizar una instalación V2. El updater V2 rechaza
+casos desconocidos antes de sustituir el comando y no promete bootstrap universal.
+
 Esta guía está pensada para un tercero que quiere instalar **todo** el stack desde este repo, empezando por un `git clone` limpio.
 
 ## Qué instala

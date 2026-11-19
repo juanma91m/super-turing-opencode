@@ -36,7 +36,7 @@ Reglas de diseño:
 - para cada override propuesto, revisar explicitamente este checklist: `mode`, `tools`, permisos seguros, responsabilidades globales, limites globales, formato de salida y skills utiles que deban reinyectarse,
 - si un override local va a recortar alguna capacidad global, explicitarlo antes de aplicar y pedir confirmacion del usuario,
 - si propones una sección `Fuentes de documentación preferidas`, incluir solo librerías relevantes para ese repo y separar al menos entre `Alta confianza`, `Usar con cautela` y `Cuando no haya match confiable` cuando aplique,
-- si el proyecto usa Jira y adopta workflow de tickets, ofrecer la estructura `tmp/<ticket>/verdict.md` / `result-dev.md` y wrappers locales como en Higyrus,
+- si el proyecto usa Jira y adopta workflow de tickets, ofrecer la estructura del addon Ticketing (`tmp/<ticket>/verdict.md` / `result-dev.md`) y solo los wrappers locales que realmente necesite, sin copiar el workflow de otro producto,
 - si el proyecto usa un addon de memoria/retrieval, ofrecer una decisión explícita de autonomía:
   - `conservadora`: lectura automática cuando haya probabilidad real de contexto útil y escritura durable solo para hallazgos claramente reutilizables,
   - `agresiva`: lectura automática en tickets/cambios no triviales y persistencia obligatoria de cierres relevantes con resumen funcional+técnico,

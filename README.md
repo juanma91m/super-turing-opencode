@@ -1,5 +1,20 @@
 # opencode-stack
 
+## Estado vigente — OpenCode V2 (2026-11-19)
+
+El harness gestionado **2.2.7 ya está instalado y operativo** en la máquina
+auditada, con general → organización opt-in → once overlays, sin Background/Stitch.
+No confundir los documentos históricos de piloto con el estado del corte actual.
+
+- Actualización conservadora desde remotos: [v2/install/README.md](v2/install/README.md).
+- Entrada: `bash install.sh --v2 plan`; aplicar sólo con `update --clients-closed`.
+- El updater conserva originales, respalda OpenCode/Engram/Qdrant y migra una copia
+  mediante OpenCode oficial; no importa credenciales por archivos ni resetea datos.
+- **No es un conversor universal de versiones desconocidas ni un bootstrap de
+  dependencias ausentes.** Layouts/configs no soportados se rechazan sin takeover.
+- Los modos `--main`/`--complete` y las instrucciones históricas de abajo son V1.
+  No usarlos para actualizar V2. Limitaciones de hosting: [contrato gestionado](migrations/v2/CONTRATO-GESTIONADO.md).
+
 Stack portable y versionable de OpenCode con:
 
 - agentes y subagentes custom,
@@ -9,7 +24,7 @@ Stack portable y versionable de OpenCode con:
 - skill global para SDD/TDD/BDD pragmático y trazabilidad spec -> cambio -> validación,
 - cleanup de sesiones y composición con addons opcionales,
 - integración con un único Playwright MCP de modo seleccionable: headless por defecto o navegador visible bajo pedido,
-- integración opcional con Stitch,
+- integración opcional con Stitch únicamente en la distribución histórica V1,
 - installer reproducible para desplegar el stack en otra máquina.
 
 ## Objetivo
@@ -36,7 +51,7 @@ Este repo es el **source of truth** del entorno OpenCode custom. La instalación
 - `STACK-MANIFEST.json`: versión y assets administrados
 - `CHANGELOG.md`: cambios relevantes del stack
 
-## Instalación rápida
+## Instalación rápida V1 — legado, no actualización V2
 
 Guía completa paso a paso: `INSTALLATION.md`
 

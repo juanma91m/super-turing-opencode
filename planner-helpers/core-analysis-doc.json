@@ -1,0 +1,17 @@
+{
+  "analysis-doc": {
+    "path": "scripts/planner_doc.py",
+    "interpreter": "python3",
+    "clients": ["opencode"],
+    "metadata_scope": "tmp",
+    "verbs": {
+      "help": {"positionals": [], "options": {}},
+      "inspect": {"positionals": [], "options": {"--path": "tmp-path"}, "required": ["--path"]},
+      "write": {
+        "positionals": [],
+        "options": {"--path": "tmp-path", "--content": "text", "--expected-sha256": {"pattern": "[a-f0-9]{64}"}},
+        "required": ["--path", "--content"]
+      }
+    }
+  }
+}

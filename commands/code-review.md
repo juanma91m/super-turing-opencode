@@ -1,5 +1,5 @@
 ---
-description: Revisa una rama origen contra una rama destino y guarda un informe incremental según el contrato del repo.
+description: Revisa una rama origen contra una rama destino y entrega el resultado según el contrato del repo.
 agent: code-reviewer
 subtask: false
 ---

@@ -21,6 +21,20 @@ def section(heading):
 
 
 class CodeReviewContractTests(unittest.TestCase):
+    def test_review_without_local_workflow_does_not_require_ticket_or_disk_report(self):
+        role = (ROOT / 'agents/code-reviewer.md').read_text()
+        self.assertIn('Sin contrato o pedido de persistencia, entregar el review en la respuesta', role)
+        self.assertIn('no exigir ticket/Jira ni inventar storage', role)
+        self.assertNotIn('requiere un ticket consistente:', role)
+        self.assertIn('Sin ese requisito, revisar sin ticket ni consulta Jira', SKILL)
+        self.assertNotIn('Resolver un ticket consistente; si falta, pedirlo antes de revisar', SKILL)
+
+    def test_organizational_policy_is_not_named_or_activated_by_core(self):
+        role = (ROOT / 'agents/code-reviewer.md').read_text()
+        self.assertNotIn('formal-review-jira', role + SKILL)
+        self.assertIn('un ID detectado no activa un workflow', SKILL)
+        self.assertIn('Si el contrato exige ticket y falta, pedirlo antes del diff', SKILL)
+
     def test_global_account_wrapper_allows_only_readonly_pr_verbs(self):
         role = (ROOT / 'agents/code-reviewer.md').read_text()
         header = role.split('---', 2)[1]
@@ -58,8 +72,8 @@ class CodeReviewContractTests(unittest.TestCase):
                      'pedir el contexto compatible', 'No crear handoff de implementación'):
             self.assertIn(rule, contract)
         role = (ROOT / 'agents/code-reviewer.md').read_text()
-        self.assertIn('tmp/<ticket>/code-review/code-review-N.md', role)
-        self.assertIn('si falta, pregúntalo antes de revisar', role)
+        self.assertNotIn('tmp/<ticket>/code-review/code-review-N.md', role)
+        self.assertIn('Si el contrato exige ticket y falta, pedirlo antes de revisar', role)
         self.assertIn('ticket <ticket> --content', role)
         self.assertNotIn('global *": allow', role)
         self.assertIn('  edit: deny', role)

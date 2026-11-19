@@ -10,6 +10,7 @@ import shutil
 import signal
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 
@@ -42,12 +43,20 @@ class PlaywrightUpstream:
         self.initialize_params: dict[str, Any] | None = None
 
     def _command(self) -> list[str]:
-        npx = shutil.which("npx")
-        if not npx:
-            raise RuntimeError("npx no está disponible para iniciar @playwright/mcp")
-
-        package = os.environ.get("PLAYWRIGHT_MCP_PACKAGE", "@playwright/mcp@latest")
-        command = [npx, "-y", package, "--isolated"]
+        # Optional operator-owned, already installed entry point. V1's npx
+        # behavior is unchanged when absent; no fallback download when explicit.
+        cli = os.environ.get("PLAYWRIGHT_MCP_CLI")
+        if cli:
+            node = shutil.which("node")
+            if not node or not Path(cli).is_absolute() or not Path(cli).is_file():
+                raise RuntimeError("El entry point Playwright explícito no está disponible")
+            command = [node, cli, "--isolated"]
+        else:
+            npx = shutil.which("npx")
+            if not npx:
+                raise RuntimeError("npx no está disponible para iniciar @playwright/mcp")
+            package = os.environ.get("PLAYWRIGHT_MCP_PACKAGE", "@playwright/mcp@latest")
+            command = [npx, "-y", package, "--isolated"]
         if self.mode == "headless":
             command.append("--headless")
 

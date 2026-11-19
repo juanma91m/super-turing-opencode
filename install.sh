@@ -3,12 +3,24 @@
 set -euo pipefail
 
 REPO_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if [[ "${1:-}" == "--v2" ]]; then
+  shift
+  exec python3 "$REPO_DIR/v2/install/update.py" "$@"
+fi
+if [[ "${1:-}" != "--help" && "${1:-}" != "-h" ]] && [[ -f "$HOME/.config/opencode/production-v2/active.json" || -f "$HOME/.local/state/opencode-stack/install/current.json" ]]; then
+  printf 'An active V2 installation was detected. V1 --main/--complete installers must not replace it. Use: bash install.sh --v2 plan\n' >&2
+  exit 2
+fi
 MODE=""
 FORWARDED_ARGS=()
 
 usage() {
   cat <<'EOF'
 Usage: bash install.sh [--main|--complete] [installer options]
+       bash install.sh --v2 plan|update|verify-backup|rollback [options]
+
+V2: data-preserving native update, explicit close gate and verified backups.
+See v2/install/README.md. Legacy modes below are V1 only, not V2 installers.
 
 Modes:
   --main       Install only the reusable base stack
