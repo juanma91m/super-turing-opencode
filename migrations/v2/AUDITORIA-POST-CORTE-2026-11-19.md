@@ -1,5 +1,9 @@
 # Auditoría post-corte V2 — 2026-11-19
 
+Este informe conserva el estado al iniciar la auditoría. La remediación y
+publicación posteriores están en [MANTENIMIENTO-POST-CORTE.md](MANTENIMIENTO-POST-CORTE.md),
+incluidos el despliegue Higyrus aún pendiente y la incidencia live Rovo posterior.
+
 ## Dictamen
 
 **Instalación gestionada operativa, pero no corresponde declarar «todo OK».**
