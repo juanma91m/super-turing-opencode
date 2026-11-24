@@ -80,6 +80,11 @@ Core. Screening de snapshots e integridad de assets se mantienen en ambos casos.
 `inspectLiveCandidate` devuelve además `audit` técnico para contraste del owner;
 el reporte público general conserva su alcance y no afirma aceptación de proyectos.
 
+El auditor comprueba el contrato de `debug config --standalone` con storage
+temporal y salida validada; no exige un número de versión al host activo.
+Una capacidad ausente o una salida incompatible impide certificar la auditoría.
+Esto no cambia los pins ni la verificación por bytes de las generaciones archivadas.
+
 Este mecanismo es de herramientas source-owned, no un plugin nuevo del perfil:
 no cambia por sí solo los assets/revisiones runtime archivados. La regresión Core
 actual suma79 Node+3 Python pass, incluido rechazo previo al parser y convivencia

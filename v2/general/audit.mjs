@@ -24,13 +24,14 @@ export function nativeSources(binary, directory, profileConfig, parent = process
     Object.assign(env, { OPENCODE_CONFIG_DIR: profileConfig, XDG_DATA_HOME: path.join(temporary, 'data'), XDG_STATE_HOME: path.join(temporary, 'state'), XDG_CACHE_HOME: path.join(temporary, 'cache'),
       OPENCODE_DB: path.join(temporary, 'audit.db'), TMPDIR: temporary, TMP: temporary, TEMP: temporary,
       OPENCODE_DISABLE_EXTERNAL_SKILLS: '1', OPENCODE_DISABLE_CLAUDE_CODE_SKILLS: '1', OPENCODE_DISABLE_MODELS_FETCH: '1', OPENCODE_DISABLE_AUTOUPDATE: '1' });
-    const version = spawnSync(binary, ['--version'], { cwd: directory, env, encoding: 'utf8', timeout: 10000 });
-    assert(version.status === 0 && version.stdout.trim() === 'opencode v2.2.7', 'Audit requires the validated official V2 pin, not opencode from PATH');
+    // Live diagnostics depend on native source discovery, not the release
+    // builder's binary pin. Exercise the public command and validate its output.
     const result = spawnSync(binary, ['debug', 'config', '--standalone'], { cwd: directory, env, encoding: 'utf8', timeout: 30000, maxBuffer: 8 * 1024 * 1024 });
-    assert(!result.error && result.status === 0, 'Native source discovery failed; raw config/log values suppressed');
+    assert(!result.error && result.status === 0, 'Native source discovery unavailable (debug config --standalone); raw config/log values suppressed');
     let entries;
     try { entries = JSON.parse(result.stdout); } catch { throw new Error('Native source JSON invalid; raw config values suppressed'); }
-    assert(Array.isArray(entries) && entries.every(entry => typeof entry.type === 'string' && typeof entry.path === 'string'), 'Unknown config source format');
+    assert(Array.isArray(entries) && entries.every(entry => entry && typeof entry.type === 'string' && typeof entry.path === 'string'
+      && (entry.type !== 'document' || (entry.info && typeof entry.info === 'object' && !Array.isArray(entry.info)))), 'Incompatible native config source format');
     return { entries, runtimeOverridesPresent: Boolean(parent.OPENCODE_CONFIG_CONTENT || parent.OPENCODE_CONFIG || parent.OPENCODE_DISABLE_PROJECT_CONFIG), applicationDataOpened: false };
   } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }
