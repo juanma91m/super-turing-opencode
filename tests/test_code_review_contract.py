@@ -127,6 +127,27 @@ class CodeReviewContractTests(unittest.TestCase):
                      '`resuelto`', '`pendiente`', '`retirado por justificación suficiente`'):
             self.assertIn(rule, rereview)
 
+    def test_review_ids_preserve_identity_and_never_recycle_closed_numbers(self):
+        tracking = section('### IDs y seguimiento entre pasadas')
+        for rule in ('mismo repo y PR', 'par ordenado origen → destino', 'no reinicia la serie',
+                     'Conservá el ID mientras persista **el mismo defecto**',
+                     'cambiá la etiqueta entre corchetes, no el ID',
+                     'Si se reabre el mismo defecto', 'Un defecto distinto tiene ID nuevo',
+                     'sin reutilizar números de hallazgos cerrados o retirados',
+                     'queda sólo `A3` abierto', '`A=3, M=2, B=2`'):
+            self.assertIn(rule, tracking)
+
+    def test_report_keeps_ids_and_counters_in_existing_outputs(self):
+        tracking = section('### IDs y seguimiento entre pasadas')
+        for rule in ('respuesta anterior o informe aportado', 'no inventes continuidad',
+                     'no reescribas el informe viejo', 'incluso si no queda ningún abierto'):
+            self.assertIn(rule, tracking)
+        output = SKILL.split('## Formato del informe\n', 1)[1]
+        for rule in ('### [ALTO] A1 — El desempate por ID no acredita la identidad: pendiente',
+                     'Cerrados en esta pasada (ID, estado y evidencia)',
+                     'Últimos números asignados: A=<n>, M=<n>, B=<n>'):
+            self.assertIn(rule, output)
+
     def test_materiality_budget_and_coverage_contracts_remain(self):
         for rule in ('hasta 20 tool calls', 'Máximo 30', 'hasta 8 archivos',
                      'como máximo 3 skills', '30 archivos o 1500 líneas',
@@ -214,6 +235,29 @@ class ReviewReportHelperTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.repo / result.stdout.strip()).read_text(), 'review\n')
         self.assertFalse((subdir / 'tmp').exists())
+
+    def test_three_review_rounds_keep_open_ids_and_closed_history_in_separate_reports(self):
+        subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)
+        reports = []
+        rounds = (
+            (('A1', 'A2', 'M1', 'M2', 'B1', 'B2'), (), 'A=2, M=2, B=2', 'nuevo'),
+            (('A1', 'A2', 'M1'), ('M2', 'B1', 'B2'), 'A=2, M=2, B=2', 'pendiente'),
+            (('A3',), ('A1', 'A2', 'M1'), 'A=3, M=2, B=2', 'nuevo'),
+        )
+        for index, (open_ids, closed_ids, counts, status) in enumerate(rounds, start=1):
+            severities = {'A': 'ALTO', 'M': 'MEDIO', 'B': 'BAJO'}
+            content = '# Fixture de review\n\n## Seguimiento de hallazgos\n'
+            content += ''.join(f'- {finding}: resuelto (evidencia sintética)\n' for finding in closed_ids)
+            content += f'- Últimos números asignados: {counts}\n\n## Hallazgos\n'
+            content += ''.join(f'### [{severities[finding[0]]}] {finding} — Ejemplo: {status}\n' for finding in open_ids)
+            if index == 3:
+                content += '- Regresión distinta introducida por el arreglo de A1.\n'
+            result = self.reserve('ticket', 'TEST-123', '--content', content)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), f'tmp/TEST-123/code-review/code-review-{index}.md')
+            reports.append((self.repo / result.stdout.strip(), content))
+        for report, content in reports:
+            self.assertEqual(report.read_text(), content)
 
     def test_empty_content_or_unexpected_args_fail_without_creating_report(self):
         subprocess.run(['git', 'init', '-q'], cwd=self.repo, env=self.env, check=True)

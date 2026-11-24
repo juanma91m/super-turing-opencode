@@ -96,6 +96,16 @@ Para un número o rama de PR, resolver primero su `url` con `gh pr view` y aplic
 - Para cada hallazgo previo, indicar `resuelto`, `pendiente` o `retirado por justificación suficiente`, con evidencia.
 - No aprobar solo porque el autor respondió ni rechazar solo porque el ticket original difiere: decidir por la consistencia entre justificación, contrato vigente, implementación y riesgo material.
 
+### IDs y seguimiento entre pasadas
+
+- Usá IDs `A1`, `M1`, `B1` para hallazgos inicialmente `ALTO`, `MEDIO`, `BAJO`, respectivamente. Cada prefijo tiene su propio contador dentro de la serie: mismo repo y PR, o mismo repo y par ordenado origen → destino para una revisión por ramas. Un ticket compartido no mezcla los IDs de PRs distintos. Un nuevo commit no reinicia la serie.
+- Antes de asignar IDs, recuperá el último informe compatible y sus contadores desde el historial autorizado: informes anteriores si hay persistencia; respuesta anterior o informe aportado por el usuario si no la hay. Si es una rerevisión y falta el antecedente necesario, pedilo; no inventes continuidad ni reinicies en `1`. Si el informe previo aún no tenía IDs, asigná los primeros a sus hallazgos identificables en orden antes de conciliarlos; no reescribas el informe viejo.
+- Conservá el ID mientras persista **el mismo defecto**. Compará comportamiento, condición que lo dispara e impacto: ni la línea, ni el título, ni un intento de arreglo definen la identidad. Si cambia la severidad, cambiá la etiqueta entre corchetes, no el ID. Si se reabre el mismo defecto con evidencia, recuperá su ID anterior.
+- Un defecto distinto tiene ID nuevo aunque aparezca en el mismo archivo o lo introduzca el arreglo de un hallazgo previo. Cerrá el anterior si su riesgo quedó resuelto, y vinculá el nuevo al anterior cuando ayude a entender la regresión. Asigná el siguiente número de su severidad inicial sin reutilizar números de hallazgos cerrados o retirados.
+- En `Hallazgos` listá sólo los abiertos (`nuevo` o `pendiente`); informá los que se cierran en esa pasada por ID y con evidencia en `Seguimiento de hallazgos`. Dejá en ese bloque los últimos números asignados por prefijo (`A=2, M=2, B=2`; `0` si aún no se usó), incluso si no queda ningún abierto. Los IDs abiertos y los contadores permiten seguir la serie desde el último informe sin releer cada pasada por rutina.
+
+Ejemplo: primera pasada `A1, A2, M1, M2, B1, B2`. En la segunda, `M2, B1, B2` quedan resueltos; `A1, A2, M1` siguen abiertos con los mismos IDs. En la tercera se resuelven esos tres, pero el arreglo de `A1` introduce otro defecto alto: queda sólo `A3` abierto y el contador queda `A=3, M=2, B=2`.
+
 ## Presupuesto operativo
 
 - Separar planning de review: planning investiga y especifica; review evalúa un diff concreto (no reabrir análisis ya cerrado).
@@ -154,7 +164,7 @@ No reportar por defecto:
 
 ## Formato del informe
 
-Esta es la plantilla base para la respuesta o el informe solicitado, no una orden de crear un archivo. Si el repo exige formato propio, conservar sus secciones, campos y extensiones, incorporando la trazabilidad de snapshot, conversación y rerevisión exigida aquí; no reemplazarlo por la plantilla global. No forzar campos de ticket cuando no aplican.
+Esta es la plantilla base para la respuesta o el informe solicitado, no una orden de crear un archivo. Si el repo exige formato propio, conservar sus secciones, campos y extensiones, incorporando IDs, seguimiento y la trazabilidad de snapshot, conversación y rerevisión exigida aquí; no reemplazarlo por la plantilla global. No forzar campos de ticket cuando no aplican.
 
 ```md
 # Code review: <origen/PR> -> <destino>
@@ -178,14 +188,18 @@ Esta es la plantilla base para la respuesta o el informe solicitado, no una orde
 ## Conversación y justificaciones del PR
 - Comentarios/reviews consultados:
 - Justificaciones aceptadas o rechazadas y motivo:
-- Estado de hallazgos previos (si es rerevisión):
+
+## Seguimiento de hallazgos
+- Informe anterior de esta serie (si aplica):
+- Cerrados en esta pasada (ID, estado y evidencia):
+- Últimos números asignados: A=<n>, M=<n>, B=<n>
 
 ## Alcance revisado
 - Archivos/áreas:
 - Zonas priorizadas:
 
 ## Hallazgos
-### [ALTO|MEDIO] Título
+### [ALTO] A1 — El desempate por ID no acredita la identidad: pendiente
 - Archivo/líneas:
 - Evidencia:
 - Escenario e impacto:
@@ -196,5 +210,7 @@ Esta es la plantilla base para la respuesta o el informe solicitado, no una orde
 
 ## Limitaciones
 ```
+
+Cada encabezado usa `### [<severidad actual>] <ID> — <título>: <nuevo|pendiente>`; el ejemplo no obliga a usar `ALTO` ni a reportar `BAJO` si no aplica.
 
 Si no hay findings relevantes, decir `Sin riesgos materiales detectados en el alcance revisado`; no afirmar que todo el sistema es correcto.

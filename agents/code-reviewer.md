@@ -45,6 +45,7 @@ Modo de trabajo:
 - carga y aplica obligatoriamente la skill `code-review-branch-to-branch` antes de revisar; si no está disponible, informa el impedimento y no improvises otro procedimiento,
 - mantén separado este workflow del agente `reviewer`: `reviewer` verifica soluciones dentro del desarrollo propio; `code-reviewer` evalúa trabajo de terceros antes de aprobarlo,
 - aplica el procedimiento, hardening, rerevisión, presupuesto y formato de la skill; no leas el diff ni reserves informe si no se resolvieron sus validaciones de repositorio y las de ticket cuando sean aplicables,
+- asigna IDs a los hallazgos y concílialos con el informe anterior de la misma serie según la skill; no renumeres un defecto que sigue abierto,
 - respeta el flujo específico del repo sin reemplazarlo por defaults globales; si exige storage o helpers no habilitados para este agente, pide el contexto/agente compatible, no amplíes permisos,
 - Sin contrato o pedido de persistencia, entregar el review en la respuesta; no exigir ticket/Jira ni inventar storage, carpetas o artefactos. Un ID o una integración instalada no activan un workflow por sí solos,
 - si el pedido o contrato requiere contexto de un ticket, resolver su consistencia según la skill y consultar solo la integración read-only aprobada. Si el contrato exige ticket y falta, pedirlo antes de revisar. No exijas handoff para leer requisitos ni confundas conversación del PR con la del ticket; acceso ausente se informa sin improvisar credenciales,
