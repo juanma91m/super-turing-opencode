@@ -1,11 +1,19 @@
 # Cierre posible de pendientes — 2026-11-24
 
+**Actualización posterior:** los dos runners de Higyrus ya se aplicaron en la PC
+auditada. Se verificó que ambos coinciden con el overlay canónico, que el paquete
+no tiene escrituras ni retiros pendientes y que pasa el chequeo nativo offline
+del proyecto. El usuario también confirmó que instaló V2 en su notebook y que
+arrancó correctamente. Eso no es una auditoría del historial de esa máquina ni
+amplía la compatibilidad del updater a layouts antiguos desconocidos.
+
 ## Resultado
 
 General, AUNE y once proyectos permanecen aplicados; offline 13/13 y última
 pasada live 13/13 listos. Se corrigió la brecha de readiness del catálogo MCP,
 sin cambios de permisos, credenciales, modelos elegidos, runtime, DB o aplicaciones.
-No es un certificado funcional de todo el stack ni de la notebook inaccesible.
+No es un certificado funcional de todo el stack ni una verificación independiente
+de la notebook.
 
 ## Rovo: corrección del launcher, no del servicio remoto
 
@@ -27,14 +35,12 @@ posterior dio **13/13**, con una muestra por ubicación. Por eso no se afirma qu
 se haya reproducido/corregido la causa interna del servidor remoto; sí se cubrió
 la transición de readiness que el launcher no contemplaba.
 
-## Higyrus: integrado, dos scripts todavía pendientes de aplicar
+## Higyrus: registro histórico del despliegue de los dos scripts
 
-Los once proyectos, incluido Higyrus, tienen despliegue V2 aplicado e íntegro.
-No quedó todo Higyrus fuera. Lo pendiente es reemplazar dos runners antiguos:
-Semgrep aún no usa su binding explícito y ast-grep aún conserva `npx latest`.
-Bindings instalados y fuentes corregidas/publicadas; smoke sintético anterior
-pasó con los ejecutables reales. No se vuelve a afirmar que esos runners ya estén
-desplegados o probados desde la aplicación.
+Al auditar inicialmente, los once proyectos, incluido Higyrus, ya tenían el
+overlay V2 aplicado. Sólo faltaba reemplazar dos runners antiguos: Semgrep no
+usaba su binding explícito y ast-grep conservaba `npx latest`. El smoke con los
+ejecutables reales usó datos sintéticos, no código de aplicación.
 
 Paquete sucesor verificado:
 
@@ -43,15 +49,14 @@ Paquete sucesor verificado:
 34b13ac4c332d0dbde40f40d1035f7920b666ffa684ae5dd6049f65c5d0dea2e
 ```
 
-Preflight de hoy: exactamente dos writes, cero removes, preimages iguales al
-archivo desplegado anterior. **No aplicado: el padre conserva un reader abierto,
-incluida la sesión desde la que se trabaja.** No se borraron leases, mataron
-clientes ni creó un watcher oculto para hacer el cambio por detrás.
+El preflight inicial informaba exactamente dos escrituras, cero retiros y
+preimages iguales al paquete anterior. No se aplicó mientras el padre tenía un
+lector abierto; se esperó el cierre normal de los clientes.
 
-### Continuación ejecutable en esta PC
+### Comando aplicado en esta PC (no repetir)
 
-Cerrar los clientes OpenCode que usan ese padre. Desde una terminal normal y el
-owner AUNE canónico actualizado:
+Una vez cerrados los clientes de OpenCode que usaban el padre, desde una
+terminal normal se ejecutó el comando del owner AUNE canónico:
 
 ```sh
 node /home/jmagnaterra/TRABAJO/AUNE/higyrus-workspace/super-turing-opencode-aune/v2/projects/deploy.mjs apply \
@@ -60,22 +65,23 @@ node /home/jmagnaterra/TRABAJO/AUNE/higyrus-workspace/super-turing-opencode-aune
   --client-closed --confirm --upgrade-sources
 ```
 
-El motor vuelve a verificar guards/preimages y conserva receipts/rollback.
-Si encuentra otro reader o drift, detenerse; no quitar el lock. Tras aplicar,
-verificar hashes de ambos scripts y `production-check ... check/live`. Las rutas
-anteriores son exclusivas de esta máquina, no instrucciones para la notebook.
+El motor verifica las guardas y los preimages, y conserva recibos y rollback.
+El resultado fue `applied`, con dos archivos cambiados, sin modificar runtime ni
+almacenamiento. Se comprobaron los bytes de ambos scripts y el chequeo offline.
+Las rutas anteriores son de esta máquina, no instrucciones para la notebook.
 
-## Lo que sigue fuera de este cierre
+## Límites y exclusiones
 
 - Context7: última consulta de esta sesión, cuota agotada. No hay cambio de cuenta,
   compra de cuota o nuevas credenciales autorizadas/proporcionadas para resolverla.
-- Notebook antigua: el updater y diagnóstico local están publicados, pero no se
-  ejecutaron en esa notebook. Layouts Background administrados/JSON desconocidos
-  siguen requiriendo migración local oficial en copia. Ver `v2/install/NOTEBOOK.md`.
+- Notebook: instalación reportada exitosa por el usuario, sin validación
+  independiente de datos o layouts. Background administrado e historial JSON
+  desconocido siguen requiriendo migración local oficial en copia. Ver
+  `v2/install/NOTEBOOK.md`.
 - Background/Stitch son exclusiones deliberadas del perfil V2. Hosting externo,
   standalone/service/ACP/pair no equivalen al contrato gestionado disponible.
 - No se hicieron builds/pruebas funcionales de aplicaciones, indexación de corpus
   o CodeGraph ni restauración/reescritura de historiales.
 
 La publicación de fuentes se verifica aparte del despliegue: un push no aplica
-los dos scripts de Higyrus mientras el padre esté ocupado.
+archivos ni elude los lectores del perfil.

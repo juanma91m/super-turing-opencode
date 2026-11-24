@@ -16,8 +16,9 @@ un atajo para completar dependencias sobre una instalación V2.
 El updater está diseñado para actualizar un stack conocido sin reemplazar sus
 datos. Si la notebook es más antigua que los contratos reconocidos, se detiene:
 **no crear una DB vacía, no resetear ni copiar la DB de otra computadora**.
-No se ha probado sobre la notebook real. Los tests de preservación son fixtures;
-no convertir esa evidencia en una garantía de compatibilidad universal.
+El usuario informó una instalación exitosa en su notebook, sin auditoría
+independiente de sus datos. Los tests de preservación usan fixtures; ni esa
+prueba ni ese arranque garantizan compatibilidad universal.
 
 ## Un comando de actualización; sin preguntas interactivas
 
