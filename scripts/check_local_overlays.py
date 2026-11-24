@@ -16,7 +16,6 @@ TOKEN_GROUPS = {
     "ticket_handoff": ["tmp/<ticket>/verdict.md", "tmp/<key>/verdict.md", "result-dev.md"],
     "no_git_side_effects": ["git add", "git commit", "push"],
     "playwright_headless": ["headless", "foreground"],
-    "stitch_timeout": ["stitch", "timeout", "polling"],
 }
 
 
@@ -182,8 +181,6 @@ def guardrail_applies(group_name: str, local_meta: dict[str, Any], project_root:
         agents_path = project_root / "AGENTS.md"
         return agents_path.is_file() and has_any_token(read_text(agents_path), TOKEN_GROUPS[group_name])
     if group_name == "playwright_headless" and local_tools.get("playwright_*") is False:
-        return False
-    if group_name == "stitch_timeout" and local_tools.get("stitch_*") is False:
         return False
     return True
 

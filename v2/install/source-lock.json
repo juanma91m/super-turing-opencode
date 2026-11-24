@@ -3,10 +3,10 @@
   "nativeVersion": "2.2.7",
   "repositories": [
     {"directory":"opencode-stack","repository":"juanma91m/super-turing-opencode","commit":"self"},
-    {"directory":"super-turing-opencode-knowledge","repository":"juanma91m/super-turing-opencode-knowledge","commit":"cd277b835edd334b72b85f6a2739a59248cf3595"},
-    {"directory":"super-turing-opencode-ticketing","repository":"juanma91m/super-turing-opencode-ticketing","commit":"6571fc4a05bba91f7fdcbab8188b34f830539b0f"},
-    {"directory":"super-turing-opencode-codegraph","repository":"juanma91m/super-turing-opencode-codegraph","commit":"b474c713f0aae6d47e72c6faafa33959c445de91"},
-    {"directory":"super-turing-opencode-documents","repository":"juanma91m/super-turing-opencode-documents","commit":"92c373ab1ac04bc3310de3e41a3284d9c5961213"},
-    {"directory":"super-turing-opencode-notifier","repository":"juanma91m/super-turing-opencode-notifier","commit":"626d9db0c1966cd602638c2f094e432aa89c48a0"}
+    {"directory":"super-turing-opencode-knowledge","repository":"juanma91m/super-turing-opencode-knowledge","commit":"1ad4a8f9cb23d2ddb208dcbb14cde9477f671704"},
+    {"directory":"super-turing-opencode-ticketing","repository":"juanma91m/super-turing-opencode-ticketing","commit":"a12389f07d928002aac8488b4cc76b8fb16dfc5d"},
+    {"directory":"super-turing-opencode-codegraph","repository":"juanma91m/super-turing-opencode-codegraph","commit":"52c2f28a643e30af165958acfb39c9752b20e8b3"},
+    {"directory":"super-turing-opencode-documents","repository":"juanma91m/super-turing-opencode-documents","commit":"2a06fe62141226dc784a69352e132bd86fdee3c5"},
+    {"directory":"super-turing-opencode-notifier","repository":"juanma91m/super-turing-opencode-notifier","commit":"595417854396dab90da297cdce5d7b60cf0bdcac"}
   ]
 }

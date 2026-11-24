@@ -9,7 +9,7 @@ import { candidateStatus, checkCandidate, officialRuntime } from '../lifecycle.m
 import { acquireCandidateLease, runLiveCandidate } from '../launch.mjs';
 import { releaseStorePath, assertNoPendingDistribution } from '../ownership.mjs';
 import { installRelease, restoreRelease, recoverRelease, distributionStatus, previewDistribution, installedPlan, validateReleaseSchema } from '../releases.mjs';
-import { nativeAddonFixture } from '../../../migrations/v2/fixtures/general-addon-stack.mjs';
+import { nativeAddonFixture } from '../../../v2/testing/fixtures/general-addon-stack.mjs';
 import { playwrightContribution } from '../../playwright/general.mjs';
 import { validateInstalledPlaywright } from '../../playwright/installed-runtime.mjs';
 import { translateDormantProviders } from '../dormant-providers.mjs';
@@ -147,7 +147,7 @@ test('candidate CLI status/rollback/check/live boot use archived assets without 
   const base = planGeneral(target, f.options), first = installRelease(base, consent);
   const next = planGeneral(target, { ...f.options, maintenanceModels: { title: { model: 'workshop-mock/mock#low' } } }); installRelease(next, consent);
   assert(!fs.existsSync(path.join(home, '.config/opencode')));
-  const cli = new URL('../../../migrations/v2/general-composed.mjs', import.meta.url).pathname;
+  const cli = new URL('../../../v2/tools/general-composed.mjs', import.meta.url).pathname;
   const run = args => { const result = spawnSync(process.execPath, [cli, ...args], { env: { HOME: home, PATH: '/usr/local/bin:/usr/bin:/bin' }, encoding: 'utf8', timeout: 60000, maxBuffer: 2 * 1024 * 1024 }); assert.equal(result.status, 0, 'Owned CLI fixture failed: ' + result.stderr); return JSON.parse(result.stdout); };
   assert.equal(run(['status', '--project', f.project]).current, distributionStatus(target).current);
   assert.equal(run(['rollback', '--project', f.project, '--revision', first.revision, '--candidate-only', '--client-closed', '--confirm']).revision, first.revision);

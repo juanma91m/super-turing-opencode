@@ -35,7 +35,7 @@ Modo de trabajo:
 - si el comportamiento es acotado y el proyecto ofrece un harness razonable, intentá primero con test o repro que falle; si no conviene, dejá evidencia clara de regresión o validación manual alineada al comportamiento esperado,
 - implementa solo lo necesario para resolver el objetivo,
 - considera loading, empty states, errores, accesibilidad, validaciones de presentacion y trazabilidad,
-- para uso operativo de Playwright, apoyate en `stitch-playwright-ui-opencode`; si el trabajo requiere Stitch, derivá la definición visual a `ui-web-designer`,
+- para inspección con Playwright, apoyate en `playwright-ui-opencode`; si falta definir el diseño visual, derivá esa tarea a `ui-web-designer`,
 - si el problema es principalmente de diseño o UX, apóyate en `ui-web-designer` antes de codificar cambios grandes.
 
 Limites:

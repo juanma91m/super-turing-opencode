@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
-"""Data-preserving, fail-closed update from a published source lock (Linux).
-
-Never updates canonical working trees, restores a database over a newer database,
-copies authentication, kills clients, deletes locks, or executes a V1 asset installer.
-Unknown legacy layouts fail before changing the active command.
-"""
+"""Install or maintain the pinned managed OpenCode V2 stack (Linux)."""
 import argparse
 from contextlib import closing, contextmanager
 import fcntl
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -120,10 +114,13 @@ def lock_manifest(file):
     return data
 
 
-def sources(file, destination, runner=run, *, github_account=None, home=None):
+def sources(file, destination, runner=run, *, github_account=None, home=None, base=False):
     """Clone exact commits into a fresh generation; never pull/reset user repos."""
     lock = lock_manifest(file)
     lock = json.loads(json.dumps(lock))
+    if base:
+        if lock.get('ownerAdapter'): raise ValueError('Base updates do not adopt owner adapters')
+        lock['repositories'] = [row for row in lock['repositories'] if row['directory'] == 'opencode-stack']
     for row in lock['repositories']:
         if row['commit']=='self':
             if runner(['git','status','--porcelain','--untracked-files=no'],cwd=ROOT): raise ValueError('Core updater tracked checkout is dirty; publish/review it first')
@@ -210,7 +207,7 @@ def corpus_lock(root):
     finally: os.close(fd)
 
 
-def discover(home, *, engram=None, qdrant=None, history=None):
+def discover(home, *, engram=None, qdrant=None):
     physical(home)
     config = home / '.config/opencode'
     updater_marker = home / '.local/state/opencode-stack/install/current.json'
@@ -224,33 +221,36 @@ def discover(home, *, engram=None, qdrant=None, history=None):
         if digest(active_entry) != previous_update.get('entrySHA256'):
             raise ValueError('Installer marker/active command differ; no old-history fallback')
     current = read(current_file) if current_file.exists() else None
-    if current is not None:
-        allowed = {'schemaVersion','owner','nativeVersion','managedContract','coreRoot','stagingRoot','foundation','generalRoot','generalRevision','privateRoot','privateRevision','workspace','storageRoot','products','auneRoot','ownerEntry'}
-        if set(current) - allowed: raise ValueError('Unreviewed production settings fields; no configuration copied')
-        if current.get('nativeVersion') != '2.2.7' or current.get('managedContract') != 'managed-harness-v1':
-            raise ValueError('Unknown active V2 contract; no automatic downgrade')
-        selected = physical(Path(current['storageRoot']))
-        default = selected / 'data/opencode/opencode.db'
-    else:
-        default = home / '.local/share/opencode/opencode.db'
-    if current and history is not None and Path(history) != default:
-        raise ValueError('An active V2 generation cannot be updated from an older history override')
-    history = physical(Path(history) if history else default)
+    if current is None:
+        raise ValueError('No managed V2 installation found; update does not adopt an unknown installation')
+    allowed = {'schemaVersion','owner','nativeVersion','managedContract','coreRoot','stagingRoot','foundation','generalRoot','generalRevision','privateRoot','privateRevision','workspace','storageRoot','products','auneRoot','ownerEntry','profile'}
+    if set(current) - allowed or current.get('profile') not in (None, 'base'):
+        raise ValueError('Unreviewed production settings; no configuration copied')
+    if current.get('nativeVersion') != '2.2.7' or current.get('managedContract') != 'managed-harness-v1':
+        raise ValueError('Unknown active V2 contract; no automatic downgrade')
+    selected = physical(Path(current['storageRoot']))
+    history = physical(selected / 'data/opencode/opencode.db')
     if not history.is_file():
-        # Old file-per-session storage must first pass the official native
-        # conversion path. Do not initialize an empty DB and hide old sessions.
-        raise ValueError('Existing SQLite history not found; file-based/unknown legacy history requires official conversion before this updater')
-    choices = [p for p in [home / '.engram/engram.db', home / '.local/share/engram/engram.db'] if p.is_file()]
-    if engram is None and len(choices) != 1:
-        raise ValueError('Engram DB selection is absent/ambiguous; provide --engram-db, never create a replacement')
-    engram = physical(Path(engram) if engram else choices[0])
-    qdrant = physical(Path(qdrant) if qdrant else home / '.local/share/super-turing-opencode-knowledge/qdrant')
-    if not engram.is_file() or not qdrant.is_dir(): raise ValueError('Existing Knowledge data required; nothing is reset or initialized')
+        raise ValueError('Published V2 history missing; no replacement will be initialized')
+    if current.get('profile') == 'base':
+        if engram is not None or qdrant is not None: raise ValueError('Base installations do not bind Knowledge stores')
+    else:
+        choices = [p for p in [home / '.engram/engram.db', home / '.local/share/engram/engram.db'] if p.is_file()]
+        if engram is None and len(choices) != 1:
+            raise ValueError('Engram DB selection is absent/ambiguous; provide --engram-db, never create a replacement')
+        engram = physical(Path(engram) if engram else choices[0])
+        qdrant = physical(Path(qdrant) if qdrant else home / '.local/share/super-turing-opencode-knowledge/qdrant')
+        if not engram.is_file() or not qdrant.is_dir(): raise ValueError('Existing Knowledge data required; nothing is reset or initialized')
     entry = home / '.opencode/bin/opencode'; physical(entry.parent)
     if not entry.exists() or entry.is_symlink(): raise ValueError('Regular existing user entry required; alternate installations require explicit integration')
     assets = {name: str(physical(history.parent / name)) for name in ['snapshot', 'repos'] if (history.parent / name).exists()}
-    return {'home': str(home), 'history': str(history), 'historyAssets': assets, 'engram': str(engram), 'qdrant': str(qdrant),
+    return {'home': str(home), 'history': str(history), 'historyAssets': assets,
+            **({'engram': str(engram), 'qdrant': str(qdrant)} if engram else {}),
             'entry': str(entry), 'previousSettings': current, 'previousUpdate': previous_update, 'config': str(config)}
+
+
+def stores(selection):
+    return [Path(selection[k]) for k in ('history', 'engram', 'qdrant') if k in selection]
 
 
 def owner_rollback(root, runner=run):
@@ -263,7 +263,7 @@ def owner_rollback(root, runner=run):
 
 
 def capture(selection, root):
-    paths = [Path(selection[key]) for key in ['history', 'engram', 'qdrant']]
+    paths = stores(selection)
     if users(paths): raise ValueError('OpenCode/Engram/corpus still in use; close clients and sync timers, no process is stopped automatically')
     physical(root)
     if root.exists(): raise ValueError('Fresh private backup directory required')
@@ -272,13 +272,15 @@ def capture(selection, root):
     for name, source in zip(['opencode', 'engram'], paths[:2]):
         directory = root / name; directory.mkdir(mode=0o700)
         reports[name] = sqlite_copy(source, directory / source.name)
-    with corpus_lock(paths[2]):
-        if users(paths[:2]): raise ValueError('Client reopened during backup; copies retained')
-        before = inventory(paths[2])
-        shutil.copytree(paths[2], root / 'qdrant', ignore=lambda directory, names: ['.lock'] if Path(directory) == paths[2] else [])
-        copied = inventory(root / 'qdrant')
-        if before != copied or inventory(paths[2]) != before: raise ValueError('Corpus changed during capture; backup not approved')
-    reports['qdrant'] = {'source': str(paths[2]), 'backup': str(root / 'qdrant'), 'files': len(before), 'hashes': before}
+    if 'qdrant' in selection:
+        corpus = Path(selection['qdrant'])
+        with corpus_lock(corpus):
+            if users(paths[:2]): raise ValueError('Client reopened during backup; copies retained')
+            before = inventory(corpus)
+            shutil.copytree(corpus, root / 'qdrant', ignore=lambda directory, names: ['.lock'] if Path(directory) == corpus else [])
+            copied = inventory(root / 'qdrant')
+            if before != copied or inventory(corpus) != before: raise ValueError('Corpus changed during capture; backup not approved')
+        reports['qdrant'] = {'source': str(corpus), 'backup': str(root / 'qdrant'), 'files': len(before), 'hashes': before}
     reports['historyAssets'] = {}
     for name, source in selection.get('historyAssets', {}).items():
         if name not in ['snapshot', 'repos']: raise ValueError('Unreviewed OpenCode data directory')
@@ -297,10 +299,11 @@ def capture(selection, root):
 
 def verify_backup(root):
     receipt = read(root / 'backup.json')
-    for key in ['opencode', 'engram']:
+    if ('engram' in receipt) != ('qdrant' in receipt): raise ValueError('Incomplete Knowledge backup')
+    for key in ['opencode'] + (['engram'] if 'engram' in receipt else []):
         if digest(physical(Path(receipt[key]['backup']))) != receipt[key]['sha256']:
             raise ValueError('Backup checksum mismatch')
-    if inventory(root / 'qdrant') != receipt['qdrant']['hashes']:
+    if 'qdrant' in receipt and inventory(root / 'qdrant') != receipt['qdrant']['hashes']:
         raise ValueError('Corpus backup checksum mismatch')
     if digest(root / 'previous-entry') != receipt['entry']['sha256']:
         raise ValueError('Entry backup checksum mismatch')
@@ -316,32 +319,31 @@ def tree_bytes(root):
 
 def update(selection, destination, *, closed=False, source_lock=None, github_account=None, runner=run):
     if not closed: raise ValueError('Explicit --clients-closed required; an updater is not permission to kill clients')
-    if users([Path(selection[k]) for k in ['history', 'engram', 'qdrant']]):
+    if users(stores(selection)):
         raise ValueError('Affected stores still in use; no update started')
-    if (Path(selection['home']) / '.opencode/.opencode-background-addon.json').exists():
-        marker = read(Path(selection['home']) / '.opencode/.opencode-background-addon.json')
-        if marker.get('mode') == 'managed-local-install':
-            raise ValueError('Background-owned legacy runtime requires its sealed cutover lifecycle before this updater; no blind takeover')
+    ownership = Path(selection['home']) / '.opencode/.opencode-background-addon.json'
+    if ownership.is_symlink() or ownership.exists() and read(ownership).get('mode') == 'managed-local-install':
+        raise ValueError('Conflicting runtime ownership marker; no takeover')
     physical(destination)
     if destination.exists(): raise ValueError('Previous attempt retained; use a new generation or inspect its journal')
     parent = destination.parent
     parent.mkdir(parents=True, mode=0o700, exist_ok=True)
-    required = 3 * Path(selection['history']).stat().st_size + Path(selection['engram']).stat().st_size + tree_bytes(Path(selection['qdrant'])) + 2 * sum(tree_bytes(Path(p)) for p in selection.get('historyAssets', {}).values()) + 4 * 1024**3
+    required = sum(p.stat().st_size for p in stores(selection) if p.is_file()) + (tree_bytes(Path(selection['qdrant'])) if 'qdrant' in selection else 0) + sum(tree_bytes(Path(p)) for p in selection.get('historyAssets', {}).values()) + 4 * 1024**3
     if shutil.disk_usage(parent).free < required: raise ValueError('Insufficient backup/staging reserve; choose --destination on a larger durable volume')
     destination.mkdir(mode=0o700)
     phase = 'backup'
     write(destination / 'selection.json', selection)
     write(destination / 'started.json', {'kind': 'data-preserving-update', 'time': time.time(), 'phase': phase})
     try:
-        print('[stack-update] Capturing verified OpenCode, Engram and corpus backups.', file=sys.stderr, flush=True)
-        originals = {key: fingerprint(Path(selection[key])) for key in ['history', 'engram']}
+        print('[stack-update] Capturing verified backups of the selected stores.', file=sys.stderr, flush=True)
+        originals = {key: fingerprint(Path(selection[key])) for key in ['history', 'engram'] if key in selection}
         capture(selection, destination / 'backup'); verify_backup(destination / 'backup')
         if any(fingerprint(Path(selection[key])) != originals[key] for key in originals):
             raise ValueError('Source changed during snapshot; no update approved')
         write(destination / 'source-fingerprints.json', originals)
         phase = 'sources'
         if source_lock is None: source_lock = ROOT / 'v2/install/source-lock.json'
-        source_record = sources(source_lock, destination / 'sources', runner, github_account=github_account,home=selection['home'])
+        source_record = sources(source_lock, destination / 'sources', runner, github_account=github_account,home=selection['home'],base=selection['previousSettings'].get('profile')=='base')
         core = destination / 'sources/opencode-stack'
         node = shutil.which('node')
         if node is None: raise ValueError('Node 22.22.2+ is required; no system runtime replaced')
@@ -349,10 +351,10 @@ def update(selection, destination, *, closed=False, source_lock=None, github_acc
                 'ownerAdapter': source_record.get('ownerAdapter')}
         write(destination / 'build-spec.json', spec)
         phase = 'native-stage'
-        print('[stack-update] Preparing complete native profile and migrating a COPY of history.', file=sys.stderr, flush=True)
+        print('[stack-update] Preparing profiles against the same pinned V2 runtime and storage.', file=sys.stderr, flush=True)
         raw = runner([node, core / 'v2/install/build.mjs', destination / 'build-spec.json'], cwd=core, budget=4200)
         result = json.loads(raw)
-        if result.get('kind') != 'native-update-staged' or not result.get('ready') or result.get('nativeVersion') != '2.2.7':
+        if result.get('kind') != 'native-update-staged' or not result.get('ready') or result.get('nativeVersion') != '2.2.7' or result.get('storageRoot') != selection['previousSettings']['storageRoot']:
             raise ValueError('Complete native stage not verified; previous command remains active')
         if not isinstance(result.get('entry'), str) or Path(result['entry']) != destination / 'entry.mjs':
             raise ValueError('Staged entry escaped generation')
@@ -360,7 +362,7 @@ def update(selection, destination, *, closed=False, source_lock=None, github_acc
         phase = 'publish'
         # The existing profile, auth/config, state, corpus and Engram DB are NOT
         # overwritten. The adapter must finish all setup before this single rename.
-        if users([Path(selection[k]) for k in ['history', 'engram', 'qdrant']]): raise ValueError('Stores reopened; publication refused')
+        if users(stores(selection)): raise ValueError('Stores reopened; publication refused')
         backup = verify_backup(destination / 'backup')
         marker_file = Path(selection['home']) / '.local/state/opencode-stack/install/current.json'
         observed_marker = read(marker_file) if marker_file.exists() else None
@@ -368,9 +370,8 @@ def update(selection, destination, *, closed=False, source_lock=None, github_acc
         entry = Path(selection['entry'])
         if digest(entry) != backup['entry']['sha256'] or stat.S_IMODE(entry.stat().st_mode) != backup['entry']['mode']:
             raise ValueError('Active entry advanced; no overwrite')
-        for key in ['history', 'engram']:
-            # Closed sources must remain byte-identical; schema migration ran in
-            # the new store. Never merge later source edits silently.
+        for key in originals:
+            # Closed sources must remain byte-identical during preparation.
             original = Path(selection[key])
             if fingerprint(original) != originals[key]:
                 raise ValueError('Source changed during native staging')
@@ -410,7 +411,7 @@ def rollback(generation, *, closed=False, runner=run):
     selection = read(generation / 'selection.json')
     if not closed: raise ValueError('Close old/new clients before rollback')
     state = read(generation / 'complete.json'); stage = state['nativeStage']
-    paths = [Path(selection[k]) for k in ['history','engram','qdrant']] + [Path(stage['storageRoot'])]
+    paths = stores(selection) + [Path(stage['storageRoot'])]
     if users(paths): raise ValueError('Stores still open; no forced rollback')
     before = verify_backup(generation / 'backup'); entry = Path(selection['entry'])
     expected = read(generation / 'publication.json')['entrySHA256']
@@ -419,8 +420,7 @@ def rollback(generation, *, closed=False, runner=run):
     marker = read(marker_file) if marker_file.exists() else None
     if marker is not None and marker.get('generation') != str(generation) and marker != selection.get('previousUpdate'):
         raise ValueError('Another update owns the current marker; no rollback')
-    # Rollback changes only the entry. New V2 conversations remain in the new
-    # store and are NOT written over the old DB. No automatic deletion or pruning.
+    # Rollback changes the entry/owner metadata only. No DB is restored or pruned.
     owner_rollback(generation, runner)
     atomic(entry, (generation / 'backup/previous-entry').read_bytes(), before['entry']['mode'])
     if marker is not None and marker.get('generation') == str(generation):
@@ -450,57 +450,49 @@ def install_lease(home):
         file.unlink(); os.close(fd)
 
 
-def record_diagnostic_attempt(directory, record):
-    if directory is None: return
-    try:
-        write(directory / 'attempt.json', record)
-    except (OSError, ValueError):
-        print('[stack-update] Could not save the optional attempt receipt; keep the generation journal. Installation result is unchanged.', file=sys.stderr)
-
-
 def main():
+    from fresh import install_base, preflight
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['plan','update','verify-backup','rollback'])
-    parser.add_argument('--home', type=Path, default=Path(pwd.getpwuid(os.getuid()).pw_dir))
-    parser.add_argument('--history-db', type=Path); parser.add_argument('--engram-db', type=Path)
+    parser.add_argument('action', choices=['plan-install','install','plan','update','verify-backup','rollback'])
+    parser.add_argument('--home', type=Path, default=Path(os.environ.get('HOME') or pwd.getpwuid(os.getuid()).pw_dir))
+    parser.add_argument('--engram-db', type=Path)
     parser.add_argument('--qdrant-dir', type=Path); parser.add_argument('--destination', type=Path)
     parser.add_argument('--source-lock', type=Path); parser.add_argument('--clients-closed', action='store_true')
     parser.add_argument('--github-account', help='Explicit local gh account for private Git fetch; no account switch or token file')
     args = parser.parse_args()
-    diagnostic_directory = None
     generation = None
     try:
-        if args.action == 'update':
-            sys.dont_write_bytecode = True
-            spec = importlib.util.spec_from_file_location('notebook_preflight', ROOT / 'v2/install/notebook-preflight.py')
-            diagnostic = importlib.util.module_from_spec(spec); spec.loader.exec_module(diagnostic)
-            inventory = diagnostic.inspect(args.home, history=args.history_db)
-            diagnostic_directory = diagnostic.save_report(args.home, inventory)
-            print('[stack-update] Diagnóstico y continuación local: ' + str(diagnostic_directory / 'NEXT-STEPS.md'), file=sys.stderr, flush=True)
-            if inventory['earlyBlockers']:
-                raise ValueError('Notebook preflight blocked: ' + ', '.join(inventory['earlyBlockers']) + '; follow the local NEXT-STEPS.md')
-        if args.action == 'verify-backup':
+        if args.action in ('plan-install', 'install'):
+            if any((args.engram_db, args.qdrant_dir, args.source_lock, args.github_account, args.clients_closed)):
+                raise ValueError('A fresh base installation does not import existing stores or owner configuration')
+            preflight(args.home, physical)
+            if args.action == 'plan-install':
+                result = {'kind': 'fresh-install-preflight', 'profile': 'base', 'nativeVersion': '2.2.7', 'writesPerformed': 0}
+            else:
+                generation = args.destination or args.home / '.local/share/opencode-stack/installs' / uuid.uuid4().hex
+                with install_lease(args.home):
+                    result = install_base(args.home, generation, source=ROOT, physical=physical, run=run, write=write)
+        elif args.action == 'verify-backup':
             if args.destination is None: raise ValueError('--destination generation required')
             verify_backup(args.destination / 'backup'); result = {'kind':'backup-verified','writesPerformed':0}
         elif args.action == 'rollback':
             if args.destination is None: raise ValueError('--destination generation required')
             with install_lease(args.home): result = rollback(args.destination, closed=args.clients_closed)
         else:
-            selected = discover(args.home, history=args.history_db, engram=args.engram_db, qdrant=args.qdrant_dir)
+            if args.home != Path(os.environ.get('HOME', '')): raise ValueError('Run from the selected HOME')
+            selected = discover(args.home, engram=args.engram_db, qdrant=args.qdrant_dir)
             if args.action == 'plan':
-                result = {'kind':'safe-update-preflight','selectedPaths':{k:selected[k] for k in ['home','history','engram','qdrant','entry']},'hasPreviousV2':selected['previousSettings'] is not None,'sourceUsers':users([Path(selected[k]) for k in ['history','engram','qdrant']]),'writesPerformed':0,
-                          'limitation':'Known SQLite/native2.2.7 layouts and existing qualified addon runtimes only. Unknown legacy config is refused, never normalized.'}
+                result = {'kind':'safe-update-preflight','selectedPaths':{k:selected[k] for k in ['home','history','engram','qdrant','entry'] if k in selected},'sourceUsers':users(stores(selected)),'writesPerformed':0}
             else:
                 root = args.destination or args.home / '.local/share/opencode-stack/updates' / (time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()) + '-' + uuid.uuid4().hex[:8])
                 generation = root
                 with install_lease(args.home): result = update(selected, root, closed=args.clients_closed, source_lock=args.source_lock,github_account=args.github_account)
-        record_diagnostic_attempt(diagnostic_directory, {'kind':'update-attempt','status':'complete','generation':result.get('generation'),'sourceStoresReplaced':False})
         print(json.dumps(result))
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         destination = generation or args.destination
-        record_diagnostic_attempt(diagnostic_directory, {'kind':'update-attempt','status':'stopped','errorType':type(error).__name__,'generation':str(destination) if destination else None,'automaticRetry':False})
-        parser.exit(1, 'Stack update refused/stopped: ' + (str(error) if isinstance(error, ValueError) else type(error).__name__) + '. Keep all generations/backups; no automatic cleanup.\n')
+        location = f' Preserved attempt: {destination}.' if destination and destination.is_dir() else ''
+        parser.exit(1, 'Stack operation refused/stopped: ' + (str(error) if isinstance(error, ValueError) else type(error).__name__) + '.' + location + ' No automatic cleanup.\n')
 
 
 if __name__ == '__main__': main()

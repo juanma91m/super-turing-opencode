@@ -1,10 +1,7 @@
-# Launcher del candidato general — no es el corte global
+# Launcher de pruebas del perfil general
 
-Implementado con OpenCode oficial **2.2.7** y probado en temporales; después el
-usuario autorizó preparar candidato/runtime durable y verify-live real con data/state
-nativos del piloto V2. Check/arranque metadata pass, cinco MCP connected y proveedor
-conectado;0 inferencias/negocio. Stitch/Background excluidos. No DB V1/login nuevo/
-credenciales copiadas o configuración V1/workshop cambiada. Ver PASO2-CIERRE.md.
+Para uso habitual, ver el [contrato gestionado](../CONTRATO-GESTIONADO.md).
+Esta interfaz separada sirve para validar un perfil antes de publicarlo.
 
 ## Separación de acciones
 
@@ -13,7 +10,7 @@ credenciales copiadas o configuración V1/workshop cambiada. Ver PASO2-CIERRE.md
 El entorno interactivo/servidor con binding `production-native-storage` ya no fija
 `OPENCODE_DISABLE_MODELS_FETCH=1`: el runtime puede refrescar su catálogo público
 nativo y ofrecer modelos nuevos sin editar los agentes. `generalEnvironment`
-(checks offline/schema) y los candidatos de migración conservan el catálogo
+(checks offline/schema) y los perfiles de prueba conservan el catálogo
 congelado para no hacer consultas externas implícitas durante verificaciones.
 
 No se habilita auto-upgrade: el binario continúa fijado en 2.2.7. Tampoco se
@@ -49,9 +46,9 @@ Contratos de la ventana ya ejecutada y futuras aperturas explícitas (cerrar otr
 clientes V2 que comparten el store), no autorización de normalizar overlays/cortar:
 
 ```text
-node migrations/v2/general-composed.mjs verify-live --project /ruta/neutral/revisada --candidate-only --client-closed
-node migrations/v2/general-composed.mjs verify-live --project /ruta/neutral/revisada --candidate-only --client-closed --reuse-v2-storage
-node migrations/v2/general-composed.mjs chat --project /ruta/neutral/revisada --candidate-only --client-closed --reuse-v2-storage
+node v2/tools/general-composed.mjs verify-live --project /ruta/neutral/revisada --candidate-only --client-closed
+node v2/tools/general-composed.mjs verify-live --project /ruta/neutral/revisada --candidate-only --client-closed --reuse-v2-storage
+node v2/tools/general-composed.mjs chat --project /ruta/neutral/revisada --candidate-only --client-closed --reuse-v2-storage
 ```
 
 ## Preflight antes de DB/MCP/TUI
@@ -60,12 +57,12 @@ node migrations/v2/general-composed.mjs chat --project /ruta/neutral/revisada --
   redirección/captura de transcript por esta interfaz ni una URL/DB/servidor ajeno.
 - Runtime durable browser seleccionado por owner, binario oficial por bytes/pin,
   assets/marker íntegros y sin prepare implícito. No descarga, adopta o repara nada.
-- Screening de candidatos de snapshots por nombres Git, no contenidos; ver
-  ACTIVATION.md. No es detector de secretos ni sandbox de captura.
+- Screening de candidatos de snapshots por nombres Git, no contenidos; no
+  es detector de secretos ni sandbox de captura.
 - Este incremento es **general-only**: config local/ancestral y assets ejecutables
   `.opencode` se rechazan por metadata antes del parser; las fuentes nativas se
   vuelven a contrastar. AGENTS aditivo sigue permitido. No desactivar descubrimiento
-  ni ignorar una capa V1 para abrir un repo como si estuviera migrado.
+  ni ignorar capas no revisadas para lanzar un proyecto.
 - Esto bloquea intencionalmente AUNE/overlays no revisados. Su port y aceptación
   nativos pertenecen a pasos3/4; no hay flag para afirmar ficticiamente que pasaron.
   Tampoco es un sandbox contra plugins o procesos confiables del mismo UID.
@@ -98,13 +95,12 @@ Transporte de escritorio allowlisted se conserva tanto en servidor (MCP visible/
 OAuth) como en TUI, sin copiar su contenido ni heredar keys/preloads/overrides.
 
 Excepción de paridad, no credenciales generales: con runtimeHome seleccionado,
-serverEnvironment conserva mecanismos libpq admitidos por el helper V1, incluidos
+serverEnvironment conserva mecanismos libpq admitidos por el helper, incluidos
 PGPASSWORD y PGSSL*/Kerberos. Sólo helper literal psql-readonly los recibe del hook;
 no TUI/shell genérica/config/argv/reportes/modelo. No se sourcean envs ni leen secretos
-desde el agente. Validado con psql falso, no DB real. Stitch no se configura ni su
-key se referencia: exclusión explícita del usuario para V2.
+desde el agente. Validado con psql falso, no DB real.
 La restricción describe el hook de shell, no sandbox de plugins/MCP confiables o
-herencia interna del SDK; el servidor conserva ese entorno existente como V1.
+herencia interna del SDK; el servidor conserva ese entorno de conexión.
 
 El SDK Plugin.Context2.2.7 no expone session.message aunque HTTP sí. Para benchmark,
 el padre entrega URL/PID/password efímero de su host por pipe fd3 al servidor después
@@ -112,7 +108,7 @@ de readiness. Flag env sólo contiene el número de descriptor, no un secreto nu
 no archivo de auth, discovery de daemon, endpoint del caller o API interna. El
 adapter valida PID/loopback, lee/cierra una vez y retiene conexión sólo RAM. GETs
 de mensajes ocurren dentro del servidor bajo permisos; proyección previa al modelo
-o métricas persistidas. Fuera de ese launcher falla cerrado, sin fallback a V1.
+o métricas persistidas. Fuera de ese launcher falla cerrado, sin fallback a otro host.
 
 Espera plugins/catálogos MCP y lee metadata de agentes/integraciones. Respeta los
 plazos startup/catalog explícitos, no un timeout del auditor
@@ -158,9 +154,9 @@ Si falta, se detiene antes del TUI; no OAuth, auth login o proveedor alternativo
 
 Chat crea una sesión nueva con agente/modelo/variant efectivos del coordinador y
 se adjunta con `--server` y `--session` al **mismo** host ya verificado. No reabre
-automáticamente una sesión del workshop. Config CLI conserva permisos interactivos,
+automáticamente una sesión existente. Config CLI conserva permisos interactivos,
 tabs por cwd y new_location launch. HOME/config/cache/tmp siguen propios; sólo
-data/state pasan al piloto V2 con la flag de reuse y validación de markers/paths.
+data/state se vinculan al almacén de pruebas seleccionado con la flag de reuse y validación de markers/paths.
 Un fallo del TUI puede dejar el draft nuevo; no es transacción o rollback de DB.
 
 ## Cierre, exclusión y fallos
@@ -169,7 +165,7 @@ Lease exclusiva `.candidate-launch.lock` bloquea otro candidato y operaciones de
 distribución durante la ejecución; prepare no puede eludir un store versionado.
 Una transacción de distribución pendiente bloquea check/live/prepare hasta recovery
 explícita. El estado se vuelve a validar bajo lease para no abrir otra revisión.
-La lease no excluye por sí sola al workshop u otros clientes V2: el operador
+La lease no excluye por sí sola a otros clientes que usen el mismo almacén: el operador
 debe cerrarlos antes del reuse. La confirmación humana no detecta procesos.
 
 Al salir/error se cierra el host propio y se retira sólo la lease del mismo inode.
@@ -181,13 +177,11 @@ No es un lock transaccional frente a otros programas del mismo usuario.
 
 verify-live devuelve metadata de readiness y termina su host. Chat rehúsa estado
 parcial; fallo MCP/auth no habilita modo degradado silencioso. Native startup puede
-escribir locks/migraciones/refresh/sesiones o archivos propios de los addons; no
+escribir locks, metadatos de refresco, sesiones o archivos propios de los addons; no
 confundir «sin tools de negocio/inferencia del launcher» con cero efectos físicos.
 
 ## Evidencia
 
-- **66 Node +3 Python general**,29 base y41 composición OK;100 migración son del
-  hito legacy anterior (adapters/workshop sin cambios en este incremento).
 - verify-live real con22 roles y5 MCP **simulados**: conectados, auditor pass,
   ningún tool call funcional/backend de negocio o solicitud de modelo.
 - TUI oficial real en PTY con mock: sesión fresca en store V2 temporal reutilizado,
@@ -197,12 +191,3 @@ confundir «sin tools de negocio/inferencia del launcher» con cero efectos fís
   sin login/fallback. No se ensayó refresh de cuentas reales.
 - Rechazos por flags/TTY, lease concurrente/reemplazada, prepare activo, actor/nonce
   del probe, MCP fallido y plugin local no revisado (no ejecutado).
-
-Distribución versionada de config/update/rollback/recovery ya probada, no backup de
-datos o despliegue global: ver DISTRIBUTION.md. Las siete definiciones dormidas ya
-están portadas; D02 benchmark está implementado/probado en fixtures. Restan
-preparación/verificación real autorizada ya completada, paso2 técnico cerrado en
-alcance candidato. Stitch explícitamente retirado; firma real Confluence corregida
-por metadata, no llamada a páginas. Sin certificar negocio/desktop por ese arranque;
-ver PASO2-CIERRE.md. No asumir exclusiones adicionales del resto del harness.
-AUNE/proyectos, historial/backup/restore y corte conservan sus gates separados.

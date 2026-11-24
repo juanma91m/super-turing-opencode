@@ -47,38 +47,12 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 8. addons privados, cuando existan, como `super-turing-opencode-github-accounts-local` y `super-turing-opencode-aune`
 9. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
 
-## Instalación orquestada
+## Instalación y mantenimiento
 
-El repo base expone un único entrypoint para bootstrap:
-
-```bash
-bash install.sh --main
-bash install.sh --complete
-```
-
-- `--main` instala únicamente la base reusable.
-- `--complete` instala base, Knowledge, CodeGraph, Ticketing, Notifier,
-  Documents y Background en el orden anterior.
-- el orquestador lee `distribution/addons.json`, clona o actualiza cada repo y
-  ejecuta su contrato estable `scripts/install.sh`;
-- la lógica interna, dependencias y lifecycle siguen siendo propiedad de cada
-  addon;
-- `github-accounts-local`, `super-turing-opencode-aune` y los overlays específicos quedan fuera del pack.
-
-Por diseño, el catálogo general solo debería cambiar cuando se agrega o quita
-un componente, o cuando cambia el orden de composición. Los cambios internos de
-un addon se resuelven dentro de su propio instalador.
-
-Racional:
-
-- el stack base instala la capa reusable común,
-- knowledge, CodeGraph y ticketing enriquecen esa base con responsabilidades separadas,
-- CodeGraph centraliza runtime y consulta estructural sin centralizar los índices de cada repo,
-- notifier suma capacidad aislada,
-- documents agrega publicación editorial reproducible sin cargar el lifecycle en la base,
-- background gobierna el runtime productivo y la UX async,
-- los addons machine-local agregan políticas específicas de la máquina sin contaminar la base portable,
-- los overlays locales aterrizan la especialización repo-específica encima de todo lo anterior.
+`bash install.sh install` prepara sólo la base gestionada. Los addons tienen
+instalación y datos propios; los perfiles compuestos existentes mantienen
+sus bindings explícitos durante `bash install.sh update --clients-closed`.
+Ver [distribución](README-DISTRIBUTION.md).
 
 ## Reglas de composición
 

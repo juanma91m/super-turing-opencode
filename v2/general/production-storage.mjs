@@ -21,7 +21,7 @@ export function productionStorage(root) {
   const file = path.join(root, '.production-storage.json'); privatePath(file);
   let record;
   try { record = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { throw new Error('Invalid production storage marker; values suppressed'); }
-  assert(Object.keys(record ?? {}).sort().join(',') === 'kind,nativeVersion,owner,phase,root,schemaVersion' && record.schemaVersion === 1 && record.owner === 'opencode-stack' && record.kind === 'production-native-storage' && record.nativeVersion === '2.2.7' && record.root === root && record.phase === 'history-verified', 'Production history not published/verified; no initialization or fallback');
+  assert(Object.keys(record ?? {}).sort().join(',') === 'kind,nativeVersion,owner,phase,root,schemaVersion' && record.schemaVersion === 1 && record.owner === 'opencode-stack' && record.kind === 'production-native-storage' && record.nativeVersion === '2.2.7' && record.root === root && ['history-verified', 'native-initialized'].includes(record.phase), 'Production storage not published/verified; no initialization or fallback');
   const data = path.join(root, 'data'), state = path.join(root, 'state'), db = path.join(data, 'opencode/opencode.db');
   for (const directory of [data, state, path.dirname(db)]) privatePath(directory, true);
   privatePath(db);

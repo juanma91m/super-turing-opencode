@@ -9,8 +9,8 @@ depender de conocimiento tribal ni ejecutar cambios privilegiados sorpresivos.
 
 - el stack base instala únicamente sus dependencias;
 - cada addon es dueño de detectar, instalar, validar y documentar las propias;
-- `distribution/addons.json` define membresía y orden, no duplica lógica de
-  package managers ni versiones internas de addons.
+- el [manifest de composición](COMPOSITION-MANIFEST.md) identifica los owners;
+  no duplica lógica de package managers ni versiones internas de addons.
 
 ## Categorías
 

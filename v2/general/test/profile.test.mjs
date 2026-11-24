@@ -75,7 +75,7 @@ test('candidate environment enables native project discovery but strips credenti
 });
 
 test('general prepare requires explicit candidate-close acknowledgment', () => {
-  const result = spawnSync(process.execPath, [new URL('../../../migrations/v2/general.mjs', import.meta.url).pathname, 'prepare', '--project', '/tmp/opencode'], { env: { HOME: '/tmp/opencode/no-such-home', PATH: '/usr/bin:/bin' }, encoding: 'utf8', timeout: 10000 });
+  const result = spawnSync(process.execPath, [new URL('../../../v2/tools/general.mjs', import.meta.url).pathname, 'prepare', '--project', '/tmp/opencode'], { env: { HOME: '/tmp/opencode/no-such-home', PATH: '/usr/bin:/bin' }, encoding: 'utf8', timeout: 10000 });
   assert.equal(result.status, 1); assert(result.stderr.includes('--client-closed'));
 });
 

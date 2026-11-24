@@ -1,5 +1,5 @@
 // Native argv is preserved. No fresh-session injection, candidate consent flags,
-// single-client quota, shell interpretation, or implicit fallback to V1/pilot.
+// single-client quota, shell interpretation, or implicit fallback to another host.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

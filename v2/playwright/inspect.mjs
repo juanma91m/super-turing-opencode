@@ -12,7 +12,7 @@ export async function inspectPlaywright(get, roles) {
     assert.equal(effect(agent.permissions, 'playwright_browser_run_code_unsafe'), 'deny', 'Unsafe host execution must stay denied');
     assert.equal(effect(agent.permissions, 'playwright_unreviewed_tool'), 'deny', 'Unknown browser tools must stay denied');
   }
-  assert((await get('/api/skill')).some(item => item.id === 'stitch-playwright-ui-opencode'), 'Missing browser workflow skill');
+  assert((await get('/api/skill')).some(item => item.id === 'playwright-ui-opencode'), 'Missing browser workflow skill');
   const mcp = await get('/api/mcp');
   assert(!mcp.some(item => item.name === 'stitch'), 'Stitch is excluded from this composition');
   const browser = mcp.find(item => item.name === 'playwright'); assert(browser, 'Playwright not registered');

@@ -1,25 +1,9 @@
-# Revisiones de distribución V2 — configuración del candidato
+# Revisiones de distribución de perfiles V2
 
-## Estado y alcance exacto
-
-Implementado y probado con OpenCode oficial **2.2.7** en temporales. La selección
-real sólo recibió `release-plan`, `release-history` y `status`: not-distributed,
-historial vacío y not-prepared, sin crear store/destino ni abrir un host o DB.
-No se ejecutaron install/update/rollback/recover en el candidato real. V1, workshop
-y los stores originales permanecen intactos.
-
-`distribution.json` de esta carpeta declara el contrato **general-native/1** y los
-siete aportes públicos por owner. No reemplaza ni interpreta
-`distribution/addons.json`: ese manifiesto sigue siendo V1 e incluye Background.
-Background/Stitch y capas privadas/organizacionales/proyecto no entran en este pack.
-Los builders siguen en cada owner, no en un compositor privado de overlays.
-
-**Es una revisión machine-bound de configuración y bundles**, no un instalador
-global portable ni un backup de HOME/datos. No cambia PATH, binario, versión del
-host o runtimes de addons; no clona repos, descarga dependencias, ejecuta installers
-V1, crea backends, copia credenciales o migra historial. Usa los runtimes existentes
-seleccionados por sus owners. El corte global y la salida de ownership V1/adopted
-siguen en su fase autorizada posterior.
+`distribution.json` declara el contrato `general-native/1` y los aportes públicos
+por owner. Este motor archiva configuración y bundles ligados a una máquina.
+No instala binarios, runtimes de addons ni administra backups de datos. Para
+eso está la [guía de instalación y mantenimiento](../install/README.md).
 
 ## Qué se conserva
 
@@ -69,9 +53,9 @@ de reconciliar el problema; no borrar backups o snapshots por iniciativa.
 Diagnóstico sin crear releases ni destino:
 
 ```text
-node migrations/v2/general-composed.mjs release-plan --project /directorio/revisado
-node migrations/v2/general-composed.mjs release-history --project /directorio/revisado
-node migrations/v2/general-composed.mjs status --project /directorio/revisado
+node v2/tools/general-composed.mjs release-plan --project /directorio/revisado
+node v2/tools/general-composed.mjs release-history --project /directorio/revisado
+node v2/tools/general-composed.mjs status --project /directorio/revisado
 ```
 
 `release-plan` muestra digest deseado y conteos added/changed/removed; no certifica
@@ -81,18 +65,18 @@ su previous. Sin store conserva el diagnóstico de candidato anterior.
 Contratos para una **futura ventana autorizada**, no pedidos para ejecutarlos ahora:
 
 ```text
-node migrations/v2/general-composed.mjs install --project /directorio/revisado --candidate-only --client-closed
-node migrations/v2/general-composed.mjs update --project /directorio/revisado --candidate-only --client-closed
-node migrations/v2/general-composed.mjs rollback --project /directorio/revisado --revision SHA256 --candidate-only --client-closed --confirm
-node migrations/v2/general-composed.mjs recover --project /directorio/revisado --to previous --candidate-only --client-closed --confirm
-node migrations/v2/general-composed.mjs recover --project /directorio/revisado --to target --candidate-only --client-closed --confirm
+node v2/tools/general-composed.mjs install --project /directorio/revisado --candidate-only --client-closed
+node v2/tools/general-composed.mjs update --project /directorio/revisado --candidate-only --client-closed
+node v2/tools/general-composed.mjs rollback --project /directorio/revisado --revision SHA256 --candidate-only --client-closed --confirm
+node v2/tools/general-composed.mjs recover --project /directorio/revisado --to previous --candidate-only --client-closed --confirm
+node v2/tools/general-composed.mjs recover --project /directorio/revisado --to target --candidate-only --client-closed --confirm
 ```
 
 Install es inicial o idempotente: una revisión distinta requiere update. Update
-exige instalación existente. Un candidato legacy sólo se adopta si coincide
+exige instalación existente. Un perfil ya preparado sólo se adopta si coincide
 **exactamente** con el plan actual; no se infiere metadata vieja desde un marker ni
-se archivan ediciones desconocidas. Una vez creado el store, `prepare` legacy queda
-bloqueado para no eludir el historial. Root V1/workshop/activo permanece prohibido.
+se archivan ediciones desconocidas. Una vez creado el store, `prepare` queda
+bloqueado para no eludir el historial. No se admiten raíces ajenas o de uso activo.
 
 Rollback restaura también modelos/permisos/guardas de la revisión elegida, no sólo
 scripts: revisar su alcance y confirmar explícitamente. No mezcla guardas actuales
@@ -127,38 +111,33 @@ a hardware/FS que no respete durabilidad. Los fallos de los tests son simulados.
 ## Boot después de rollback
 
 status/history/rollback/recover y el boot de releases instaladas no regeneran los
-builders actuales ni leen V1 para reconstruir el release viejo. `installedPlan`
+builders actuales para reconstruir la revisión archivada. `installedPlan`
 valida el archive y materializa su metadata/path mapping en el mismo destino,
 sin mergear dominio local. Check/live usan esos assets aunque el plan nuevo difiera.
 
 Playwright valida su binding durable con el programa owner archivado; no consulta
-la caché/V1 para cambiarlo o descargar un reemplazo. Otros runtimes/entornos siguen
+la caché para cambiarlo ni descarga un reemplazo. Otros runtimes/entornos siguen
 referenciados por bindings de sus owners y sus checks normales, no restaurados por
 este mecanismo. El código de control base/contrato y las dependencias instaladas
 siguen siendo requisitos; no es bundle relocatable o bootstrap de máquina vacía.
 
 ## Evidencia
 
-- **66 Node +3 Python general**,29 base,41 composición OK.100 migración conserva
-  evidencia del hito legacy anterior, no repetido sin cambios a esos adapters.
 - Install/update/rollback/recovery/idempotencia, adición/retirada de assets, drift,
   credenciales, colisiones, lease, symlinks, root ajeno y archive corrupto cubiertos.
 - Fallo de validación y estados parciales old/new/absent recuperados explícitamente;
   proyecto, data/state/cache sintéticos conservados, sin backup/restauración de ellos.
 - Schema oficial tras update/rollback y boot metadata real con22 roles/5 MCP fixture;
   sin inferencia ni tool calls funcionales.
-- CLI en HOME temporal sin configuración V1: status, rollback, recovery, check y
+- CLI en HOME temporal: status, rollback, recovery, check y
   verify-live funcionan con assets archivados. Copia del binario público oficial
   verificada por el mismo pin; no copia de stores.
 - Preflight browser archivado funciona tras borrar sólo caches fuente del fixture
   y falla ante drift del snapshot sin repair/download.
 
-Las siete definiciones dormidas ya se preservan también en update/rollback, sin
-habilitar discovery o uso (DORMANT-PROVIDERS.md). Catálogo general7 aportes/5 MCP,
-sin Background/Stitch. Reintroducción Stitch retirada por decisión del usuario,
-sin excepción de key-ref en archivos de release. Candidato real instalado/actualizado
-y verify-live pass; detalle en PASO2-CIERRE.md. Esto no es despliegue global. AUNE,
-once proyectos, historial rico y backup/restore de datos conservan gates separados.
+Las definiciones dormidas se preservan sin habilitar discovery ni uso; ver
+[DORMANT-PROVIDERS.md](DORMANT-PROVIDERS.md). El mantenimiento de producción
+se documenta en [la guía de instalación y updates](../install/README.md).
 
 ## Reuso del motor sin ampliar el pack portable
 

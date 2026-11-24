@@ -4,6 +4,11 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ## [Unreleased]
 
+- Instalación del perfil base desde un HOME vacío, con runtime oficial fijado,
+  almacén inicial vacío y prueba reproducible de arranque nativo.
+- Mantenimiento de perfiles instalados con backup verificado y rollback de la
+  entrada, sin reemplazar el almacén de producción.
+
 - 0.15.4: Planner puede guardar documentos Markdown de análisis pedidos
   explícitamente bajo `tmp/` mediante el helper Core `analysis-doc`, sin inventar
   ticket ni activar handoff. Registro solo OpenCode; `edit: deny`, broker y
@@ -124,7 +129,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 ### Cognitive load
 
-- los agentes globales dejan de sugerir listas amplias de skills genéricas cuando el mismo criterio ya está expresado en el prompt del rol; se conservan los triggers obligatorios o específicos (`code-review-branch-to-branch`, diseño de agentes/overlays y UI/Stitch) y no se retira ninguna skill del catálogo
+- los agentes globales dejan de sugerir listas amplias de skills genéricas cuando el mismo criterio ya está expresado en el prompt del rol; se conservan los triggers específicos para code review, diseño de agentes y overlays, y trabajo de UI
 - la auditoría de overlays reconoce referencias inline a skills globales y ya no exige una sección ritual `Skills sugeridas` para preservar una capacidad
 
 ### Overlay hygiene
@@ -136,9 +141,8 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 
 - `STACK-MANIFEST.json` sube a `0.14.0`; se retiran los plugins globales `opencode-scheduler` y `opencode-worktree`, incorporados para usos eventuales que no se consolidaron. Su estado machine-local no se borra automáticamente.
 - Playwright queda oculto globalmente y se habilita de forma explícita para `master-dev`, `planner`, `frontend-web-developer`, `ui-web-designer` y `dev-test`.
-- Stitch permanece disponible como capacidad on-demand, pero su único owner operativo es `ui-web-designer`; frontend deriva allí cualquier generación o variación visual.
 - el renderer de `opencode.json` ahora mergea la base administrada sobre la configuración existente mediante archivo temporal, preservando providers machine-local y bloques de addons como Engram, CodeGraph, Rovo y Artifact Studio; ante JSON inválido aborta en vez de reemplazarlo silenciosamente.
-- el sync incremental también detecta y aplica la política global de visibilidad Playwright/Stitch, con backup previo de `opencode.json` cuando hay drift.
+- el sync incremental detecta y aplica la política global de visibilidad de Playwright, con backup previo de `opencode.json` cuando hay drift.
 
 ### Ownership
 
@@ -176,7 +180,6 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - `STACK-MANIFEST.json` sube a `0.12.0`; Documents se incorpora a `distribution/addons.json` antes de Background sin trasladar su runtime al stack base
 - `STACK-MANIFEST.json` sube a `0.11.3`; `master-dev` pasa a ser el agente global por defecto y el built-in `build` queda oculto sin deshabilitarlo para flujos internos
 - `STACK-MANIFEST.json` sube a `0.11.2`; la instalación completa exige una versión de Node compatible con las dependencias bloqueadas y aborta antes de instalar si falla cualquier preflight
-- `STACK-MANIFEST.json` sube a `0.11.1`; el installer omite el header `{file:...}` de Stitch cuando no existe `stitch-api-key`, evitando una configuración global inválida aunque el MCP esté deshabilitado
 - `STACK-MANIFEST.json` sube a `0.11.0` por el instalador de distribución completa desacoplado
 - `STACK-MANIFEST.json` sube a `0.10.1`; `permission-autopilot` aplica también
   el perfil Bash seguro durante `config` para builds que no ejecutan el hook
@@ -186,7 +189,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - `code-reviewer` ahora detiene PRs de otro repo, detecta discrepancias entre ticket explícito y título/rama, y registra hashes exactos para que cada aprobación sea reproducible
 - `reviewer` conserva su workflow post-solución; el nuevo `code-reviewer` separa la aprobación de desarrollos de terceros sin mezclar ambos procesos
 - `planner`, `master-dev` y `agent-design` se compactan de nuevo para bajar costo fijo de contexto sin recortar sus guardrails principales
-- agentes no orientados a UI ahora recortan tools `stitch_*` y/o `playwright_*` cuando no aportan valor operativo claro, para bajar schemas visibles sin degradar flujos clave
+- agentes no orientados a UI recortan las tools de Playwright cuando no aportan valor operativo claro
 - `code-inspector` deja de forzar `variant: xhigh` como primer recorte conservador de costo en subagentes read-only acotados
 - `merge-conflict-resolver` deja de forzar `variant: xhigh` como recorte conservador en un agente de scope muy acotado
 - `install-opencode-stack.sh` y `sync-opencode-stack.sh` ahora recomponen automáticamente agentes aditivos cuando knowledge/ticketing están activos, en vez de dejar prompts compuestos stale
@@ -194,7 +197,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 - el notifier del SO deja de formar parte del stack base y pasa al addon externo `super-turing-opencode-notifier`
 - `README.md`, `README-AGENTS.md`, `INSTALLATION.md`, `README-DISTRIBUTION.md` y `STACK-MANIFEST.json` documentan el nuevo boundary del notifier
 - `master-dev` y `README-AGENTS.md` ahora derivan más detalle procedural a los skills `delegacion-async-opencode` y `overlays-locales-opencode` para mantener prompts y referencia global más compactos
-- `planner`, `frontend-web-developer` y `ui-web-designer` ahora condensan más contexto base y derivan detalle de memoria, Playwright y Stitch a skills dedicados para economizar contexto sin perder capacidad operativa
+- `planner`, `frontend-web-developer` y `ui-web-designer` condensan contexto base y delegan el detalle de memoria y Playwright a skills dedicadas
 - `planner` ahora incorpora explícitamente un rol más de arquitecto/tutor técnico y se apoya en la nueva skill `mentoria-tecnica-opencode`; `master-dev`, `reviewer` y `agent-design` también refuerzan esa capacidad de enseñar y desafiar atajos cuando corresponde
 - `opencode-worktree` ahora ejecuta `git worktree prune --expire now` después del borrado y antes del listado para evitar metadata stale en `git worktree list`
 - `master-dev` ahora reconoce herramientas globales de worktree y scheduler bajo pedido explícito del usuario
@@ -463,7 +466,7 @@ Todos los cambios relevantes del stack global de OpenCode deberían registrarse 
 ### Notes
 
 - el bootstrap automático de Go está pensado inicialmente para Linux x86_64
-- la memoria persistida de Engram sigue siendo una migración separada
+- Engram administra su almacenamiento por separado
 
 ## [0.1.0] - 2026-04-24
 

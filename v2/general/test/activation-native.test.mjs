@@ -6,9 +6,9 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { prepareGeneral, generalEnvironment } from '../profile.mjs';
 import { existingV2Storage, bindV2Storage } from '../storage.mjs';
-import { prepare, layout } from '../../../migrations/v2/staging.mjs';
-import { startServer, until } from '../../../migrations/v2/private-server.mjs';
-import { getApiList } from '../../../migrations/v2/api-list.mjs';
+import { prepare, layout } from '../../../v2/runtime/staging.mjs';
+import { startServer, until } from '../../../v2/testing/private-server.mjs';
+import { getApiList } from '../../../v2/testing/api-list.mjs';
 
 test('official host preserves maintenance models and reopens synthetic native sessions through opt-in shared storage', async t => {
   const root = fs.mkdtempSync('/tmp/opencode/native-activation-'); t.after(() => fs.rmSync(root, { recursive: true, force: true }));

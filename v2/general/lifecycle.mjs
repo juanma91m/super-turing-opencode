@@ -12,11 +12,13 @@ import { assertNoPendingDistribution } from './ownership.mjs';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 export const OFFICIAL_SHA256 = '589253d36810f21217edd51545cd435b328cdc3cf4f451fbe0cce6f88afcf5e1';
 export function officialRuntime(root) {
-  assert(path.isAbsolute(root) && path.resolve(root) === root && path.basename(root) === 'opencode-v2-clean', 'Explicit official staging root required');
-  const marker = path.join(root, '.stack-v2-migration.json'), recordFile = path.join(root, 'runtime.json'); noLinks(marker); noLinks(recordFile);
+  const existing = path.basename(root) === 'opencode-v2-clean';
+  assert(path.isAbsolute(root) && path.resolve(root) === root && (existing || path.basename(root) === 'opencode-runtime'), 'Explicit official runtime root required');
+  // Existing V2 settings keep their recorded runtime identity; no marker rewrite.
+  const marker = path.join(root, existing ? '.stack-v2-migration.json' : '.stack-runtime.json'), recordFile = path.join(root, 'runtime.json'); noLinks(marker); noLinks(recordFile);
   let owner, record;
   try { owner = JSON.parse(fs.readFileSync(marker)); record = JSON.parse(fs.readFileSync(recordFile)); } catch { throw new Error('Official runtime metadata invalid; values suppressed'); }
-  assert(owner?.owner === 'opencode-stack' && owner.kind === 'v2-clean-staging' && owner.schemaVersion === 1 && owner.version === '2.2.7', 'Official staging identity differs');
+  assert(owner?.owner === 'opencode-stack' && owner.kind === (existing ? 'v2-clean-staging' : 'official-native-runtime') && owner.schemaVersion === 1 && owner.version === '2.2.7', 'Official runtime identity differs');
   assert(record?.package === '@opencode/cli@2.2.7' && record.version === 'opencode v2.2.7' && record.sha256 === OFFICIAL_SHA256 && typeof record.binary === 'string' && path.isAbsolute(record.binary), 'Official runtime pin differs; no update/download attempted');
   const prefix = path.join(root, 'npm'); noLinks(prefix);
   const actual = fs.realpathSync(path.join(prefix, 'bin/opencode'));

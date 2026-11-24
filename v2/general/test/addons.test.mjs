@@ -70,8 +70,15 @@ test('native addon contribution plan composes without workshop/V1-header edits o
   assert.equal(p.document.mcp.servers.stitch,undefined);assert(!p.components.includes('stitch'));
   assert.equal(effect(p.document.policies,'mcp.use','stitch'),'deny');assert.equal(effect(p.document.policies,'tool.use','stitch_generate_screen_from_text:*'),'deny');
   assert(![...p.assets.keys()].some(file=>file.includes('/v2/stitch/')||file.includes('/skills/stitch-playwright-')));
-  assert(p.assets.has(path.join(p.config,'opencode/skills/playwright-ui-opencode/SKILL.md')));
-  const designer=p.assets.get(path.join(p.config,'opencode/agents/ui-web-designer.md')).toString();assert(!designer.includes('Stitch'));assert(designer.includes('playwright-ui-opencode'));
+  const browserSkill = p.assets.get(path.join(p.config, 'opencode/skills/playwright-ui-opencode/SKILL.md'));
+  assert.deepEqual(browserSkill, fs.readFileSync(new URL('../../../skills/playwright-ui-opencode/SKILL.md', import.meta.url)));
+  for (const role of ['ui-web-designer', 'frontend-web-developer']) {
+    const text = p.assets.get(path.join(p.config, 'opencode/agents', role + '.md')).toString();
+    const prompt = text.split('\n---\n')[1];
+    assert.match(prompt, /playwright-ui-opencode/);
+    assert.doesNotMatch(prompt, /stitch/i);
+  }
+  assert.doesNotMatch(p.assets.get(path.join(p.config, 'opencode/AGENTS.md')).toString(), /stitch/i);
   assert.equal(cli.plugins[1].options.legacy.configPath, path.join(p.config,'opencode/notify.json'));
   const notifierBackend=p.assets.get(path.join(p.root,'bundle/notifier/v2/desktop/legacy-backend.mjs')).toString();
   assert(notifierBackend.includes('focusGnomeTerminalTabBySessionTitle')); assert(!notifierBackend.includes('@opencode-ai/plugin'));

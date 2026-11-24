@@ -6,9 +6,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
 import { prepareGeneral, generalEnvironment } from '../profile.mjs';
-import { layout } from '../../../migrations/v2/staging.mjs';
-import { startServer, until } from '../../../migrations/v2/private-server.mjs';
-import { getApiList } from '../../../migrations/v2/api-list.mjs';
+import { layout } from '../../../v2/runtime/staging.mjs';
+import { startServer, until } from '../../../v2/testing/private-server.mjs';
+import { getApiList } from '../../../v2/testing/api-list.mjs';
 
 function sse(response, { text, call, inputTokens = 100 }) {
   response.writeHead(200, { 'Content-Type': 'text/event-stream' });

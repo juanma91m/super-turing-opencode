@@ -16,11 +16,13 @@ class UpdateTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR'));self.addCleanup(self.temp.cleanup)
         self.root=Path(self.temp.name);self.home=self.root/'home';self.home.mkdir()
-        self.history=self.home/'.local/share/opencode/opencode.db';self.memory=self.home/'.engram/engram.db';self.corpus=self.home/'.local/share/super-turing-opencode-knowledge/qdrant'
+        self.storage=self.home/'production-storage';self.history=self.storage/'data/opencode/opencode.db';self.memory=self.home/'.engram/engram.db';self.corpus=self.home/'.local/share/super-turing-opencode-knowledge/qdrant'
         for file in [self.history,self.memory]:
             file.parent.mkdir(parents=True,exist_ok=True);db=sqlite3.connect(file);db.execute('CREATE TABLE preserved(value TEXT)');db.execute('INSERT INTO preserved VALUES (?)',('SYNTHETIC_HISTORY' if file==self.history else 'SYNTHETIC_MEMORY',));db.commit();db.close()
         self.corpus.mkdir(parents=True);(self.corpus/'segments').write_text('SYNTHETIC_CORPUS')
         self.entry=self.home/'.opencode/bin/opencode';self.entry.parent.mkdir(parents=True);self.entry.write_text('#!/bin/sh\nexit 0\n');self.entry.chmod(0o755)
+        self.settings=self.home/'.config/opencode/production-v2/settings.json';self.settings.parent.mkdir(parents=True)
+        self.settings.write_text(json.dumps({'owner':'portable-production-entry','nativeVersion':'2.2.7','managedContract':'managed-harness-v1','storageRoot':str(self.storage)}))
         self.selected=up.discover(self.home);self.originals={str(p):up.digest(p) for p in [self.history,self.memory,self.corpus/'segments',self.entry]}
         self.generation=self.root/'generation'
         self.no_users=patch.object(up,'users',return_value=[]);self.no_users.start();self.addCleanup(self.no_users.stop)
@@ -29,10 +31,9 @@ class UpdateTests(unittest.TestCase):
 
     def runner(self,argv,**kwargs):
         root=Path(argv[-1]).parent
-        settings={'owner':'portable-production-entry','nativeVersion':'2.2.7','managedContract':'managed-harness-v1','storageRoot':str(root/'production-storage')}
+        settings=json.loads(self.settings.read_text())
         (root/'settings.json').write_text(json.dumps(settings));(root/'entry.mjs').write_text('// SYNTHETIC_ENTRY')
-        db=root/'production-storage/data/opencode/opencode.db';db.parent.mkdir(parents=True);up.sqlite_copy(self.history,db)
-        return json.dumps({'kind':'native-update-staged','ready':True,'nativeVersion':'2.2.7','entry':str(root/'entry.mjs'),'storageRoot':str(root/'production-storage'),'needsLogin':True})
+        return json.dumps({'kind':'native-update-staged','ready':True,'nativeVersion':'2.2.7','entry':str(root/'entry.mjs'),'storageRoot':str(self.storage),'needsLogin':False})
 
     def assert_data(self):
         for p in [self.history,self.memory,self.corpus/'segments']:self.assertEqual(up.digest(p),self.originals[str(p)])
@@ -40,20 +41,18 @@ class UpdateTests(unittest.TestCase):
     def test_backup_update_and_rollback_never_replace_local_stores(self):
         result=up.update(self.selected,self.generation,closed=True,runner=self.runner)
         self.assertEqual(result['kind'],'data-preserving-update-complete');self.assert_data();up.verify_backup(self.generation/'backup')
-        selected=up.discover(self.home);self.assertEqual(selected['history'],str(self.generation/'production-storage/data/opencode/opencode.db'))
+        selected=up.discover(self.home);self.assertEqual(selected['history'],str(self.history))
         db=sqlite3.connect(selected['history']);db.execute('INSERT INTO preserved VALUES ("NEW_V2_HISTORY")');db.commit();db.close()
-        rollback=up.rollback(self.generation,closed=True);self.assertTrue(rollback['newHistoryPreserved']);self.assert_data()
+        rollback=up.rollback(self.generation,closed=True);self.assertTrue(rollback['newHistoryPreserved'])
         self.assertEqual(up.digest(self.entry),self.originals[str(self.entry)])
         db=sqlite3.connect(selected['history']);self.assertEqual(db.execute('SELECT count(*) FROM preserved').fetchone()[0],2);db.close()
         self.assertEqual(up.discover(self.home)['history'],str(self.history))
 
-    def test_second_update_selects_new_history_not_the_old_v1_database(self):
+    def test_second_update_and_rollback_keep_the_active_native_storage(self):
         up.update(self.selected,self.generation,closed=True,runner=self.runner)
-        next_selection=up.discover(self.home);self.assertNotEqual(next_selection['history'],str(self.history))
+        next_selection=up.discover(self.home);self.assertEqual(next_selection['history'],str(self.history))
         second=self.root/'generation2'
-        def current_runner(argv,**kwargs):
-            result=json.loads(self.runner(argv,**kwargs));new=Path(result['storageRoot'])/'data/opencode/opencode.db';new.unlink();up.sqlite_copy(Path(next_selection['history']),new);return json.dumps(result)
-        up.update(next_selection,second,closed=True,runner=current_runner);self.assertEqual(up.discover(self.home)['history'],str(second/'production-storage/data/opencode/opencode.db'))
+        up.update(next_selection,second,closed=True,runner=self.runner);self.assertEqual(up.discover(self.home)['history'],str(self.history))
         up.rollback(second,closed=True);self.assertEqual(up.discover(self.home)['history'],next_selection['history']);self.assert_data()
 
     def test_missing_confirmation_open_store_or_background_owner_refuses_before_data_capture(self):
@@ -61,13 +60,27 @@ class UpdateTests(unittest.TestCase):
         with patch.object(up,'users',return_value=[123]):
             with self.assertRaisesRegex(ValueError,'still in use'):up.update(self.selected,self.generation,closed=True,runner=self.runner)
         marker=self.home/'.opencode/.opencode-background-addon.json';marker.write_text('{"mode":"managed-local-install"}')
-        with self.assertRaisesRegex(ValueError,'sealed cutover'):up.update(self.selected,self.generation,closed=True,runner=self.runner)
+        with self.assertRaisesRegex(ValueError,'Conflicting runtime ownership'):up.update(self.selected,self.generation,closed=True,runner=self.runner)
         self.assertFalse(self.generation.exists());self.assert_data()
 
-    def test_unknown_legacy_never_creates_an_empty_history(self):
-        self.history.unlink();storage=self.history.parent/'storage/session';storage.mkdir(parents=True)
-        with self.assertRaisesRegex(ValueError,'official conversion'):up.discover(self.home)
+    def test_missing_v2_store_is_never_initialized_by_update(self):
+        self.history.unlink()
+        with self.assertRaisesRegex(ValueError,'Published V2 history missing'):up.discover(self.home)
         self.assertFalse(self.history.exists())
+
+    def test_base_updates_do_not_select_or_back_up_addon_data(self):
+        settings=json.loads(self.settings.read_text());settings['profile']='base';self.settings.write_text(json.dumps(settings))
+        selected=up.discover(self.home);self.assertNotIn('engram',selected)
+        up.update(selected,self.generation,closed=True,runner=self.runner)
+        backup=up.verify_backup(self.generation/'backup');self.assertNotIn('engram',backup);self.assertNotIn('qdrant',backup)
+        self.assertEqual(up.discover(self.home)['history'],str(self.history))
+
+    def test_refuses_a_builder_that_switches_the_active_store(self):
+        def unexpected(argv,**kwargs):
+            result=json.loads(self.runner(argv,**kwargs));result['storageRoot']=str(self.generation/'production-storage');return json.dumps(result)
+        with self.assertRaisesRegex(ValueError,'Complete native stage not verified'):
+            up.update(self.selected,self.generation,closed=True,runner=unexpected)
+        self.assert_data();self.assertEqual(up.digest(self.entry),self.originals[str(self.entry)])
 
     def test_stage_failure_retains_verified_backups_and_original_command(self):
         def fail(*args,**kwargs):raise ValueError('SYNTHETIC_NATIVE_FAILURE')

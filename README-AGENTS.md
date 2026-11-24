@@ -1,33 +1,20 @@
-# Global Agents Reference
+# Referencia de agentes del perfil gestionado
 
-Este archivo documenta el **esquema efectivo de agentes** disponible en esta instalación de OpenCode y distingue entre:
-
-- agentes **base** provistos por OpenCode,
-- agentes y subagentes **custom globales** instalados en `~/.config/opencode/`.
-
-Distribución portable e instalación: `~/.config/opencode/README-DISTRIBUTION.md`
-
-Playbook de overlays locales: `~/.config/opencode/PLAYBOOK-LOCAL-OVERLAYS.md`
-
-Playbook de pattern checks: `~/.config/opencode/PLAYBOOK-CODE-PATTERNS.md`
+Este archivo distingue los agentes base de OpenCode de los agentes y subagentes
+que registra el Core. Para empezar, ver [instalación](INSTALLATION.md). Para
+extender el perfil, ver [overlays](PLAYBOOK-LOCAL-OVERLAYS.md) y
+[patrones de código](PLAYBOOK-CODE-PATTERNS.md).
 
 ## Instrucciones globales y separación de runtimes
 
-`AGENTS.md` es la guía común del Core y se distribuye mediante
-`STACK-MANIFEST.json` a `~/.config/opencode/AGENTS.md`. Complementa al agente
-seleccionado y a las instrucciones locales; no reemplaza sus roles ni permisos.
-`README-AGENTS.md` es documentación, no el archivo global de instrucciones.
+`AGENTS.md` se instala dentro del perfil gestionado y complementa al agente
+seleccionado y a las instrucciones locales; no reemplaza permisos. Este README
+es documentación, no instrucciones del agente. El perfil no importa skills
+externas ni cambia la configuración de otros clientes.
 
-En el runtime 1.19.4 verificado, OpenCode busca primero ese `AGENTS.md` global y,
-si falta y la compatibilidad está habilitada, usa `~/.claude/CLAUDE.md`. Distribuir
-la guía propia evita ese fallback, sin desactivar el descubrimiento de skills
-externas ni modificar Claude. La guía Claude se mantiene por separado en
-`super-turing-claude-code/base/CLAUDE.md`: se alinean principios, no herramientas,
-roles o permisos por copia literal.
-
-Tras cambiar las guías, reiniciar los clientes para comprobarlas en sesiones
-nuevas. `opencode debug config` valida configuración, pero no prueba por sí solo
-el conjunto completo de instrucciones recibido por el modelo.
+Tras cambiar una guía, `opencode debug config` muestra fuentes y precedencia.
+Para verificar las instrucciones efectivas de una tarea, probá también una sesión
+en el directorio del proyecto con el agente que corresponda.
 
 ## Shell del planner
 
@@ -285,15 +272,11 @@ shell general, delegación o edición de código. Leer el remote y consultar el 
 en llamadas separadas evita que una composición o un fallo de transporte oculte
 qué operación se pudo ejecutar.
 
-En V1 1.19.4 se verificó con `debug agent` la composición de las dos entradas del
-mapa Bash global con deltas nativos de proyectos. El resultado del rollout privado
-se documenta en su capa organizacional, no como política de esta base portable.
-Es una propiedad comprobada de este merge de mapas/orden de reglas, no
-herencia del cuerpo del prompt ni permiso para quitar otros guardrails por
-analogía. Jira, ticket obligatorio, storage y denegaciones específicas pertenecen
-al pedido o contrato organizacional/local adoptado. Revalidar capacidades efectivas si cambia el runtime o la forma del
-overlay; el auditor estático que exige reinyectar cada allow puede advertir sobre
-estas dos entradas ausentes aunque la comprobación nativa confirme su herencia.
+En un proyecto con deltas, verificá las capacidades efectivas mediante
+`opencode debug agents` y `stack-layer-audit`. No deduzcas que se conserva el
+prompt a partir de la presencia de una regla ni repitas permisos por analogía.
+Jira, ticket obligatorio, almacenamiento y denegaciones específicas pertenecen
+al contrato organizacional o local que los adopta.
 
 ### Roles
 
@@ -312,7 +295,7 @@ Los cambios de defaults requieren reiniciar OpenCode. Una sesión reabierta pued
 - `merge-conflict-resolver`: integra conflictos de merge/rebase preservando la intención funcional de ambas ramas.
 - `reviewer`: revisor tecnico centrado en riesgos, regresiones, compatibilidad, performance y validaciones pendientes.
 - `code-reviewer`: revisión independiente por ramas o Pull Request, sin ticket/Jira ni archivos obligatorios por defecto. Entrega en la respuesta salvo contrato/pedido de persistencia; si se adopta review por ticket conserva consistencia, integración aprobada y storage definidos. El writer global es una capacidad opcional segura, no una orden de invocarlo ni fallback a `~/code-reviews`. No crea handoff, edita código ni reporta observaciones cosméticas.
-- `ui-web-designer`: diseña interfaces y flujos web con criterio de UX, Material UI, Stitch y Playwright cuando haga falta. No implementa codigo; su foco es diseño y definicion visual.
+- `ui-web-designer`: diseña interfaces y flujos web con criterio de UX y el sistema de diseño local. Usa Playwright cuando aporta evidencia visual. Su foco es el diseño, no la implementación.
 
 ## Agentes de soporte/base que pueden aparecer en OpenCode
 
@@ -335,7 +318,7 @@ Los cambios de defaults requieren reiniciar OpenCode. Una sesión reabierta pued
 - `contratos-api-y-datos`: evalúa impacto en interfaces, datos compartidos o acceso a datos riesgoso; no se carga por la sola presencia de API/DB. Ambas conservan sus checklists y pueden solaparse sin imponer una pareja fija.
 - `mentoria-tecnica-opencode`: refuerza un estilo de tutoría técnica con conceptos primero, explicación del porqué y desafío explícito de atajos flojos.
 - `overlays-locales-opencode`: resume cuándo overridear `.opencode/`, cómo preservar la capa global y cómo auditar drift.
-- `stitch-playwright-ui-opencode`: resume el uso operativo de Playwright y Stitch para trabajo de UI, incluida la selección dinámica entre navegador headless y visible.
+- `playwright-ui-opencode`: guía de inspección visual con Playwright y selección de modo headless o visible.
 - `sdd-tdd-bdd-pragmatico`: conecta especificación, comportamiento esperado y estrategia de pruebas sin imponer ceremonias rígidas.
 - `verificacion-antes-de-cerrar`: evalúa evidencia material pertinente y vigente; permite reutilizar pruebas comprobadas aún válidas, sin convertir confirmaciones en reruns ni omitir validaciones requeridas.
 - `workflow-ticket-handoff` puede estar disponible cuando se instala el addon Ticketing; no pertenece al core.
@@ -376,10 +359,9 @@ comandos `/ticket-*` y el workflow de handoff asociado.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
 - Si el addon externo `super-turing-opencode-background` está instalado, puede exponer tools y UX async adicionales sin volverlo parte del stack base.
 - Si `super-turing-opencode-codegraph` está instalado, `code-inspector`, `planner`, `reviewer`, `code-reviewer` y `master-dev` pueden usar `codegraph_explore` para análisis estructural en repos ya indexados; inicialización y reindex siguen wrappers explícitos del addon.
-- Para uso operativo de Playwright y Stitch en trabajo de UI, referirse a `stitch-playwright-ui-opencode`.
-- Stitch pertenece operativamente a `ui-web-designer`; otros agentes deben derivar allí el trabajo de generación o variación visual.
+- Para inspección de UI, ver `playwright-ui-opencode`. La definición visual pertenece a `ui-web-designer`.
 - Playwright se expone solo a roles que planifican, implementan, diseñan o validan superficies web; los overlays pueden especializar ese acceso según el stack real.
 - Playwright se expone como un único MCP `playwright_*`; `playwright_browser_set_mode` selecciona `headless` o `visible` antes de cada workflow. Cambiar el modo reinicia el único browser activo y pierde su sesión aislada, por lo que no se deben superponer workflows foreground/background.
-- Para distribuir este stack a otra máquina, versionar `agents/`, `skills/`, `plugins/`, docs y manifest; no versionar secretos ni estado local (`stitch-api-key`, `node_modules/`, etc.).
+- Para distribuir el stack, versioná las fuentes; conservá fuera del repositorio las credenciales, dependencias instaladas y datos de uso.
 - Los backups del stack se podan automáticamente con retención base de 5 snapshots por bucket y soporte de `.pin`.
 - Cuando uses `opencode debug config`, no compartas la salida cruda si contiene secretos resueltos; resumila y redactá valores sensibles.

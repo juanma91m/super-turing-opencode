@@ -18,7 +18,6 @@ Checklist mínimo:
 - plugin async cargado,
 - MCP Context7 presente/habilitado para documentación externa de librerías/APIs,
 - Playwright Chromium presente si corresponde,
-- Stitch key presente/ausente,
 - comandos/agents/skills globales clave presentes,
 - si el repo actual tiene `.opencode/`, ejecutar **siempre al inicio** `bash ~/.config/opencode/scripts/check_local_overlays.sh --project-root "$PWD"` como baseline obligatorio de la auditoría,
 - si el repo actual tiene `.opencode/`, revisar `AGENTS.md` local si existe,

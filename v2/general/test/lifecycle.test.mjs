@@ -68,7 +68,7 @@ test('snapshot preflight inventories tracked and non-ignored paths without readi
   assert.equal(snapshotReadiness(project).sensitiveCandidates,1);assert.throws(()=>checkCandidate(p,{binary:'/MUST_NOT_EXECUTE',version:'2.2.7'}),/sensitive snapshot candidates/);
 });
 test('candidate CLI rejects missing live consent or misplaced reuse flags before selecting runtime or stores', () => {
-  const cli = new URL('../../../migrations/v2/general-composed.mjs', import.meta.url).pathname;
+  const cli = new URL('../../../v2/tools/general-composed.mjs', import.meta.url).pathname;
   assert.equal(spawnSync(process.execPath, ['--check', cli], { encoding: 'utf8' }).status, 0);
   for (const args of [['prepare', '--project', '/tmp/opencode'], ['chat', '--project', '/tmp/opencode'], ['status', '--project', '/tmp/opencode', '--reuse-v2-storage']]) {
     const result = spawnSync(process.execPath, [cli, ...args], { env: { HOME: '/tmp/opencode/not-an-installed-home', PATH: '/usr/bin:/bin' }, encoding: 'utf8', timeout: 10000 });
@@ -78,7 +78,7 @@ test('candidate CLI rejects missing live consent or misplaced reuse flags before
   assert.equal(chat.status, 1); assert(chat.stderr.includes('interactive terminal')); assert(!chat.stderr.includes('ENOENT'));
 });
 test('absent durable browser reports not-prepared rather than unowned drift and never creates directories', t => {
-  const {root}=fixture(t),cli=new URL('../../../migrations/v2/playwright-runtime.mjs',import.meta.url).pathname;
+  const {root}=fixture(t),cli=new URL('../../../v2/tools/playwright-runtime.mjs',import.meta.url).pathname;
   const result=spawnSync(process.execPath,[cli,'status'],{env:{HOME:root,PATH:'/usr/bin:/bin'},encoding:'utf8',timeout:10000});
   assert.equal(result.status,0);const value=JSON.parse(result.stdout);assert.equal(value.status,'not-prepared');assert.equal(value.verified,false);assert.equal(value.changed,false);assert(!fs.existsSync(path.join(root,'.local')));
   const runtime=path.join(root,'.local/share/opencode-stack/runtime/playwright-mcp-0.0.85');fs.mkdirSync(runtime,{recursive:true});

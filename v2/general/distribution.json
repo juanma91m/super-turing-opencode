@@ -3,7 +3,7 @@
   "id": "opencode-general-v2",
   "contract": "general-native/1",
   "nativeVersion": "2.2.7",
-  "scope": "machine-bound candidate configuration and owner bundles; not global cutover",
+  "scope": "machine-bound profile configuration and owner bundles",
   "components": [
     { "id": "context7", "owner": "opencode-stack", "builder": "v2/context7/general.mjs" },
     { "id": "knowledge", "owner": "super-turing-opencode-knowledge", "builder": "v2/general.mjs" },
@@ -13,6 +13,6 @@
     { "id": "documents", "owner": "super-turing-opencode-documents", "builder": "v2/general.mjs" },
     { "id": "notifier", "owner": "super-turing-opencode-notifier", "builder": "v2/general.mjs" }
   ],
-  "excluded": ["background", "stitch", "private addons", "organizational and project overlays"],
-  "dependencies": "Owner preflights select existing approved runtimes. No implicit install, update, auth copying or storage migration."
+  "excluded": ["background", "private addons", "organizational and project overlays"],
+  "dependencies": "Owner preflights select approved runtimes. No implicit runtime changes or auth copying."
 }

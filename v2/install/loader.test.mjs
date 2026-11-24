@@ -7,5 +7,5 @@ test('generated entry parses with quoted paths and gates chat until marker and c
   const file=path.join(root,'entry.mjs');fs.writeFileSync(file,renderEntry({coreRoot:root+'/quoted "core"',home:root,root}));
   assert.equal(spawnSync(process.execPath,['--check',file],{encoding:'utf8'}).status,0);
   fs.writeFileSync(path.join(root,'settings.json'),'{}');
-  const failed=spawnSync(process.execPath,[file],{encoding:'utf8'});assert.equal(failed.status,1);assert.match(failed.stderr,/Update not committed/);
+  const failed=spawnSync(process.execPath,[file],{encoding:'utf8'});assert.equal(failed.status,1);assert.match(failed.stderr,/generation not published/);
 });

@@ -8,14 +8,14 @@ import { test } from 'node:test';
 import { launchConsent, acquireCandidateLease, interactiveEnvironment, terminalEnvironment, runLiveCandidate } from '../launch.mjs';
 import { prepareGeneral } from '../profile.mjs';
 import { generalEnvironment } from '../profile.mjs';
-import { prepare, layout } from '../../../migrations/v2/staging.mjs';
+import { prepare, layout } from '../../../v2/runtime/staging.mjs';
 import { existingV2Storage, bindV2Storage } from '../storage.mjs';
 import { startOwnedServer } from '../owned-server.mjs';
 import { decodeList } from '../audit.mjs';
 import { translateDormantProviders } from '../dormant-providers.mjs';
 import { dormantFixture } from './dormant-fixture.mjs';
 import { officialRuntime, candidateStatus } from '../lifecycle.mjs';
-import { nativeAddonFixture } from '../../../migrations/v2/fixtures/general-addon-stack.mjs';
+import { nativeAddonFixture } from '../../../v2/testing/fixtures/general-addon-stack.mjs';
 
 function fixture(t) {
   const root = fs.mkdtempSync('/tmp/opencode/general-launch-'); t.after(() => fs.rmSync(root, { recursive: true, force: true }));

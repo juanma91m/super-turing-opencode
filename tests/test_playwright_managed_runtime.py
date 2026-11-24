@@ -128,7 +128,7 @@ class ManagedRuntimeTests(unittest.TestCase):
             managed.prepare(target, {**selected, 'home': '/another-identity'})
 
     def test_cli_requires_confirmation_and_rejects_inherited_profile_override_before_config_read(self):
-        cli = ROOT / 'migrations/v2/playwright-runtime.mjs'
+        cli = ROOT / 'v2/tools/playwright-runtime.mjs'
         for arguments, env in [(['prepare'], {}), (['remove', '--client-closed'], {}), (['plan'], {'PLAYWRIGHT_MCP_CDP_ENDPOINT': 'SYNTHETIC_PRIVATE_MARKER'})]:
             result = subprocess.run(['/usr/bin/node', str(cli), *arguments], env={'PATH': '/usr/bin:/bin', 'HOME': '/tmp/opencode/not-an-installed-home', **env}, capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)

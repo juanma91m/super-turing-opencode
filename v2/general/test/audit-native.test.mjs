@@ -6,8 +6,8 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import { prepareGeneral, generalEnvironment } from '../profile.mjs';
-import { startServer, until } from '../../../migrations/v2/private-server.mjs';
-import { layout } from '../../../migrations/v2/staging.mjs';
+import { startServer, until } from '../../../v2/testing/private-server.mjs';
+import { layout } from '../../../v2/runtime/staging.mjs';
 import { nativeSources } from '../audit.mjs';
 
 test('native source discovery and live-registry audit plus proposal-only scaffold through official host', async t => {

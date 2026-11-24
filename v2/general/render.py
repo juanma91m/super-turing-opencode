@@ -62,9 +62,6 @@ def native(text, config, mock=False):
         raise ValueError('Agent frontmatter required')
     header, body = text[4:].split('\n---\n', 1)
     data = closed_frontmatter(header)
-    # Explicit V2 exclusion, not a change to the installed/source V1 roles.
-    if isinstance(data.get('description'), str):
-        data['description'] = data['description'].replace('Stitch/Playwright', 'Playwright')
     if set(data) - {'description', 'mode', 'model', 'variant', 'tools', 'permission', 'steps', 'hidden'}:
         raise ValueError('Unreviewed agent field')
     agent = {key: data[key] for key in ('description', 'mode', 'steps', 'hidden') if key in data}
@@ -86,10 +83,6 @@ def native(text, config, mock=False):
                 raise ValueError('Unreviewed permission effect')
             rules.append({'action': aliases.get(action, action), 'resource': str(resource).replace('~/.config/opencode', config), 'effect': effect})
     body = body.replace('~/.config/opencode', config)
-    body = body.replace('stitch-playwright-ui-opencode', 'playwright-ui-opencode')
-    body = body.replace('; si el trabajo requiere Stitch, derivá la definición visual a `ui-web-designer`', '')
-    body = body.replace('Stitch o Playwright', 'Playwright').replace('Stitch y Playwright', 'Playwright').replace('Stitch/Playwright', 'Playwright')
-    body = body.replace('- prompt o acciones sugeridas para Stitch si aplica,', '- acciones sugeridas para inspección visual si aplica,')
     body = body.replace('- si usás `delegate` o `delegate_isolated`, hacelo solo cuando el paralelismo agregue valor real,', '- usá subagent nativo sólo si está permitido y agrega valor; no hay worktree/aislamiento de escrituras automático,')
     body = body.replace('- si las tools `delegate` y `delegation_*` estan disponibles, puedes ser un target async adecuado para revisiones read-only largas,', '- podés recibir trabajo por subagent nativo para revisiones read-only largas, sin delegar más,')
     body = body.replace('- si las tools `delegate` y `delegation_*` estan disponibles, puedes ser un target async adecuado para inspecciones read-only largas,', '- podés recibir trabajo por subagent nativo para inspección read-only, sin delegar más,')
