@@ -1,5 +1,10 @@
 # Mantenimiento posterior al corte — 2026-11-19
 
+Actualización 2026-11-24: ver [CIERRE-PENDIENTES-2026-11-24.md](CIERRE-PENDIENTES-2026-11-24.md).
+Se corrigió la espera de readiness del catálogo MCP y la pasada live posterior
+dio 13/13; los dos runners de Higyrus siguen pendientes por un padre abierto.
+Este archivo conserva la evidencia y los pendientes observados el 19.
+
 ## Estado y alcance
 
 La entrada habitual ya es OpenCode oficial **2.2.7**, contrato

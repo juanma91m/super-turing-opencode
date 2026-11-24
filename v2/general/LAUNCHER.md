@@ -123,6 +123,26 @@ los mismos contratos de retención de prompts/modos/modelos/permisos/guards/tool
 También verifica que plugins desactivados estén ausentes y proveedores declarados
 denegados no figuren en modelos utilizables; ver DORMANT-PROVIDERS.md.
 
+### Readiness del catálogo MCP — 2026-11-24
+
+`Connected` no prueba que el registro nativo ya publique las herramientas. El
+launcher anterior tomaba un solo runtimeAudit después de ese estado y podía
+rechazar un catálogo todavía incompleto. Ahora vuelve a muestrear, dentro del
+presupuesto startup/catalog restante, únicamente si faltan tools revisadas de
+MCP habilitados y conectados. No reintenta OAuth, tools de negocio ni inferencia;
+no suprime findings y al vencer el plazo sigue devolviendo no-listo.
+
+Cada muestra usa un nonce nuevo pero la misma sesión diagnóstica propia. Sólo
+retira sus receipts y esa sesión al salir. Errores de permiso/retención de prompt,
+servidores desconocidos, disabled o fallidos no se convierten en éxito/reintentos
+de catálogo. El set MCP se revalida entre muestras.
+
+La transición Connected→registro incompleto→registro completo se reprodujo con
+un fixture de la API pública: fallaba antes y pasa después. Pruebas de deadline
+conservan el finding permanente. La validación real posterior pasó 13/13 con una
+muestra por ubicación; no demuestra la causa interna de cada respuesta Rovo
+anterior ni ausencia universal de fallos futuros del servicio remoto.
+
 **Pin:** no existe tool.list HTTP en el OpenAPI 2.2.7. Para leer el registro completo
 se usa `stack-runtime-probe`, comando público nativo, no endpoint privado o prompt
 de inferencia. Sólo master-dev/agent-design, UUID exacto y sin adjuntos ni paths:

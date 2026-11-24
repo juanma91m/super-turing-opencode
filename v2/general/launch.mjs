@@ -11,6 +11,7 @@ import { startOwnedServer, until } from './owned-server.mjs';
 import { assertNoPendingDistribution } from './ownership.mjs';
 import { effect, libpqEnvironment } from './policy.mjs';
 import { assertNoProductionReaders } from './production-leases.mjs';
+import { pendingMcpCatalog,settleCatalogAudit } from './catalog-readiness.mjs';
 
 export function launchConsent(action, options = {}, terminal = { input: process.stdin.isTTY, output: process.stdout.isTTY }) {
   assert(['verify-live', 'chat'].includes(action), 'Explicit live candidate action required');
@@ -68,7 +69,8 @@ export async function inspectLiveCandidate(server, plan, extension = {}) {
   // Respect configured native startup/catalog windows,
   // instead of declaring a slow-but-within-contract connection failed at45s.
   const startupBudget = Math.max(45000,...Object.values(expectedServers).filter(server=>!server.disabled).map(server=>(server.timeout?.startup??0)+(server.timeout?.catalog??0)));
-  const expectedMcp = Object.keys(expectedServers), mcp = await until(async () => {
+  const startupDeadline = Date.now() + startupBudget, expectedMcp = Object.keys(expectedServers);
+  let mcp = await until(async () => {
     const items = await get('/api/mcp');
     return expectedMcp.every(name => items.some(item => item.name === name && !['pending', 'connecting'].includes(item.status?.status))) ? items : undefined;
   }, 'Candidate MCP startup metadata', startupBudget);
@@ -81,7 +83,14 @@ export async function inspectLiveCandidate(server, plan, extension = {}) {
     assert(entry, 'Native usable model catalog metadata required');
     const available = await get(entry[0]); assert(!available.some(model => dormantIDs.includes(model.providerID)), 'Dormant provider unexpectedly present in usable catalog; no partial chat');
   }
-  const audit = await probeLiveAudit(server, plan, specResult.value);
+  const audit = await probeLiveAudit(server, plan, specResult.value, {
+    deadline: startupDeadline,
+    pending: async audit => {
+      mcp = await get('/api/mcp');
+      assert(mcp.length === expectedMcp.length && expectedMcp.every(name => mcp.some(item => item.name === name)), 'Native MCP set changed during catalog startup; no normalization');
+      return pendingMcpCatalog(audit, expectedServers, mcp);
+    },
+  });
   const main = agents.find(agent => agent.id === plan.document.default_agent);
   assert(main && ['primary', 'all'].includes(main.mode) && !main.hidden && main.model, 'Explicit visible candidate primary/model required');
   const integrations = await get('/api/integration'), provider = main.model.providerID;
@@ -93,9 +102,9 @@ export async function inspectLiveCandidate(server, plan, extension = {}) {
     dormantProvidersChecked: dormantIDs, disabledDiscoveryPluginsChecked: disabledPlugins, diagnosticSessionRemoved: true, actualHierarchyAcceptance: false, modelRequestsIssuedByLauncher: 0, businessToolCallsIssuedByLauncher: 0 }, agent: main, audit };
 }
 
-async function probeLiveAudit(server, plan, spec) {
-  const nonce = randomUUID(), directory = path.join(plan.cache, 'general-runtime-probes'), file = path.join(directory, nonce + '.json');
-  const agent = 'agent-design'; let sessionID, report, receiptOwned = false;
+async function probeLiveAudit(server, plan, spec, catalog) {
+  const directory = path.join(plan.cache, 'general-runtime-probes');
+  const agent = 'agent-design'; let sessionID;
   const operation = async (id, body) => {
     for (const [route, methods] of Object.entries(spec.paths)) for (const [method, value] of Object.entries(methods)) if (value.operationId === id) return server.request(method.toUpperCase(), route.replace('{sessionID}', sessionID), body);
     throw new Error('Required native metadata operation missing: ' + id);
@@ -103,16 +112,22 @@ async function probeLiveAudit(server, plan, spec) {
   try {
     const created = await server.request('POST', '/api/session', { agent, title: 'Candidate startup metadata probe', location: { directory: plan.project } });
     assert(created.status === 200 && /^ses_[A-Za-z0-9]+$/.test(created.value?.data?.id), 'Could not create owned diagnostic session'); sessionID = created.value.data.id;
-    const invoked = await operation('session.command', { name: 'stack-runtime-probe', text: nonce });
-    assert(invoked.status >= 200 && invoked.status < 300, 'Native metadata command failed; no model fallback');
-    await until(() => fs.existsSync(file), 'Native runtime metadata receipt', 15000); noLinks(file);
-    assert(fs.statSync(file).isFile() && fs.statSync(file).size < 1024 * 1024, 'Invalid runtime metadata receipt');
-    try { report = JSON.parse(fs.readFileSync(file)); } catch { throw new Error('Runtime metadata receipt invalid; raw values suppressed'); }
-    assert(report.owner === 'opencode-stack' && report.kind === 'native-runtime-probe' && report.version === 1 && report.nonce === nonce && Array.isArray(report.audit?.toolIDs), 'Unexpected diagnostic receipt identity; unknown file retained'); receiptOwned = true;
-    return report.audit;
+    return await settleCatalogAudit(async () => {
+      const nonce = randomUUID(), file = path.join(directory, nonce + '.json'); let receiptOwned = false;
+      try {
+        const invoked = await operation('session.command', { name: 'stack-runtime-probe', text: nonce });
+        assert(invoked.status >= 200 && invoked.status < 300, 'Native metadata command failed; no model fallback');
+        await until(() => fs.existsSync(file), 'Native runtime metadata receipt', 15000); noLinks(file);
+        assert(fs.statSync(file).isFile() && fs.statSync(file).size < 1024 * 1024, 'Invalid runtime metadata receipt');
+        let report; try { report = JSON.parse(fs.readFileSync(file)); } catch { throw new Error('Runtime metadata receipt invalid; raw values suppressed'); }
+        assert(report.owner === 'opencode-stack' && report.kind === 'native-runtime-probe' && report.version === 1 && report.nonce === nonce && Array.isArray(report.audit?.toolIDs), 'Unexpected diagnostic receipt identity; unknown file retained'); receiptOwned = true;
+        return report.audit;
+      } finally {
+        if (receiptOwned && fs.existsSync(file)) { noLinks(file); fs.unlinkSync(file); }
+      }
+    }, catalog.pending, { deadline: catalog.deadline });
   } finally {
-    try { if (sessionID) { const removed = await operation('session.remove'); assert(removed.status >= 200 && removed.status < 300, 'Owned diagnostic session cleanup failed; no other session was removed'); } }
-    finally { if (receiptOwned && fs.existsSync(file)) { noLinks(file); fs.unlinkSync(file); } }
+    if (sessionID) { const removed = await operation('session.remove'); assert(removed.status >= 200 && removed.status < 300, 'Owned diagnostic session cleanup failed; no other session was removed'); }
   }
 }
 
