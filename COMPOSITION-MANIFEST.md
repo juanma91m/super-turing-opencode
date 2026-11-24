@@ -15,7 +15,7 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 ## Superficies de despliegue
 
 - `~/.config/opencode/` — configuración global efectiva, agentes, commands, skills y plugins globales.
-- `~/.opencode/` — runtime local gestionado de OpenCode cuando el addon background adopta la instalación.
+- `~/.opencode/bin/` — lanzador local del perfil gestionado.
 - `<repo>/.opencode/` — overlay local por proyecto.
 
 ## Repos canónicos y ownership
@@ -23,15 +23,13 @@ La instalación efectiva ya no debe leerse como salida de un único repo. Hoy el
 | Componente | Repo canónico | Superficie principal | Regla de ownership |
 |---|---|---|---|
 | Stack base | `opencode-stack` | `~/.config/opencode/` | base reusable y dueño del scaffolding/auditoría de overlays locales; no describe por sí solo la composición final cuando hay addons activos |
-| Background | `super-turing-opencode-background` | `~/.opencode/` + plugins async globales | dueño canónico del modelo async/background, del lifecycle y de los patches host/core versionados; el stack base no distribuye esos assets |
 | Knowledge | `super-turing-opencode-knowledge` | `~/.config/opencode/` + runtime Engram/Qdrant | dueño de assets de knowledge y de augment aditivo de autonomía |
 | CodeGraph | `super-turing-opencode-codegraph` | `~/.config/opencode/` + runtime global + `<repo>/.codegraph/` | dueño del runtime/MCP/wrappers de inteligencia estructural; cada índice permanece machine-local en su repository root |
 | Ticketing | `super-turing-opencode-ticketing` | `~/.config/opencode/` | dueño de Jira, Atlassian Rovo, comandos `/ticket-*`, workflow de tickets y augment aditivo de autonomía |
 | Notifier | `super-turing-opencode-notifier` | `~/.config/opencode/plugins/opencode-notify.ts` | dueño del plugin de notificaciones del SO |
 | Documents | `super-turing-opencode-documents` | `~/.config/opencode/` + runtime Quarto user-space | dueño de publicación PDF/DOCX/ODT, plantillas, QA visual y lifecycle del runtime documental |
 | GitHub accounts local | `super-turing-opencode-github-accounts-local` | `~/.config/opencode/skills/github-cuentas-multiples/` | addon privado y machine-local; dueño del mapeo cuenta/owner/alias SSH de esta máquina, sin credenciales |
-| AUNE private | `super-turing-opencode-aune` | `~/.config/opencode/` | repo privado fuera del pack portable; dueño de MCPs, helpers y políticas específicas de AUNE, empezando por Grafana AUNESA read-only |
-| Overlay Higyrus | `super-turing-opencode-higyrus` | `higyrus/.opencode/`, `higyrus/AGENTS.md`, `higyrus/opencode.json` | dueño del overlay local del proyecto Higyrus |
+| AUNE private | `super-turing-opencode-aune` | perfil privado y `overlays/<producto>/` | dueño de integraciones, políticas y overlays AUNE, incluido Grafana AUNESA read-only dentro de su alcance |
 
 ## Orden recomendado de composición
 
@@ -43,9 +41,8 @@ Cuando haya que reconstruir o reconciliar una máquina, aplicar en este orden:
 4. `super-turing-opencode-ticketing`
 5. `super-turing-opencode-notifier`
 6. `super-turing-opencode-documents`
-7. `super-turing-opencode-background`
-8. addons privados, cuando existan, como `super-turing-opencode-github-accounts-local` y `super-turing-opencode-aune`
-9. overlays locales por proyecto, por ejemplo `super-turing-opencode-higyrus`
+7. addons privados, cuando existan, como `super-turing-opencode-github-accounts-local` y `super-turing-opencode-aune`
+8. overlays locales por proyecto, incluidos los que distribuye AUNE
 
 ## Instalación y mantenimiento
 
@@ -62,7 +59,7 @@ Ver [distribución](README-DISTRIBUTION.md).
 |---|---|
 | roles generales, permisos base, seguridad, Context7, auditoría o scaffolding de overlays | `opencode-stack` |
 | memoria durable, retrieval, Engram, Qdrant, backup o sync de conocimiento | `super-turing-opencode-knowledge` |
-| delegación async, foreground/background, estado o UX de tareas en segundo plano | `super-turing-opencode-background` |
+| pautas reusables de delegación y revisión del trabajo paralelo | `opencode-stack`, sobre subagentes nativos de OpenCode |
 | Jira, Confluence vía Rovo, comandos `/ticket-*` o handoffs `tmp/<ticket>/` | `super-turing-opencode-ticketing` |
 | generación PDF/PPTX/DOCX/ODT, diagramas, render, templates o QA visual | `super-turing-opencode-documents` |
 | índices estructurales, MCP CodeGraph o wrappers de init/sync/reindex | `super-turing-opencode-codegraph` |
@@ -133,18 +130,9 @@ Scripts como:
 
 pueden existir dentro del repo del addon para operar su lifecycle, sin que eso implique que deban competir por el mismo path en `~/.config/opencode/` como parte del estado final compuesto.
 
-## Nota específica sobre background
+## Delegación nativa
 
-El componente background se modela en dos planos:
-
-1. **addon/lifecycle/plugin**
-2. **patch host/core versionado + runtime gestionado**
-
-La expectativa operativa es:
-
-> instalar `super-turing-opencode-background` debe alcanzar para instalar todo lo necesario del sistema async/background: plugin, patch host/core requerido y runtime productivo gestionado.
-
-El stack base no debería distribuir assets canónicos de background. La funcionalidad async/background completa debe instalarse desde `super-turing-opencode-background`.
+OpenCode coordina las sesiones hijas. Core distribuye las [pautas de delegación](skills/delegacion-nativa-opencode/SKILL.md), sin ampliar targets ni permisos. El [launcher gestionado](v2/CONTRATO-GESTIONADO.md) define la vida del host; la entrega de avisos de escritorio corresponde a Notifier.
 
 ## Nota específica sobre políticas machine-local
 

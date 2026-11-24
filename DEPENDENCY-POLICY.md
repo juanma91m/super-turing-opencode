@@ -69,7 +69,6 @@ de instalar la base. Ese preflight:
 - Ticketing: Python estándar, sin runtime adicional.
 - Notifier: helpers de foco del escritorio opcionales y no privilegiados por defecto.
 - Documents: Quarto/Pandoc/Typst fijado y verificado en user-space.
-- Background: Bun fijado y verificado en user-space para el runtime administrado.
 
 ## Regla de cierre
 

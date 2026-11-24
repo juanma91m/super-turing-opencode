@@ -10,6 +10,7 @@ misma guía incluye una prueba que usa un HOME temporal.
 
 - [Mantenimiento](v2/install/README.md): plan, actualización, backups y rollback.
 - [Contrato de hosting](v2/CONTRATO-GESTIONADO.md): qué admite la entrada gestionada.
+- [Delegación nativa](skills/delegacion-nativa-opencode/SKILL.md): encargos a subagentes y revisión de cambios en worktrees.
 - [Distribución por owners](README-DISTRIBUTION.md): base, addons y overlays.
 - [Criterios para overlays locales](PLAYBOOK-LOCAL-OVERLAYS.md),
   [permisos](PLAYBOOK-PERMISSIONS.md) y [roles](README-AGENTS.md).

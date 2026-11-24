@@ -30,6 +30,10 @@ test('pure candidate plan has native roles, nine commands, four helper registrie
   assert(source.document.agents.plan.hidden && source.document.agents.build.hidden);
   const overlaySkill = p.assets.get(path.join(p.config, 'opencode/skills/overlays-locales-opencode/SKILL.md')).toString();
   assert(overlaySkill.includes('stack-layer-audit') && !overlaySkill.includes('tools` reinyectadas'));
+  const delegationSkill = 'skills/delegacion-nativa-opencode/SKILL.md';
+  assert.deepEqual(p.assets.get(path.join(p.config, 'opencode', delegationSkill)),
+    fs.readFileSync(new URL('../../../' + delegationSkill, import.meta.url)));
+  assert.match(p.assets.get(path.join(p.config, 'opencode/AGENTS.md')).toString(), /delegacion-nativa-opencode/);
   for (const name of ['init-project-agent-layer', 'stack-doctor', 'check-local-overlays']) {
     const command = p.assets.get(path.join(p.config, 'opencode/commands', name + '.md')).toString();
     assert(command.includes('stack-layer-audit')); assert(!command.includes('codegraph_project_init.sh') && !command.includes('JIRA_API_TOKEN'));

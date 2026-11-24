@@ -22,6 +22,7 @@ workflows del proyecto permanecen en su capa local.
 ## Uso del stack
 
 - Conservá responsabilidad y límites del rol activo. Delegá solo si agrega especialización, aislamiento o paralelismo útil, dentro de los targets permitidos.
+- Para coordinar subagentes o escrituras en paralelo, usá `delegacion-nativa-opencode`: encargo explícito, sin escrituras concurrentes sobre los mismos archivos.
 - Si hay antecedentes relevantes, consultá conocimiento según la política del addon disponible. Engram es memoria curada; Qdrant es corpus recuperable. Persistí solo hallazgos durables, no logs ni hipótesis temporales; escribí el corpus solo mediante wrappers aprobados.
 - No abras sistemas externos sin necesidad real. Jira se consulta en modo read-only por integraciones aprobadas; no asumas credenciales ni acceso. Usá el handoff local cuando corresponda y generá artefactos de tickets solo si el workflow está habilitado.
 - CodeGraph aporta evidencia estructural, no prueba única de ausencia ni reemplazo de verificar código. No inicialices ni reindexes sin pedido explícito, ni compartas índices entre worktrees.

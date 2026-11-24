@@ -309,6 +309,7 @@ Los cambios de defaults requieren reiniciar OpenCode. Una sesión reabierta pued
 
 - `investigacion-web`: investigacion web con evidencia verificable y heuristica Context7-first para docs de librerias/APIs.
 - `diseno-agentes-opencode`: criterios para crear o ajustar agentes, skills, comandos y permisos.
+- [`delegacion-nativa-opencode`](skills/delegacion-nativa-opencode/SKILL.md): alcance, contexto y entrega de subagentes; revisión de escrituras paralelas en worktrees separados.
 - `diseno-ui-web`: criterios de diseño web claros, accesibles e implementables, con fuerte referencia en Material UI.
 - `analisis-tecnico-evidencia`: organiza evidencia material incompleta/contradictoria para decidir o auditar hechos y supuestos; no se carga por toda solución técnica.
 - `cambio-seguro-enterprise`: delimita cambios con decisiones no triviales de alcance/compatibilidad; no se carga por la sola etiqueta enterprise/legacy ni por el tamaño del diff.
@@ -357,7 +358,7 @@ comandos `/ticket-*` y el workflow de handoff asociado.
 - El stack global incluye guardrails explícitos sobre `.env*` (salvo `.env.example`) para evitar lecturas/ediciones accidentales de secretos.
 - `permission-autopilot` autoaprueba prompts de bajo riesgo, pero conserva confirmación para `sudo`, borrados, Git destructivo/force, infraestructura, bases de datos, publicación y referencias sensibles. Los `deny` de agentes read-only no se modifican.
 - El stack global puede exponer `agent_attribution` para atribución multiagente.
-- Si el addon externo `super-turing-opencode-background` está instalado, puede exponer tools y UX async adicionales sin volverlo parte del stack base.
+- Los subagentes se coordinan con `subagent` y sus reportes nativos. El aislamiento de escrituras requiere worktrees explícitos; las alertas de escritorio, si se usan, pertenecen a Notifier.
 - Si `super-turing-opencode-codegraph` está instalado, `code-inspector`, `planner`, `reviewer`, `code-reviewer` y `master-dev` pueden usar `codegraph_explore` para análisis estructural en repos ya indexados; inicialización y reindex siguen wrappers explícitos del addon.
 - Para inspección de UI, ver `playwright-ui-opencode`. La definición visual pertenece a `ui-web-designer`.
 - Playwright se expone solo a roles que planifican, implementan, diseñan o validan superficies web; los overlays pueden especializar ese acceso según el stack real.
