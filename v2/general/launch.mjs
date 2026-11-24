@@ -35,6 +35,10 @@ export function acquireCandidateLease(root, { productionReader = false } = {}) {
 
 export function interactiveEnvironment(profile, parent = process.env) {
   const env = generalEnvironment(profile, parent);
+  // Ordinary managed use follows the native public model catalog. Keep the
+  // frozen catalog for offline/schema checks and isolated migration candidates.
+  // This does not enable runtime upgrades or change any agent's selected model.
+  if (profile.storageBinding?.kind === 'production-native-storage') delete env.OPENCODE_DISABLE_MODELS_FETCH;
   for (const key of ['DISPLAY', 'WAYLAND_DISPLAY', 'XDG_RUNTIME_DIR', 'DBUS_SESSION_BUS_ADDRESS', 'XDG_SESSION_TYPE', 'XAUTHORITY', 'COLORTERM', 'TERM_PROGRAM', 'TERM_PROGRAM_VERSION', 'VTE_VERSION', 'GNOME_TERMINAL_SERVICE', 'GNOME_TERMINAL_SCREEN', 'KITTY_WINDOW_ID', 'GHOSTTY_RESOURCES_DIR', 'TMUX']) if (parent[key]) env[key] = parent[key];
   return env;
 }

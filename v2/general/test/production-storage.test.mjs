@@ -4,6 +4,7 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { productionStorage, bindProductionStorage } from '../production-storage.mjs';
 import { generalEnvironment } from '../profile.mjs';
+import { interactiveEnvironment,serverEnvironment,terminalEnvironment } from '../launch.mjs';
 
 function fixture(t) {
   const directory = fs.mkdtempSync(path.join(process.env.TMPDIR ?? '/tmp/opencode', 'production-storage-test-'));
@@ -39,4 +40,19 @@ test('unpublished history, arbitrary paths, secrets in marker, loose permissions
   assert.throws(() => productionStorage(root), /private/); fs.chmodSync(marker, 0o600);
   const selected = productionStorage(root); fs.unlinkSync(selected.db); fs.symlinkSync('/never-follow', selected.db);
   assert.throws(() => bindProductionStorage(profile, selected), /symlink/);
+});
+
+test('production refreshes native model metadata while offline checks and candidate environments stay frozen', t => {
+  const {root,profile}=fixture(t),bound=bindProductionStorage(profile,productionStorage(root));
+  const inherited={OPENCODE_DISABLE_MODELS_FETCH:'1',OPENCODE_MODELS_URL:'https://untrusted.invalid',OPENAI_API_KEY:'MUST_NOT_FORWARD'};
+  assert.equal(generalEnvironment(bound,inherited).OPENCODE_DISABLE_MODELS_FETCH,'1','Schema/source checks remain offline even with production binding');
+  const candidate={...profile,data:path.join(profile.home,'.local/share'),state:path.join(profile.home,'.local/state')};
+  assert.equal(interactiveEnvironment(candidate,inherited).OPENCODE_DISABLE_MODELS_FETCH,'1','Unbound migration candidates remain deterministic');
+  assert.equal(serverEnvironment(candidate,inherited).OPENCODE_DISABLE_MODELS_FETCH,'1');
+  for(const env of [interactiveEnvironment(bound,inherited),serverEnvironment(bound,inherited),terminalEnvironment(bound,{url:'http://127.0.0.1:12345',env:{OPENCODE_PASSWORD:'SYNTHETIC_OWNED'}},inherited)]){
+    assert.equal(env.OPENCODE_DISABLE_MODELS_FETCH,undefined);
+    assert.equal(env.OPENCODE_DISABLE_AUTOUPDATE,'1','Catalog refresh never upgrades the pinned runtime');
+    assert.equal(env.OPENCODE_MODELS_URL,undefined,'Do not inherit arbitrary catalog endpoints');
+    assert.equal(env.OPENAI_API_KEY,undefined);
+  }
 });

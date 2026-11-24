@@ -8,6 +8,30 @@ credenciales copiadas o configuración V1/workshop cambiada. Ver PASO2-CIERRE.md
 
 ## Separación de acciones
 
+### Catálogo de modelos en producción — 2026-11-24
+
+El entorno interactivo/servidor con binding `production-native-storage` ya no fija
+`OPENCODE_DISABLE_MODELS_FETCH=1`: el runtime puede refrescar su catálogo público
+nativo y ofrecer modelos nuevos sin editar los agentes. `generalEnvironment`
+(checks offline/schema) y los candidatos de migración conservan el catálogo
+congelado para no hacer consultas externas implícitas durante verificaciones.
+
+No se habilita auto-upgrade: el binario continúa fijado en 2.2.7. Tampoco se
+cambian modelos predeterminados, variantes, permisos, proveedores habilitados,
+credenciales o historiales. No se heredan endpoints de catálogo arbitrarios.
+
+El refresco nativo es asíncrono: al consultar inmediatamente puede verse todavía
+el catálogo previo. En la comprobación real pasó de 19 a 34 modelos OpenAI a los
+siete segundos y aparecieron `gpt-6.2-sol`/`gpt-6.2-astra` y sus variantes fast y
+ultrafast; cero inferencias. El inventario visible depende del catálogo remoto,
+soporte del runtime y la conexión disponible, no sólo de este flag.
+
+Este es un cambio de entorno de proceso, no de configuración recargable: un host
+que ya arrancó con el flag anterior debe cerrarse y abrirse normalmente para
+tomar el nuevo entorno. No matar servidores ajenos ni borrar cachés/datos. En la
+instalación habitual el entry importa el launcher desde el Core seleccionado;
+no se reescriben releases archivadas para activar este cambio de código.
+
 | Acción | Efectos autorizados por el comando |
 |---|---|
 | plan / status | Selección/metadata/estado de assets; no host ni store de aplicación |
