@@ -27,9 +27,23 @@ cero](../../INSTALLATION.md).
 - `/tareas-delegadas` (`/bg-tasks`) abre un panel de sólo lectura de las
   sesiones hijas de la familia actual. No agrega un segundo motor, permisos
   ni persistencia. La skill `delegacion-nativa-opencode` describe el handoff
-  de worktree antes de integrar cambios aprobados.
+  de worktree antes de integrar cambios aprobados. El alias no requiere el
+  antiguo addon Background.
+- El arranque gestionado comprueba plugins y agentes, pero no espera a que
+  conecten los MCP. Cada servidor queda disponible por separado; `/mcps`
+  permite ver su estado. El diagnóstico completo puede esperar el catálogo,
+  sin que eso se convierta en requisito para abrir la TUI.
 
 ## Verificar
 
 `opencode debug config` muestra las fuentes que carga el runtime. Para validar
 la instalación base, usá la [prueba con HOME temporal](../../INSTALLATION.md#repetir-la-prueba-en-un-home-temporal).
+
+Regresión de arranque con `tmux` y el binario oficial (no el launcher gestionado):
+
+```sh
+OPENCODE_TEST_MCP_STARTUP_TUI=/ruta/al/binario/oficial/opencode \
+  node --test v2/general/test/mcp-startup-tui.test.mjs
+```
+
+La prueba usa un perfil temporal y MCP sintéticos; no abre sesiones reales.
