@@ -18,6 +18,16 @@ cero](../../INSTALLATION.md).
   [contrato nativo](NATIVE-CONTRACTS.md) y el [playbook de overlays](../../PLAYBOOK-LOCAL-OVERLAYS.md).
 - Los addons no se cargan implícitamente. Sus aportes se ensamblan con un
   [contrato explícito](COMPOSED.md), sin absorber sus datos o permisos en Core.
+- `opencode-stack.local-file-links` se carga sólo en la TUI. Cada bloque
+  `opencode-local-file` contiene una ruta absoluta y ofrece **Abrir archivo**.
+  El clic delega al escritorio (`gio open`) dentro o fuera del proyecto, sin
+  visor ni permisos de agente nuevos. No abre URLs, rutas de credenciales
+  conocidas, ejecutables ni archivos especiales. Conserva `opencode-review-report`
+  para el historial. Sin TUI compatible la ruta sigue siendo copiable.
+- `/tareas-delegadas` (`/bg-tasks`) abre un panel de sólo lectura de las
+  sesiones hijas de la familia actual. No agrega un segundo motor, permisos
+  ni persistencia. La skill `delegacion-nativa-opencode` describe el handoff
+  de worktree antes de integrar cambios aprobados.
 
 ## Verificar
 

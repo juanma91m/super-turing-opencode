@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { planGeneral } from '../general/profile.mjs';
 import * as portableReleases from '../general/releases.mjs';
-import { officialRuntime } from '../general/lifecycle.mjs';
+import { npmRuntime } from '../general/npm-runtime.mjs';
 import { productionStorage } from '../general/production-storage.mjs';
 import {renderEntry} from './loader.mjs';
 
@@ -19,7 +19,7 @@ const coreRoot=path.join(sourceRoot,'opencode-stack');
 process.env.OPENCODE_STACK_SOURCE_DIR=coreRoot;
 process.env.OPENCODE_PRIVATE_SOURCE_ROOT=sourceRoot;
 const {stagingRoot,storageRoot,profile}=selection.previousSettings;
-const runtime=officialRuntime(stagingRoot);
+const runtime=npmRuntime(stagingRoot);
 productionStorage(storageRoot);
 const project=path.join(root,'neutral-project');
 fs.mkdirSync(project,{mode:0o700});

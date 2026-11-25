@@ -41,10 +41,16 @@ export function selectGeneralAddons(home, config, parent = process.env, { source
   if (current.command !== undefined) assert(JSON.stringify(current.command) === JSON.stringify(['npx', '-y', '@upstash/context7-mcp@latest']), 'Unreviewed legacy Context7 command; values suppressed');
   const context7 = { ...context7Server(), disabled: current.enabled === false };
   if (current.timeout !== undefined) { assert(Number.isSafeInteger(current.timeout) && current.timeout > 0); context7.timeout.execution = current.timeout; }
+  // Metadata only. A provisioned key opts into local stdio; a missing/broken
+  // companion runtime is reported by Context7 rather than blocking startup.
+  const credentialFile = path.join(home, '.config/opencode-private/context7/api-key');
+  if (fs.lstatSync(credentialFile, { throwIfNoEntry: false })) {
+    context7.privateBinding = { credentialFile, runtimeRoot: path.join(home, '.local/share/opencode-stack/runtime/context7-mcp-4.8.0') };
+  }
   return { runtimeHome: home, descriptors: { context7,
     knowledge: { runtimeHome: home, runtimeConfig: config, environment: knowledge.environment, server: translateEngram(knowledge.server), permissions: knowledge.permissions },
     ticketing: { server: { ...rovoDiscoveryServer(dcrLoopbackServer(rovoServer())), disabled: !ticketing.enabled } },
       codegraph: { binding: graph.binding, maintenanceRegistry: graph.maintenanceRegistry }, playwright: { runtime: browser }, documents: { binding: selectDocumenter(home, config, { sourceUpdate }) }, notifier: { configPath: path.join(config, 'notify.json') } },
-    metadata: { selection: 'owner preflights; no backend started', context7SourceTransport: current.type, context7TargetTransport: 'approved native public remote; no npx download', context7LegacyCommandOmitted: current.command !== undefined, rovoScope: 'resource-metadata; native V2 compatibility', browserPin: browser.version,
+    metadata: { selection: 'owner preflights; no backend started', context7SourceTransport: current.type, context7TargetTransport: context7.privateBinding ? 'private preprovisioned stdio' : 'approved native public remote; no npx download', context7LegacyCommandOmitted: current.command !== undefined, rovoScope: 'resource-metadata; native V2 compatibility', browserPin: browser.version,
       browserDurability: browser.managed_root ? 'managed snapshot verified' : 'prepare offline managed snapshot before candidate activation', credentialsCopied: false } };
 }

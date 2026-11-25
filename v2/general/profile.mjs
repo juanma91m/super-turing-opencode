@@ -86,6 +86,10 @@ export function planGeneral(root, { project, mock, plugins = [], contributions =
   copy('v2/native-history.mjs', path.join(p.bundle, 'v2/native-history.mjs'));
   copy('lib/permission-policy.ts', path.join(p.bundle, 'lib/permission-policy.ts'));
   tree('v2/general/plugins/access', path.join(p.bundle, 'v2/general/plugins/access'));
+  const localFileLinks = path.join(p.bundle, 'v2/general/plugins/local-file-links');
+  tree('v2/general/plugins/local-file-links', localFileLinks);
+  const delegationPanel = path.join(p.bundle, 'v2/general/plugins/delegation-panel');
+  tree('v2/general/plugins/delegation-panel', delegationPanel);
   for (const name of ['policy.mjs', 'session-tools.mjs', 'readonly-shell.py', 'audit.mjs', 'scaffold.mjs', 'skills.mjs']) copy('v2/general/' + name, path.join(p.bundle, 'v2/general', name));
   tree('skills', path.join(config, 'skills'), new Set(['skills/overlays-locales-opencode/SKILL.md']));
   copy('v2/general/assets/overlays-locales-opencode.md', path.join(config, 'skills/overlays-locales-opencode/SKILL.md'));
@@ -103,7 +107,7 @@ export function planGeneral(root, { project, mock, plugins = [], contributions =
   }
   let instructions = fs.readFileSync(path.join(source, 'AGENTS.md'), 'utf8') + '\n## Perfil general gestionado\nUsá subagent sólo para targets permitidos y contexto acotado. El host notifica el fin del hijo; esperar no es polling. No hay worktree/aislamiento automático de escrituras: no superponer writers sobre los mismos archivos sin alcance explícito. Capas organizacionales son opt-in y propias de su addon; proyectos aportan deltas nativos sin borrar prompts/guardas globales. Los addons se componen por su owner explícitamente; el plan no prueba conexiones. Helpers SSH/DB conservan sus contratos pero este HOME aislado no copia autenticación ni contexto machine-local. No operar infraestructura/GitHub por preparar un perfil.\n';
   const broker = path.join(config, 'scripts/planner_shell.py');
-  const document = { $schema: 'https://opencode.ai/config.json', model: mock ? 'workshop-mock/mock' : 'openai/gpt-6.1-sol', default_agent: 'master-dev', update: 'disable', share: 'disabled', snapshots: true, compaction: { auto: true }, warming: false,
+  const document = { $schema: 'https://opencode.ai/config.json', model: mock ? 'workshop-mock/mock' : 'openai/gpt-6.1-sol', default_agent: 'master-dev', update: 'notify', share: 'disabled', snapshots: true, compaction: { auto: true }, warming: false,
     permissions: basePermissions(), agents: { plan: { hidden: true, permissions: [{ action: 'edit', resource: '*', effect: 'deny' }, { action: 'shell', resource: '*', effect: 'deny' }, { action: 'shell', resource: 'python3 ' + broker + ' *', effect: 'allow' }] }, build: { hidden: true }, general: { disabled: true }, explore: { disabled: true } },
     experimental: { todo: true }, mcp: { servers: {} },
     policies: [{ action: 'provider.use', resource: '*', effect: 'deny' }, { action: 'provider.use', resource: mock ? 'workshop-mock' : 'openai', effect: 'allow' }, { action: 'mcp.use', resource: '*', effect: 'deny' }, { action: 'mcp.use', resource: 'stitch', effect: 'deny' }, { action: 'tool.use', resource: 'stitch_*:*', effect: 'deny' }, { action: 'tool.use', resource: 'execute:*', effect: 'deny' }, { action: 'plugin.use', resource: 'opencode.provider.ollama', effect: 'deny' }],
@@ -200,6 +204,8 @@ export function planGeneral(root, { project, mock, plugins = [], contributions =
   document.plugins.push(...plugins);
   if (mock) document.providers = { ...(document.providers ?? {}), 'workshop-mock': { package: '@opencode/ai/providers/openai-compatible', settings: { baseURL: mock, apiKey: 'synthetic' }, models: { mock: { modelID: 'mock', name: 'General fixture', capabilities: { tools: true, input: ['text'], output: ['text'] }, limit: { context: 65536, output: 4096 } } } } };
   add(path.join(config, 'opencode.json'), JSON.stringify(document, null, 2) + '\n');
+  // Keep addon-owned overrides (e.g. Notifier) ahead of this client-only UI.
+  cli.plugins = [...(cli.plugins ?? []), { package: localFileLinks }, { package: delegationPanel }];
   add(path.join(config, 'cli.json'), JSON.stringify(cli, null, 2) + '\n');
   return { ...p, runtimeHome, document, assets, roles: Object.keys(agents), readonly, broker, components: [...ids], componentMetadata,
     commands: [...assets.keys()].filter(file => path.dirname(file) === path.join(config, 'commands') && file.endsWith('.md')).map(file => path.basename(file, '.md')) };

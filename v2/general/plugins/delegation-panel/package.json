@@ -1,0 +1,6 @@
+{
+  "name": "@opencode-stack/delegation-panel",
+  "private": true,
+  "type": "module",
+  "exports": { "./tui": "./tui.tsx" }
+}

@@ -75,11 +75,19 @@ export async function register(ctx) {
   });
   await ctx.shell.hook('create.before', event => {
     event.env = shellEnvironment();
+    const brokerRoute = ctx.options.brokerRoute;
     if (ctx.options.runtimeHome && /^\s*python3\s/.test(event.command) && event.command.includes(ctx.options.broker) && event.command.includes('helper')) {
-      const result = spawnSync('python3', [ctx.options.shellChecker], { input: JSON.stringify({ broker: ctx.options.broker, command: event.command, runtimeMatch: true }),
+      if (brokerRoute) {
+        assert(brokerRoute.target === path.join(ctx.options.profileConfig, 'scripts/planner_shell.py')
+          && Object.hasOwn(pinned, brokerRoute.target), 'Relocation requires the pinned broker of the selected profile');
+        integrity();
+      }
+      const result = spawnSync('python3', [ctx.options.shellChecker], { input: JSON.stringify({ broker: ctx.options.broker, command: event.command, runtimeMatch: true, brokerRoute, cwd: event.cwd }),
         encoding: 'utf8', timeout: 10000, env: { PATH: '/usr/local/bin:/usr/bin:/bin', HOME: process.env.HOME, PYTHONDONTWRITEBYTECODE: '1' } });
       assert(!result.error && result.status === 0, 'Helper runtime invocation must be recognized literally');
-      const helper=JSON.parse(result.stdout);
+      const inspected = JSON.parse(result.stdout);
+      const helper = brokerRoute ? inspected.helper : inspected;
+      if (brokerRoute && typeof inspected.relocated === 'string') event.command = inspected.relocated;
       if (typeof helper === 'string') {
         const home = ctx.options.runtimeHome;
         Object.assign(event.env, { HOME: home, XDG_CONFIG_HOME: path.join(home, '.config'), XDG_DATA_HOME: path.join(home, '.local/share'), XDG_STATE_HOME: path.join(home, '.local/state'), XDG_CACHE_HOME: path.join(home, '.cache') });

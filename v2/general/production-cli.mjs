@@ -4,12 +4,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { OFFICIAL_SHA256 } from './lifecycle.mjs';
+import { npmRuntime, npmUpdateEnvironment } from './npm-runtime.mjs';
 import { bindProductionStorage, productionStorage } from './production-storage.mjs';
 import { acquireCandidateLease, serverEnvironment, terminalEnvironment, interactiveEnvironment } from './launch.mjs';
 import { publishProductionReader } from './production-leases.mjs';
 import { startOwnedServer } from './owned-server.mjs';
+import { selectSkills, skillEnvironment } from './skill-release.mjs';
 
 const verbs = new Set(['upgrade', 'update', 'uninstall', 'acp', 'api', 'debug', 'auth', 'mcp', 'plugin', 'models', 'stats', 'mini', 'run', 'session', 'service', 'reload', 'pair', 'serve']);
 const rootValues = new Set(['--server', '--session', '-s', '--prompt', '--log-level', '--completions']);
@@ -60,17 +60,24 @@ export async function nativeChild(binary, argv, { cwd, env }) {
   finally { process.off('SIGINT', int); process.off('SIGTERM', term); process.off('SIGHUP', hup); }
 }
 
-export async function runProductionCLI({ argv, cwd, runtime, storageRoot, select, managedContract, child = nativeChild, host = startOwnedServer }) {
+export async function runProductionCLI({ argv, cwd, stagingRoot, storageRoot, select, managedContract, child = nativeChild, host = startOwnedServer }) {
   assert(managedContract === MANAGED_CONTRACT, 'Explicit managed-harness production contract required');
-  assert(runtime.version === '2.2.7' && runtime.sha256 === OFFICIAL_SHA256 && createHash('sha256').update(fs.readFileSync(runtime.binary)).digest('hex') === OFFICIAL_SHA256, 'Official production runtime pin changed');
+  const runtime = npmRuntime(stagingRoot);
   return dispatchProductionCLI({ argv, cwd, runtime, storageRoot, select, child, host });
 }
 
-// Separately exported orchestration permits synthetic tests without weakening
-// the public entrypoint's fixed-runtime hash check.
+// Separately exported orchestration permits synthetic tests of the dispatch.
 export async function dispatchProductionCLI({ argv, cwd, runtime, storageRoot, select, child = nativeChild, host = startOwnedServer }) {
   const input = invocation(argv, cwd);
-  const selected = await select(input.project, { informational: input.informational });
+  const updating = ['upgrade','update'].includes(input.command) && !input.informational;
+  const updateEnv = env => runtime.prefix ? npmUpdateEnvironment(env, runtime) : env;
+  if (updating) {
+    assert(runtime.prefix && !argv.some(value => /^(-m|--method)(=|$)/.test(value) || value.startsWith('-m') && !value.startsWith('--')), 'Managed upgrades must use the detected isolated npm prefix');
+    const env = updateEnv({ HOME: path.dirname(runtime.prefix), XDG_CACHE_HOME: path.join(path.dirname(runtime.prefix), 'home/.cache'),
+      PATH: [path.dirname(process.execPath), '/usr/local/bin', '/usr/bin', '/bin'].join(':'), LANG: 'C.UTF-8' });
+    return child(runtime.binary, argv, { cwd: path.dirname(runtime.prefix), env });
+  }
+  const selected = await select(input.project, { informational: input.informational, ...(runtime.prefix ? { runtime } : {}) });
   if (input.informational) return child(runtime.binary, argv, { cwd, env: interactiveEnvironment(selected.plan) });
   // The user chose the working managed harness, not exact equivalence with every
   // native hosting mode. Keep every harness tool on the owned fd3 host; never
@@ -85,15 +92,17 @@ export async function dispatchProductionCLI({ argv, cwd, runtime, storageRoot, s
     }
     if (selected.acquireReader) readers.push(selected.acquireReader());
     await selected.check();
+    const skills = selectSkills(selected.plan);
+    if (skills) skills.verify(runtime, selected.plan);
     const active = bindProductionStorage(selected.plan, productionStorage(storageRoot));
-    if (pathsOnly) return await child(runtime.binary, argv, { cwd, env: interactiveEnvironment(active) });
-    server = await host(runtime.binary, active, serverEnvironment);
+    if (pathsOnly) return await child(runtime.binary, argv, { cwd, env: skillEnvironment(interactiveEnvironment(active), skills) });
+    server = await host(runtime.binary, active, (profile, parent) => skillEnvironment(updateEnv(serverEnvironment(profile, parent)), skills));
     if (['tui', 'run', 'mini'].includes(input.command)) {
-      const ready = await selected.inspect(server, active);
-      assert(ready.readyForChat === true, 'Production startup/auth is not ready; no login or degraded fallback');
+      const ready = await selected.inspectStartup(server, active);
+      assert(ready.readyForStartup === true, 'Managed guard or agent readiness did not pass; no unguarded fallback');
     }
-    // Auth/recovery/history commands must remain usable while integrations are
-    // disconnected. Their explicit native operation still uses the checked host.
-    return await child(runtime.binary, connectedArguments(argv, server.connection.url), { cwd, env: terminalEnvironment(active, server.connection) });
+    // MCP connections and their status remain native; the frontend does not
+    // wait for the tool catalog here. Auth/recovery/history still use this host.
+    return await child(runtime.binary, connectedArguments(argv, server.connection.url), { cwd, env: skillEnvironment(updateEnv(terminalEnvironment(active, server.connection)), skills) });
   } finally { try { await server?.close(); } finally { for (const release of readers.reverse()) release(); } }
 }

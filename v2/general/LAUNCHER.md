@@ -5,7 +5,7 @@ Esta interfaz separada sirve para validar un perfil antes de publicarlo.
 
 ## Separación de acciones
 
-### Catálogo de modelos en producción — 2026-11-24
+### Catálogo de modelos en producción
 
 El entorno interactivo/servidor con binding `production-native-storage` ya no fija
 `OPENCODE_DISABLE_MODELS_FETCH=1`: el runtime puede refrescar su catálogo público
@@ -13,9 +13,11 @@ nativo y ofrecer modelos nuevos sin editar los agentes. `generalEnvironment`
 (checks offline/schema) y los perfiles de prueba conservan el catálogo
 congelado para no hacer consultas externas implícitas durante verificaciones.
 
-No se habilita auto-upgrade: el binario continúa fijado en 2.2.7. Tampoco se
-cambian modelos predeterminados, variantes, permisos, proveedores habilitados,
-credenciales o historiales. No se heredan endpoints de catálogo arbitrarios.
+El refresco del catálogo no actualiza el binario. El flujo manual de producción
+se describe en el [contrato gestionado](../CONTRATO-GESTIONADO.md); el launcher de
+pruebas conserva su pin de fixture. No cambian modelos predeterminados, variantes,
+permisos, proveedores habilitados, credenciales o historiales. No se heredan
+endpoints de catálogo arbitrarios.
 
 El refresco nativo es asíncrono: al consultar inmediatamente puede verse todavía
 el catálogo previo. En la comprobación real pasó de 19 a 34 modelos OpenAI a los
@@ -83,7 +85,9 @@ el reporte público general conserva su alcance y no afirma aceptación de proye
 El auditor comprueba el contrato de `debug config --standalone` con storage
 temporal y salida validada; no exige un número de versión al host activo.
 Una capacidad ausente o una salida incompatible impide certificar la auditoría.
-Esto no cambia los pins ni la verificación por bytes de las generaciones archivadas.
+Este chequeo no selecciona ni autentica el ejecutable. Producción resuelve el
+paquete oficial en su prefijo npm privado; las herramientas de prueba que
+requieren reproducir un pin siguen verificándolo por separado.
 
 Este mecanismo es de herramientas source-owned, no un plugin nuevo del perfil:
 no cambia por sí solo los assets/revisiones runtime archivados. La regresión Core

@@ -34,7 +34,8 @@ function fixture(t) {
   fs.writeFileSync(path.join(storageRoot, '.production-storage.json'), JSON.stringify({ schemaVersion: 1, owner: 'opencode-stack', kind: 'production-native-storage', nativeVersion: '2.2.7', root: storageRoot, phase: 'history-verified' }), { mode: 0o600 });
   const calls = [], connection = { url: 'http://127.0.0.1:1234', env: { OPENCODE_PASSWORD: 'SYNTHETIC_EPHEMERAL_PASSWORD' } };
   const options = { argv: ['run', '--session', 'ses_existing', '--format', 'json', 'hi'], cwd: directory, runtime: { binary: '/synthetic' }, storageRoot,
-    select: async () => ({ plan, check: async () => { calls.push('check'); }, inspect: async () => { calls.push('inspect'); return { readyForChat: true }; } }),
+    select: async () => ({ plan, check: async () => { calls.push('check'); }, inspectStartup: async () => { calls.push('inspect'); return { readyForStartup: true }; },
+      inspect: () => assert.fail('Full integration audit must not run in the launcher') }),
     host: async (_binary, active, environment) => { calls.push('host'); assert.equal(environment(active).OPENCODE_DB, path.join(storageRoot, 'data/opencode/opencode.db')); return { connection, close: async () => { calls.push('close'); } }; },
     child: async (_binary, argv, { env }) => { calls.push('child'); assert.deepEqual(argv, connectedArguments(options.argv, connection.url)); assert.equal(env.OPENCODE_PASSWORD, connection.env.OPENCODE_PASSWORD); assert.equal(env.OPENCODE_STACK_TRANSPORT_FD, undefined); return 7; } };
   return { directory, root, options, calls };
@@ -61,7 +62,7 @@ test('two concurrent production readers are allowed; lifecycle writer is not', a
 test('failed startup closes owned host and removes only its readers; unsupported hosting does not open storage', async t => {
   const { root, options, calls } = fixture(t);
   const original = options.select;
-  await assert.rejects(dispatchProductionCLI({ ...options, select: async (...args) => ({ ...await original(...args), inspect: async () => ({ readyForChat: false }) }) }), /not ready/);
+  await assert.rejects(dispatchProductionCLI({ ...options, select: async (...args) => ({ ...await original(...args), inspectStartup: async () => ({ readyForStartup: false }) }) }), /readiness did not pass/);
   assert.equal(calls.at(-1), 'close'); assertNoProductionReaders(root);
   calls.length = 0;
   await assert.rejects(dispatchProductionCLI({ ...options, argv: ['acp'], storageRoot: '/MUST_NOT_OPEN' }), /Managed harness does not support/);

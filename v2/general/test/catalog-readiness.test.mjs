@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {test} from 'node:test';
-import {inspectLiveCandidate} from '../launch.mjs';
+import {inspectLiveCandidate,inspectStartup} from '../launch.mjs';
 import {pendingMcpCatalog,settleCatalogAudit} from '../catalog-readiness.mjs';
 
 test('catalog deadline retains the final missing-tool finding; failed/disabled/unknown servers and permission errors are not retried',async()=>{
@@ -46,4 +46,20 @@ test('Connected MCP is not sufficient: startup waits for its reviewed tool regis
   assert.equal(samples,2);
   assert.equal(created,1);assert.equal(removed,1);
   assert.deepEqual(fs.readdirSync(directory),[]);
+});
+
+test('production startup never requests MCP health or catalogs, but rejects missing prompts or unexpected plugins',async()=>{
+  const role={id:'master-dev',mode:'primary',model:'fixture/model',system:'required baseline',permissions:[]};
+  const options={auditBaselines:{'master-dev':role},requiredSystems:{'master-dev':role.system}};
+  const plan={project:'/fixture/project',config:'/fixture/config',components:[],document:{default_agent:role.id,
+    plugins:[{package:'/fixture/general/plugins/access',options}],mcp:{servers:{slow:{timeout:{startup:60000}}}}}};
+  const ids=['env-guard','controlled-permissions','planner-shell','agent-identity','general'].map(x=>'opencode-stack.'+x);
+  const server=(effectiveRole=role,extra=[])=>({request:async(method,route)=>{
+    assert.equal(method,'GET');
+    assert(['/api/plugin','/api/agent'].includes(route),'unexpected startup query '+route);
+    return{status:200,value:route==='/api/agent'?[effectiveRole]:[...ids,...extra].map(id=>({id,source:{type:'file'}}))};
+  }});
+  assert.deepEqual(await inspectStartup(server(),plan),{readyForStartup:true});
+  assert.deepEqual(await inspectStartup(server({...role,system:'missing'}),plan),{readyForStartup:false});
+  await assert.rejects(inspectStartup(server(role,['unreviewed.plugin']),plan),/Unexpected external native plugin/);
 });

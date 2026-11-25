@@ -27,7 +27,7 @@ test('native addon contribution plan composes without workshop/V1-header edits o
   const target = path.join(root, 'profile');
   const p = planGeneral(target, { project, mock: 'http://127.0.0.1:1/v1', contributions: fixtureContributions(root, project) });
   assert.equal(p.roles.length, 22); assert.equal(p.commands.length, 34);
-  assert.equal([...p.assets.keys()].filter(file => file.endsWith('/SKILL.md')).length, 33);
+  assert.equal([...p.assets.keys()].filter(file => file.endsWith('/SKILL.md')).length, 34);
   assert.equal([...p.assets.keys()].filter(file => file.includes('/planner-helpers/')).length, 7);
   assert.equal(Object.keys(p.document.mcp.servers).length, 5);
   assert(!JSON.stringify(p.document).includes('workshop-guard'));

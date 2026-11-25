@@ -86,6 +86,14 @@ class CodeReviewContractTests(unittest.TestCase):
                      'no asumir que las refs locales están actualizadas'):
             self.assertIn(rule, branch)
 
+    def test_saved_report_is_delivered_as_copyable_absolute_path_with_optional_tui_renderer(self):
+        delivery = section('### Entrega del informe guardado')
+        for rule in ('`git rev-parse --show-toplevel`', 'relativa a la raíz Git',
+                     'Releer el archivo exacto', 'ruta absoluta completa',
+                     'como código copiable', '`opencode-local-file`', 'sola en una línea',
+                     'No emitir `file://`'):
+            self.assertIn(rule, delivery)
+
     def test_wrong_repo_stops_before_jira_diff_and_report(self):
         repo = section('### Repositorio correcto')
         for rule in ('Antes de consultar ticket, leer el diff o reservar', 'normalizar ambos a `owner/repo`',
@@ -233,7 +241,12 @@ class ReviewReportHelperTests(unittest.TestCase):
         subdir.mkdir()
         result = self.reserve('ticket', 'TEST-123', '--content', 'review', cwd=subdir)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual((self.repo / result.stdout.strip()).read_text(), 'review\n')
+        relative = Path(result.stdout.strip())
+        self.assertFalse(relative.is_absolute())
+        git_root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], cwd=subdir, env=self.env, text=True).strip()
+        report = Path(git_root) / relative
+        self.assertEqual(report, self.repo / 'tmp/TEST-123/code-review/code-review-1.md')
+        self.assertEqual(report.read_text(), 'review\n')
         self.assertFalse((subdir / 'tmp').exists())
 
     def test_three_review_rounds_keep_open_ids_and_closed_history_in_separate_reports(self):

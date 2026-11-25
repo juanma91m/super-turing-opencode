@@ -20,6 +20,11 @@ description: Usa para aprobar desarrollos de terceros comparando ramas o Pull Re
 - Solo con persistencia requerida, usar el helper aprobado por el agente efectivo, sin sobrescribir informes previos. El helper común admite `ticket <ticket> --content '<informe literal>'` para reservar y escribir en una única llamada, sin Edit/apply_patch; su disponibilidad no obliga a crear un informe. Ejecutarlo desde el repositorio revisado: devuelve el path relativo a la raíz Git, incluso desde un subdirectorio. Releer el archivo real antes de anunciarlo guardado; un path reservado vacío no es un informe. Si falla, declarar no guardado, sin redirecciones ni destinos alternativos. No crear handoff de implementación; si ya existe, es solo contexto adicional cuando la capa local lo permite.
 - Antes de operar con GitHub, aplicar la política de cuenta disponible; usar únicamente `gh pr view`/`gh pr diff` o el wrapper read-only habilitado por esa política y agente. No improvisar acceso a credenciales ni comandos fuera de la allowlist.
 
+### Entrega del informe guardado
+
+- Si el writer devuelve una ruta relativa a la raíz Git, unila a la raíz del checkout revisado (`git rev-parse --show-toplevel`), no al subdirectorio actual ni al HOME del perfil. Si devuelve una ruta absoluta, usala tal cual dentro del destino aprobado. Releer el archivo exacto antes de anunciarlo guardado.
+- En la respuesta final, escribir `Informe guardado:` y entregar la **ruta absoluta completa** del archivo releído en el bloque común `opencode-local-file`, sola en una línea y sin comillas. La TUI compatible muestra **Abrir archivo**; sin el complemento queda como código copiable. No emitir `file://`, ejecutar abridores por cuenta del revisor ni publicar el informe para obtener una URL.
+
 ## Entradas
 
 ### Ramas

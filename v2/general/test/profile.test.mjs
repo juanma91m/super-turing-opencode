@@ -20,7 +20,15 @@ test('pure candidate plan has native roles, nine commands, four helper registrie
   assert.equal([...p.assets.keys()].filter(file => file.includes('/planner-helpers/')).length, 4);
   assert(!JSON.stringify(p.document).includes('workshop-guard'));
   assert.deepEqual(p.document.mcp, { servers: {} }); assert.deepEqual(p.document.compaction, { auto: true });
-  assert.equal(p.document.snapshots, true); assert.equal(p.document.update, 'disable');
+  const localFileLinks = path.join(p.bundle, 'v2/general/plugins/local-file-links');
+  const delegationPanel = path.join(p.bundle, 'v2/general/plugins/delegation-panel');
+  assert.deepEqual(JSON.parse(p.assets.get(path.join(p.config, 'opencode/cli.json'))).plugins, [{ package: localFileLinks }, { package: delegationPanel }]);
+  assert(p.assets.has(path.join(delegationPanel, 'tui.tsx')));
+  assert(!p.document.plugins.some(plugin => (plugin.package ?? plugin) === delegationPanel));
+  assert(p.assets.has(path.join(localFileLinks, 'tui.tsx')));
+  assert(!p.document.plugins.some(plugin => (plugin.package ?? plugin) === localFileLinks));
+  assert.match(p.assets.get(path.join(p.config, 'opencode/AGENTS.md')).toString(), /`opencode-local-file`/);
+  assert.equal(p.document.snapshots, true); assert.equal(p.document.update, 'notify');
   const master = p.assets.get(path.join(p.config, 'opencode/agents/master-dev.md')).toString();
   assert(master.includes('action: "subagent"') && master.includes('resource: "reviewer"'));
   assert(!master.includes('delegate_isolated') && !master.includes('\ntools:') && !master.includes('\npermission:'));

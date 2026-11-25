@@ -68,7 +68,7 @@ test('public native CLI standalone preserves its mode but does not deliver the o
   const copied=spawnSync('/usr/bin/python3',['-c','import sqlite3,sys; a=sqlite3.connect("file:"+sys.argv[1]+"?mode=ro",uri=True); b=sqlite3.connect(sys.argv[2]); a.backup(b); b.close(); a.close()',path.join(plan.data,'opencode/opencode.db'),db],{encoding:'utf8'});assert.equal(copied.status,0);fs.chmodSync(db,0o600);
   fs.writeFileSync(path.join(storageRoot,'.production-storage.json'),JSON.stringify({schemaVersion:1,owner:'opencode-stack',kind:'production-native-storage',nativeVersion:'2.2.7',root:storageRoot,phase:'history-verified'}),{mode:0o600});
   const before=fs.statSync(path.join(plan.data,'opencode/opencode.db')).mtimeMs;
-  const code=await runProductionCLI({argv:['api','POST','/api/session/'+made.data.id+'/command','--data','{"name":"fixture-transport-compat","text":""}'],cwd:project,runtime,storageRoot,managedContract:MANAGED_CONTRACT,
+  const code=await runProductionCLI({argv:['api','POST','/api/session/'+made.data.id+'/command','--data','{"name":"fixture-transport-compat","text":""}'],cwd:project,stagingRoot:path.join(os.homedir(),'.local/share/opencode-v2-clean'),storageRoot,managedContract:MANAGED_CONTRACT,
     select:async()=>({plan,check:()=>checkCandidate(plan,runtime),inspect:async()=>{throw Error('No model/chat inspection for explicit API command');}}),
     child:async(binary,args,{env})=>{await cli(binary,args,plan,env);return 0;}});
   assert.equal(code,0);await until(()=>fs.existsSync(receipt),'Managed production transport receipt');

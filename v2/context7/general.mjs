@@ -6,7 +6,17 @@ const root = fileURLToPath(new URL('./', import.meta.url));
 export function context7Contribution(server = context7Server()) {
   return { id: 'context7', apply(ctx) {
     assert(ctx.version === 1 && ctx.kind === 'general' && !ctx.document.mcp.servers.context7 && server.codemode === false);
-    ctx.document.mcp.servers.context7 = structuredClone(server);
+    const { privateBinding, ...native } = structuredClone(server);
+    if (privateBinding) {
+      const { credentialFile, runtimeRoot } = privateBinding;
+      assert(native.type === 'remote' && [credentialFile, runtimeRoot].every(file => typeof file === 'string' && path.isAbsolute(file)));
+      const wrapper = 'scripts/context7-stdio.mjs';
+      ctx.addConfig(wrapper, ctx.readAsset(path.join(root, 'stdio.mjs')));
+      delete native.url;
+      delete native.oauth;
+      Object.assign(native, { type: 'local', command: [process.execPath, path.join(ctx.config, wrapper), credentialFile, runtimeRoot] });
+    }
+    ctx.document.mcp.servers.context7 = native;
     ctx.document.permissions.push(...CONTEXT7_TOOLS.map(action => ({ action, resource: '*', effect: 'allow' })));
     ctx.document.policies.push({ action: 'mcp.use', resource: 'context7', effect: 'allow' });
     ctx.closeTools('context7_*', CONTEXT7_TOOLS);

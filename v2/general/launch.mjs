@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { desktopBindings } from './plugins/local-file-links/links.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -6,7 +7,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { noLinks, generalEnvironment } from './profile.mjs';
 import { checkCandidate, OFFICIAL_SHA256 } from './lifecycle.mjs';
 import { existingV2Storage, bindV2Storage } from './storage.mjs';
-import { decodeList } from './audit.mjs';
+import { auditEvidence, decodeList } from './audit.mjs';
 import { startOwnedServer, until } from './owned-server.mjs';
 import { assertNoPendingDistribution } from './ownership.mjs';
 import { effect, libpqEnvironment } from './policy.mjs';
@@ -51,21 +52,55 @@ export function serverEnvironment(profile, parent = process.env) {
 export function terminalEnvironment(profile, connection, parent = process.env) {
   const url = new URL(connection.url);
   assert(url.protocol === 'http:' && url.hostname === '127.0.0.1' && !url.username && !url.password && typeof connection.env.OPENCODE_PASSWORD === 'string', 'Owned native connection required');
-  return { ...interactiveEnvironment(profile, parent), OPENCODE_PASSWORD: connection.env.OPENCODE_PASSWORD };
+  return { ...interactiveEnvironment(profile, parent), ...desktopBindings(parent), OPENCODE_PASSWORD: connection.env.OPENCODE_PASSWORD };
 }
 
 const addonPlugins = { context7: ['opencode-stack.context7-access'], knowledge: ['opencode-knowledge.engram', 'opencode-knowledge.runtime-env'], ticketing: ['opencode-ticketing.titles'],
   codegraph: ['opencode-codegraph.access'], playwright: ['opencode-stack.playwright-access'], documents: ['opencode-documents.native'], notifier: [] };
+async function metadata(server, route) {
+  const result = await server.request('GET', route);
+  assert(result.status === 200, 'Native metadata query failed: ' + route);
+  return decodeList(result.value);
+}
+async function inspectPlugins(server, plan, extraPlugins) {
+  assert(Array.isArray(extraPlugins) && extraPlugins.every(id => typeof id === 'string'), 'Explicit owner plugin expectations required');
+  const required = ['opencode-stack.env-guard', 'opencode-stack.controlled-permissions', 'opencode-stack.planner-shell', 'opencode-stack.agent-identity', 'opencode-stack.general', ...plan.components.flatMap(id => addonPlugins[id] ?? []), ...(plan.componentMetadata?.ticketing?.metrics ? ['opencode-ticketing.metrics'] : []), ...extraPlugins];
+  const plugins = await until(async () => {
+    const items = await metadata(server, '/api/plugin');
+    return required.every(id => items.some(item => item.id === id)) ? items : undefined;
+  }, 'Managed native plugins');
+  assert(plugins.filter(item => item.source?.type !== 'builtin').every(item => required.includes(item.id)), 'Unexpected external native plugin');
+  const disabledPlugins = plan.document.plugins.filter(plugin => typeof plugin === 'string' && plugin.startsWith('-')).map(plugin => plugin.slice(1));
+  assert(!plugins.some(plugin => disabledPlugins.includes(plugin.id)), 'Disabled native plugin unexpectedly active');
+  return { plugins, disabledPlugins };
+}
+
+// Production checks the safety contract, not service availability. Never
+// query MCP/tool catalogs, create a diagnostic session, or await remote I/O
+// from the launcher. The native host owns async connections and /mcps.
+export async function inspectStartup(server, plan, { plugins: extraPlugins = [], expectations } = {}) {
+  const { plugins } = await inspectPlugins(server, plan, extraPlugins);
+  const agents = await metadata(server, '/api/agent');
+  const options = plan.document.plugins.find(item => typeof item === 'object' && item.package.endsWith('/general/plugins/access'))?.options;
+  assert(options?.requiredSystems && options.auditBaselines, 'Archived native guard expectations required');
+  const { baselines, builtins, defaultAgent, sources = [], acceptedFinding = () => false } = expectations?.(agents) ?? {
+    baselines: Object.fromEntries(Object.entries(options.auditBaselines).map(([id, baseline]) => [id, { ...baseline, system: options.requiredSystems[id] }])),
+    builtins: options.builtinExpectations, defaultAgent: plan.document.default_agent,
+  };
+  const audit = auditEvidence({ sources, agents, plugins, baselines, builtinExpectations: builtins,
+    directory: plan.project, config: path.join(plan.config, 'opencode'), managedTools: Object.keys(options.toolActors ?? {}), guards: options });
+  const main = agents.find(agent => agent.id === defaultAgent);
+  assert(main && ['primary', 'all'].includes(main.mode) && !main.hidden && main.model, 'Explicit visible default agent/model required');
+  const blocking = audit.findings.filter(item => item.severity === 'error' || !acceptedFinding(item));
+  return { readyForStartup: blocking.length === 0 };
+}
+
 export async function inspectLiveCandidate(server, plan, extension = {}) {
-  const get = async route => { const result = await server.request('GET', route); assert(result.status === 200, 'Native candidate metadata query failed: ' + route); return decodeList(result.value); };
+  const get = route => metadata(server, route);
   const extraPlugins=extension.plugins??[],extraMcp=extension.mcp??{};
   assert(Array.isArray(extraPlugins)&&extraPlugins.every(id=>typeof id==='string')&&!Object.keys(extraMcp).some(name=>Object.hasOwn(plan.document.mcp.servers,name)),'Explicit non-replacing owner startup extension required');
   const expectedServers={...plan.document.mcp.servers,...extraMcp};
-    const required = ['opencode-stack.env-guard', 'opencode-stack.controlled-permissions', 'opencode-stack.planner-shell', 'opencode-stack.agent-identity', 'opencode-stack.general', ...plan.components.flatMap(id => addonPlugins[id] ?? []),...(plan.componentMetadata?.ticketing?.metrics?['opencode-ticketing.metrics']:[]),...extraPlugins];
-  const plugins = await until(async () => { const items = await get('/api/plugin'); return required.every(id => items.some(item => item.id === id)) ? items : undefined; }, 'Candidate server plugins');
-  assert(plugins.filter(item => item.source?.type !== 'builtin').every(item => required.includes(item.id)), 'Unexpected external native plugin; no partial candidate chat');
-  const disabledPlugins = plan.document.plugins.filter(plugin => typeof plugin === 'string' && plugin.startsWith('-')).map(plugin => plugin.slice(1));
-  assert(!plugins.some(plugin => disabledPlugins.includes(plugin.id)), 'Disabled native plugin unexpectedly active; no partial candidate chat');
+  const { disabledPlugins } = await inspectPlugins(server, plan, extraPlugins);
   // Respect configured native startup/catalog windows,
   // instead of declaring a slow-but-within-contract connection failed at45s.
   const startupBudget = Math.max(45000,...Object.values(expectedServers).filter(server=>!server.disabled).map(server=>(server.timeout?.startup??0)+(server.timeout?.catalog??0)));

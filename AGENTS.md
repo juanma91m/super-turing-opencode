@@ -34,3 +34,8 @@ workflows del proyecto permanecen en su capa local.
 
 Mantené el idioma de la sesión. Respondé directo y breve, con conclusiones primero;
 explicá el criterio técnico cuando aporte valor.
+
+## Enlaces a archivos locales
+
+- Cuando entregues un archivo local o un enlace a uno, verificá la ruta con evidencia disponible y usá la **ruta absoluta completa**. Resolvé las relativas contra el directorio que declara su origen, no contra el HOME ni el directorio actual por defecto.
+- Por cada enlace local, mostrale al usuario un bloque cercado `opencode-local-file` con sólo esa ruta en una línea, sin comillas ni `file://`. La TUI lo muestra como **Abrir archivo** y, sin el complemento, queda como código copiable. Vale también para archivos fuera del proyecto ya autorizados; no amplía permisos y no autoriza entregar secretos, ejecutar abridores ni publicar archivos.

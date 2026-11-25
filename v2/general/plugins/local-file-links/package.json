@@ -1,0 +1,6 @@
+{
+  "name": "@opencode-stack/local-file-links",
+  "private": true,
+  "type": "module",
+  "exports": { "./tui": "./tui.tsx" }
+}
